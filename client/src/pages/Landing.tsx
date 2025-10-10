@@ -10,9 +10,12 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
+import { BubblesBackground } from "@/components/BubblesBackground";
+import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 
 export default function Landing() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [bookingData, setBookingData] = useState({
     addressLine1: '',
     city: '',
@@ -23,17 +26,22 @@ export default function Landing() {
 
   const bookingMutation = useMutation({
     mutationFn: async (data: typeof bookingData) => {
-      return await apiRequest("POST", "/api/orders", {
-        customer: { id: 'guest' },
-        address: {
-          line1: data.addressLine1,
-          city: data.city,
-          eircode: data.eircode,
-        },
-        services: [{ service_id: data.service, qty: 1 }],
-        payment_method: 'card',
-        notes: data.notes,
-      });
+      setIsLoading(true);
+      try {
+        return await apiRequest("POST", "/api/orders", {
+          customer: { id: 'guest' },
+          address: {
+            line1: data.addressLine1,
+            city: data.city,
+            eircode: data.eircode,
+          },
+          services: [{ service_id: data.service, qty: 1 }],
+          payment_method: 'card',
+          notes: data.notes,
+        });
+      } finally {
+        setTimeout(() => setIsLoading(false), 800);
+      }
     },
     onSuccess: () => {
       toast({
@@ -58,11 +66,13 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
+      <WashingMachineLoader isVisible={isLoading} />
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/20" />
+      <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-600 overflow-hidden">
+        <BubblesBackground />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-white/20 text-white backdrop-blur-sm px-4 py-2 rounded-full mb-6">
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium">Ireland's Premier Laundry Service</span>
           </div>
@@ -70,28 +80,42 @@ export default function Landing() {
             <img 
               src={logoImage} 
               alt="Mr Bubbles Laundry & Linen Specialist" 
-              className="h-32 md:h-40 w-auto object-contain"
+              className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl"
             />
           </div>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-lg">
             Professional laundry collection, processing, and delivery. Book your pickup in seconds.
           </p>
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button size="lg" className="gap-2" asChild>
+              <Button 
+                size="lg" 
+                className="gap-2 bg-white text-primary hover:bg-white/90 border-white shadow-xl" 
+                asChild
+              >
                 <a href="#booking" data-testid="button-book-now">
                   Book Now <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-              <Button size="lg" variant="outline" className="flex-1 bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="flex-1 bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white/20" 
+                asChild
+              >
                 <a href="/api/login?role=customer" data-testid="button-login-customer">
                   <Package className="h-5 w-5 mr-2" />
                   Customer Login
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="flex-1 bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="flex-1 bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white/20" 
+                asChild
+              >
                 <a href="/api/login?role=driver" data-testid="button-login-driver">
                   <Truck className="h-5 w-5 mr-2" />
                   Driver Login

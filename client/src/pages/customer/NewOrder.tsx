@@ -15,6 +15,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Package } from "lucide-react";
 import type { Service } from "@shared/schema";
+import { WashingMachineLoader } from "@/components/WashingMachineLoader";
+import { useLoadingAction } from "@/hooks/use-loading-action";
 
 const orderSchema = z.object({
   addressLine1: z.string().min(1, "Address is required"),
@@ -31,6 +33,7 @@ type OrderFormData = z.infer<typeof orderSchema>;
 export default function NewOrder() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { isLoading, withLoading } = useLoadingAction();
 
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
@@ -84,8 +87,15 @@ export default function NewOrder() {
     },
   });
 
-  const onSubmit = (data: OrderFormData) => {
-    createOrderMutation.mutate(data);
+  const onSubmit = async (data: OrderFormData) => {
+    await withLoading(async () => {
+      return new Promise<void>((resolve, reject) => {
+        createOrderMutation.mutate(data, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        });
+      });
+    });
   };
 
   const selectedService = services.find(s => s.serviceId === form.watch('serviceId'));
@@ -96,6 +106,7 @@ export default function NewOrder() {
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
+      <WashingMachineLoader isVisible={isLoading} />
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6">
