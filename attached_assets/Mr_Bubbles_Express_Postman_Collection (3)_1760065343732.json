@@ -1,0 +1,321 @@
+{
+  "info": {
+    "name": "Mr Bubbles Express \u2013 Core APIs (MVP)",
+    "_postman_id": "a2f9a4a7-7d30-4b45-9f7e-brief-mrbubbles",
+    "description": "Core endpoints for Orders, Scans, Subcontracts, Splits, Invoices, and Admin policies.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth \u2013 Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"driver@example.com\", \"password\": \"secret\"}"
+        }
+      }
+    },
+    {
+      "name": "Orders \u2013 Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"customer\": {\"id\": \"cust_demo\"}, \"address\": {\"line1\": \"Main St\", \"city\": \"Drogheda\", \"eircode\": \"A92\"}, \"services\": [{\"service_id\": \"svc_laundry_kg\", \"qty\": 3}, {\"service_id\": \"svc_shirt_press\", \"qty\": 5}], \"payment_method\": \"card\"}"
+        }
+      }
+    },
+    {
+      "name": "Orders \u2013 Confirm",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{order_id}}/confirm",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{order_id}}",
+            "confirm"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Bags \u2013 Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{order_id}}/bags",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{order_id}}",
+            "bags"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"bags\": [{\"seq\": 1}, {\"seq\": 2}], \"print_label\": true}"
+        }
+      }
+    },
+    {
+      "name": "Scan \u2013 Handoff to Shop",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/scan",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "scan"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"type\": \"handoff.to_shop\", \"order_id\": \"{{order_id}}\", \"bag_id\": \"{{bag_id}}\", \"from_party\": {\"type\": \"driver\", \"id\": \"{{driver_id}}\"}, \"to_party\": {\"type\": \"shop\", \"id\": \"{{shop_id}}\"}, \"geo\": {\"lat\": 53.716, \"lng\": -6.352}}"
+        }
+      }
+    },
+    {
+      "name": "Subcontract \u2013 Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{order_id}}/subcontract",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{order_id}}",
+            "subcontract"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"to_shop_id\": \"{{processing_shop_id}}\", \"terms\": {\"processing_pct\": 0.6, \"sla_hours\": 48}}"
+        }
+      }
+    },
+    {
+      "name": "Splits \u2013 Calculate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/splits/calculate?order_id={{order_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "splits",
+            "calculate"
+          ],
+          "query": [
+            {
+              "key": "order_id",
+              "value": "{{order_id}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Invoice \u2013 Create (PDF)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{order_id}}/invoice",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{order_id}}",
+            "invoice"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin \u2013 Upload Split Policy (Versioned)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/policies/split",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "policies",
+            "split"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Default EUR policy\", \"version\": \"2025-10-01\", \"policy_json\": {\"currency\": \"EUR\", \"default\": {\"origin_shop_pct\": 0.2, \"processing_shop_pct\": 0.55, \"driver_pct\": 0.1, \"platform_pct\": 0.15}, \"caps\": {\"platform_min_cents\": 50}, \"rounding\": \"HALF_UP_2DP\"}}"
+        }
+      }
+    },
+    {
+      "name": "Admin \u2013 Audit Search",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/audit?entity_type=order&entity_id={{order_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "audit"
+          ],
+          "query": [
+            {
+              "key": "entity_type",
+              "value": "order"
+            },
+            {
+              "key": "entity_id",
+              "value": "{{order_id}}"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.mrbubbles.local"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    },
+    {
+      "key": "bag_id",
+      "value": ""
+    },
+    {
+      "key": "driver_id",
+      "value": ""
+    },
+    {
+      "key": "shop_id",
+      "value": ""
+    },
+    {
+      "key": "processing_shop_id",
+      "value": ""
+    }
+  ]
+}
