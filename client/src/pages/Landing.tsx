@@ -105,12 +105,12 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="py-16 md:py-24 bg-cover bg-center bg-no-repeat relative"
+        className="py-16 md:py-24 bg-cover bg-right bg-no-repeat relative min-h-[600px]"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F5EDE4]/95 via-[#F5EDE4]/90 to-transparent"></div>
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F5EDE4] via-[#F5EDE4]/80 to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
+          <div className="grid md:grid-cols-2 gap-12 items-center h-full">
             <div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
                 Laundry, Dry Cleaning & Ironing – Done in 24 Hours
