@@ -96,7 +96,7 @@ export default function Landing() {
               <a href="#services" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-services">SERVICES</a>
               <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-pricing">PRICES</a>
               <a href="#how-it-works" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-how-it-works">HOW IT WORKS</a>
-              <a href="/customer/login" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-login">SIGN IN</a>
+              <a href="/signin" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-login">SIGN IN</a>
               <Button 
                 className="bg-[#FFD700] text-black hover:bg-[#FFD700]/90 font-semibold px-6"
                 asChild
@@ -296,7 +296,7 @@ export default function Landing() {
                 Join our driver network and earn on your schedule. Full training and equipment provided.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="/driver/login" data-testid="link-driver-signup">Apply Now</a>
+                <a href="/signup" data-testid="link-driver-signup">Apply Now</a>
               </Button>
             </CardContent>
           </Card>

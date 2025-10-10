@@ -4,6 +4,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { signUpSchema, signInSchema, hashPassword, verifyPassword } from "./auth";
 import { z } from "zod";
 
 // ============= VALIDATION SCHEMAS =============
@@ -676,6 +677,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const splits = await storage.getAllSplits();
       res.json(splits);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ============= AUTHENTICATION ROUTES (Email/Password) =============
+  
+  // Sign up with email/password
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const validation = signUpSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: validation.error.errors 
+        });
+      }
+
+      const { email, password, firstName, lastName, role } = validation.data;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+
+      // Create user
+      const newUser = await storage.createUser({
+        email,
+        firstName,
+        lastName,
+        hashedPassword,
+        role: role as any,
+      });
+
+      // Create session
+      (req as any).session.user = {
+        claims: {
+          sub: newUser.id,
+          email: newUser.email,
+          first_name: newUser.firstName,
+          last_name: newUser.lastName,
+        }
+      };
+
+      res.status(201).json({
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        role: newUser.role,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Sign in with email/password
+  app.post("/api/auth/signin", async (req, res) => {
+    try {
+      const validation = signInSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: validation.error.errors 
+        });
+      }
+
+      const { email, password, role } = validation.data;
+
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Check if user has password (might be Replit Auth user)
+      if (!user.hashedPassword) {
+        return res.status(401).json({ message: "Please use Replit sign-in" });
+      }
+
+      // Verify password
+      const isValidPassword = await verifyPassword(password, user.hashedPassword);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Check role matches
+      if (user.role !== role) {
+        return res.status(403).json({ message: `This account is registered as ${user.role}` });
+      }
+
+      // Create session
+      (req as any).session.user = {
+        claims: {
+          sub: user.id,
+          email: user.email,
+          first_name: user.firstName,
+          last_name: user.lastName,
+        }
+      };
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

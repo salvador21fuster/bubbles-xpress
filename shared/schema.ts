@@ -62,13 +62,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (mandatory for Replit Auth, enhanced with role)
+// User storage table (supports both Replit Auth and email/password)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  hashedPassword: varchar("hashed_password"), // For email/password auth
   role: userRoleEnum("role").notNull().default('customer'),
   shopId: varchar("shop_id"), // If user is associated with a shop
   createdAt: timestamp("created_at").defaultNow(),

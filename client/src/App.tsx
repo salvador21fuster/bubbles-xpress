@@ -23,8 +23,8 @@ import CustomerNewOrder from "@/pages/customer/NewOrder";
 import CustomerOrderDetails from "@/pages/customer/OrderDetails";
 import DriverDashboard from "@/pages/driver/Dashboard";
 import DriverOrderDetails from "@/pages/driver/OrderDetails";
-import CustomerAuth from "@/pages/CustomerAuth";
-import DriverAuth from "@/pages/DriverAuth";
+import SignIn from "@/pages/SignIn";
+import SignUp from "@/pages/SignUp";
 
 function Router() {
   const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isAdmin } = useAuth();
@@ -41,8 +41,8 @@ function Router() {
     return (
       <Switch>
         <Route path="/" component={Landing} />
-        <Route path="/customer/login" component={CustomerAuth} />
-        <Route path="/driver/login" component={DriverAuth} />
+        <Route path="/signin" component={SignIn} />
+        <Route path="/signup" component={SignUp} />
         <Route component={NotFound} />
       </Switch>
     );
