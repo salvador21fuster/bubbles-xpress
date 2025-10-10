@@ -8,6 +8,8 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-10**: Dedicated auth portal pages created - Customer and Driver login/signup portals with branded UI, role-specific messaging, and Replit Auth integration
+- **2025-10-10**: Landing page hero image optimized - Professional driver/customer photo showing Mr Bubbles bag with perfect framing
 - **2025-10-10**: Customer and Driver apps complete - Mobile-first responsive web apps with order booking, tracking, pickup/delivery workflows
 - **2025-10-10**: All four user portals operational - Customer App (booking, order history), Driver App (pickups/deliveries, earnings), Shop Portal, Admin Portal
 - **2025-10-10**: Mr Bubbles logo integrated throughout application (landing page, shop portal, admin portal)
