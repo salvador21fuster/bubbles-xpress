@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
+import heroImage from "@assets/0db98c33-e8bb-4902-a13a-2b9d4f72fa6d_1760099535437.jpg";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 
 export default function Landing() {
@@ -103,8 +104,12 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
+      <section 
+        className="py-16 md:py-24 bg-cover bg-center bg-no-repeat relative"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F5EDE4]/95 via-[#F5EDE4]/90 to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
