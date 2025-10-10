@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
-import heroImage from "@assets/0db98c33-e8bb-4902-a13a-2b9d4f72fa6d_1760099535437.jpg";
+import heroImage from "@assets/c3c698ce-9153-4350-b5c7-18ba0974bc96_1760099867398.jpg";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 
 export default function Landing() {
