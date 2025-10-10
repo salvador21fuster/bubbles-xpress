@@ -124,16 +124,6 @@ export default function Landing() {
                 </a>
               </Button>
             </div>
-            <div className="flex justify-center items-center">
-              <div className="relative">
-                <div className="w-full h-96 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <Package className="h-32 w-32 mx-auto text-primary mb-4" />
-                    <p className="text-gray-600 font-medium">Professional Laundry Service</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
