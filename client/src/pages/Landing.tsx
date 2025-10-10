@@ -113,7 +113,7 @@ export default function Landing() {
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
           <div className="grid md:grid-cols-2 gap-12 items-center h-full">
-            <div className="bg-[#F5EDE4]/95 p-8 rounded-lg">
+            <div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
                 Laundry, Dry Cleaning & Ironing – Done in 24 Hours
               </h1>
