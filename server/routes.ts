@@ -696,12 +696,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { email, password, firstName, lastName, role } = validation.data;
+      const { email, username, phone, password, firstName, lastName, role } = validation.data;
 
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({ message: "Email already registered" });
+      if (email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser) {
+          return res.status(409).json({ message: "Email already registered" });
+        }
+      }
+      if (username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(409).json({ message: "Username already taken" });
+        }
+      }
+      if (phone) {
+        const existingUser = await storage.getUserByPhone(phone);
+        if (existingUser) {
+          return res.status(409).json({ message: "Phone number already registered" });
+        }
       }
 
       // Hash password
@@ -709,7 +723,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create user
       const newUser = await storage.createUser({
-        email,
+        email: email || undefined,
+        username: username || undefined,
+        phone: phone || undefined,
         firstName,
         lastName,
         hashedPassword,
@@ -720,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req as any).session.user = {
         claims: {
           sub: newUser.id,
-          email: newUser.email,
+          email: newUser.email || newUser.username,
           first_name: newUser.firstName,
           last_name: newUser.lastName,
         }
@@ -729,6 +745,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json({
         id: newUser.id,
         email: newUser.email,
+        username: newUser.username,
+        phone: newUser.phone,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         role: newUser.role,
@@ -738,7 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sign in with email/password
+  // Sign in with email/username/phone
   app.post("/api/auth/signin", async (req, res) => {
     try {
       const validation = signInSchema.safeParse(req.body);
@@ -750,12 +768,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { email, password, role } = validation.data;
+      const { identifier, password, role } = validation.data;
 
-      // Find user by email
-      const user = await storage.getUserByEmail(email);
+      // Find user by email, username, or phone
+      const user = await storage.getUserByIdentifier(identifier);
       if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       // Check if user has password (might be Replit Auth user)
@@ -766,7 +784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verify password
       const isValidPassword = await verifyPassword(password, user.hashedPassword);
       if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       // Check role matches
@@ -778,7 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req as any).session.user = {
         claims: {
           sub: user.id,
-          email: user.email,
+          email: user.email || user.username,
           first_name: user.firstName,
           last_name: user.lastName,
         }
@@ -787,6 +805,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         id: user.id,
         email: user.email,
+        username: user.username,
+        phone: user.phone,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,

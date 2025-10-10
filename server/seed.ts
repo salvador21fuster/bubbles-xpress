@@ -1,5 +1,6 @@
 // Seed data for Mr Bubbles Express
 import { storage } from "./storage";
+import { hashPassword } from "./auth";
 
 export async function seedDatabase() {
   try {
@@ -113,6 +114,43 @@ export async function seedDatabase() {
       console.log("✅ Created default split policy");
     } catch (error) {
       // Policy might already exist
+    }
+
+    // Seed admin users
+    const adminUsers = [
+      {
+        username: "benbubbles",
+        password: "benbubbles",
+        firstName: "Ben",
+        lastName: "Bubbles",
+        role: "admin" as const,
+      },
+      {
+        username: "ronanbubbles",
+        password: "ronanbubbles",
+        firstName: "Ronan",
+        lastName: "Bubbles",
+        role: "admin" as const,
+      },
+    ];
+
+    for (const admin of adminUsers) {
+      try {
+        const existingUser = await storage.getUserByUsername(admin.username);
+        if (!existingUser) {
+          const hashedPassword = await hashPassword(admin.password);
+          await storage.createUser({
+            username: admin.username,
+            firstName: admin.firstName,
+            lastName: admin.lastName,
+            hashedPassword,
+            role: admin.role,
+          });
+          console.log(`✅ Created admin user: ${admin.username}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error creating admin user ${admin.username}:`, error);
+      }
     }
 
     console.log("✅ Database seeding complete!");

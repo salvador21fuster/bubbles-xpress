@@ -65,7 +65,9 @@ export const sessions = pgTable(
 // User storage table (supports both Replit Auth and email/password)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique().notNull(),
+  email: varchar("email").unique(),
+  username: varchar("username").unique(), // For admin/shop users
+  phone: varchar("phone").unique(), // Required for customer/driver signup
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
