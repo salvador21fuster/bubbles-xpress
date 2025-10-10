@@ -8,14 +8,19 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
-- **2025-10-10**: Dedicated auth portal pages created - Customer and Driver login/signup portals with branded UI, role-specific messaging, and Replit Auth integration
+- **2025-10-10**: Authentication system overhauled - Custom email/password auth with bcrypt, username/phone login support, all 4 roles (customer, driver, shop, admin)
+- **2025-10-10**: Admin users created - benbubbles and ronanbubbles admin accounts seeded for Admin Portal access
+- **2025-10-10**: Admin Portal enhanced - Complete oversight with Dashboard, Transactions, Invoices, Users, and Policies pages
+- **2025-10-10**: SignUp/SignIn pages updated - Phone number required, username/email optional, supports all 4 user roles
+- **2025-10-10**: Multi-identifier login - Users can sign in with email, username, or phone number
+- **2025-10-10**: Dedicated auth portal pages created - Customer and Driver login/signup portals with branded UI, role-specific messaging
 - **2025-10-10**: Landing page hero image optimized - Professional driver/customer photo showing Mr Bubbles bag with perfect framing
 - **2025-10-10**: Customer and Driver apps complete - Mobile-first responsive web apps with order booking, tracking, pickup/delivery workflows
 - **2025-10-10**: All four user portals operational - Customer App (booking, order history), Driver App (pickups/deliveries, earnings), Shop Portal, Admin Portal
 - **2025-10-10**: Mr Bubbles logo integrated throughout application (landing page, shop portal, admin portal)
 - **2025-10-10**: Security hardening complete - Comprehensive Zod validation, EUR/VAT pricing (23% Ireland VAT), state machine enforcement, RBAC on all endpoints
 - **2025-10-10**: Complete database schema with all 12 tables implemented and seeded with initial data
-- **2025-10-10**: Backend fully implemented - PostgreSQL database, Replit Auth, all API endpoints, revenue split calculation engine
+- **2025-10-10**: Backend fully implemented - PostgreSQL database, custom auth system, all API endpoints, revenue split calculation engine
 
 ## User Preferences
 

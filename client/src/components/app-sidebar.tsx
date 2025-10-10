@@ -1,4 +1,4 @@
-import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText } from "lucide-react";
+import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText, Receipt } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +31,7 @@ export function AppSidebar() {
   const adminItems = [
     { title: "Dashboard", url: "/admin", icon: Home },
     { title: "Transactions", url: "/admin/transactions", icon: BarChart3 },
+    { title: "Invoices", url: "/admin/invoices", icon: Receipt },
     { title: "Users", url: "/admin/users", icon: Users },
     { title: "Policies", url: "/admin/policies", icon: FileText },
     { title: "Settings", url: "/admin/settings", icon: Settings },

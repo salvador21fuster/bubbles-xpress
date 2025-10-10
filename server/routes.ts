@@ -682,6 +682,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all invoices (admin)
+  app.get("/api/admin/invoices", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Forbidden: Admin access required" });
+      }
+
+      const invoices = await storage.getAllInvoices();
+      res.json(invoices);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ============= AUTHENTICATION ROUTES (Email/Password) =============
   
   // Sign up with email/password

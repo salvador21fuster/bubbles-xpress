@@ -18,6 +18,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
 import AdminPolicies from "@/pages/admin/Policies";
+import AdminInvoices from "@/pages/admin/Invoices";
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import CustomerNewOrder from "@/pages/customer/NewOrder";
 import CustomerOrderDetails from "@/pages/customer/OrderDetails";
@@ -109,6 +110,7 @@ function Router() {
                 <>
                   <Route path="/admin" component={AdminDashboard} />
                   <Route path="/admin/transactions" component={AdminTransactions} />
+                  <Route path="/admin/invoices" component={AdminInvoices} />
                   <Route path="/admin/users" component={AdminUsers} />
                   <Route path="/admin/policies" component={AdminPolicies} />
                   <Route path="/" component={AdminDashboard} />

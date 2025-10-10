@@ -90,6 +90,7 @@ export interface IStorage {
   // Invoice operations
   createInvoice(invoice: Omit<Invoice, 'id' | 'createdAt'>): Promise<Invoice>;
   getInvoiceByOrder(orderId: string): Promise<Invoice | undefined>;
+  getAllInvoices(): Promise<Invoice[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -322,6 +323,10 @@ export class DatabaseStorage implements IStorage {
   async getInvoiceByOrder(orderId: string): Promise<Invoice | undefined> {
     const [invoice] = await db.select().from(invoices).where(eq(invoices.orderId, orderId)).limit(1);
     return invoice;
+  }
+
+  async getAllInvoices(): Promise<Invoice[]> {
+    return await db.select().from(invoices).orderBy(desc(invoices.createdAt));
   }
 }
 
