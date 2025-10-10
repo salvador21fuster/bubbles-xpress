@@ -113,7 +113,7 @@ export default function Landing() {
         className="pt-16 md:pt-24 pb-0 bg-cover bg-no-repeat relative min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
-          backgroundPosition: 'right 5%'
+          backgroundPosition: 'center center'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
