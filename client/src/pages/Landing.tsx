@@ -105,7 +105,7 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="py-16 md:py-24 bg-cover bg-no-repeat relative min-h-[600px]"
+        className="pt-16 md:pt-24 pb-0 bg-cover bg-no-repeat relative min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
           backgroundPosition: 'right 5%'
