@@ -105,13 +105,15 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="py-16 md:py-24 bg-cover bg-right bg-no-repeat relative min-h-[600px]"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        className="py-16 md:py-24 bg-cover bg-no-repeat relative min-h-[600px]"
+        style={{ 
+          backgroundImage: `url(${heroImage})`,
+          backgroundPosition: 'right bottom'
+        }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F5EDE4] via-[#F5EDE4]/80 to-transparent"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
           <div className="grid md:grid-cols-2 gap-12 items-center h-full">
-            <div>
+            <div className="bg-[#F5EDE4]/95 p-8 rounded-lg">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
                 Laundry, Dry Cleaning & Ironing – Done in 24 Hours
               </h1>
