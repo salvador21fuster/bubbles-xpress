@@ -108,7 +108,7 @@ export default function Landing() {
         className="py-16 md:py-24 bg-cover bg-no-repeat relative min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
-          backgroundPosition: 'right 40%'
+          backgroundPosition: 'right 20%'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
