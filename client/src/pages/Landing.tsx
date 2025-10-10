@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 export default function Landing() {
   const { toast } = useToast();
@@ -65,9 +66,13 @@ export default function Landing() {
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium">Ireland's Premier Laundry Service</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-            Mr Bubbles Express
-          </h1>
+          <div className="mb-8 flex justify-center">
+            <img 
+              src={logoImage} 
+              alt="Mr Bubbles Laundry & Linen Specialist" 
+              className="h-32 md:h-40 w-auto object-contain"
+            />
+          </div>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Professional laundry collection, processing, and delivery. Book your pickup in seconds.
           </p>

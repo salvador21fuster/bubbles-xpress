@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 export function AppSidebar() {
   const { user, isShop, isAdmin } = useAuth();
@@ -40,14 +41,13 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-lg font-bold text-primary-foreground">MB</span>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">Mr Bubbles</h2>
-            <p className="text-xs text-muted-foreground capitalize">{user?.role} Portal</p>
-          </div>
+        <div className="flex flex-col gap-2">
+          <img 
+            src={logoImage} 
+            alt="Mr Bubbles" 
+            className="h-12 w-auto object-contain"
+          />
+          <p className="text-xs text-muted-foreground capitalize text-center">{user?.role} Portal</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
