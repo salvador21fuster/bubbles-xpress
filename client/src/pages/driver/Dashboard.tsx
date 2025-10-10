@@ -7,13 +7,24 @@ import { Package, MapPin, Navigation, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import type { Order } from "@shared/schema";
 
+// Simple route optimization: sort by city then address
+function optimizeRoute(orders: Order[]): Order[] {
+  return [...orders].sort((a, b) => {
+    // First sort by city
+    const cityCompare = (a.city || '').localeCompare(b.city || '');
+    if (cityCompare !== 0) return cityCompare;
+    // Then by address within same city
+    return (a.addressLine1 || '').localeCompare(b.addressLine1 || '');
+  });
+}
+
 export default function DriverDashboard() {
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/driver/orders"],
   });
 
-  const pickups = orders.filter(o => o.state === 'confirmed');
-  const deliveries = orders.filter(o => o.state === 'packed' || o.state === 'out_for_delivery');
+  const pickups = optimizeRoute(orders.filter(o => o.state === 'confirmed'));
+  const deliveries = optimizeRoute(orders.filter(o => o.state === 'packed' || o.state === 'out_for_delivery'));
   const completed = orders.filter(o => o.state === 'delivered');
 
   const todayEarnings = completed.reduce((sum, order) => {
@@ -28,18 +39,25 @@ export default function DriverDashboard() {
         <p className="text-muted-foreground">Today's pickups and deliveries</p>
       </div>
 
-      {/* Earnings Card */}
-      <Card className="mb-6 bg-primary text-primary-foreground">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm opacity-90">Today's Earnings</p>
-              <p className="text-3xl font-bold">€{todayEarnings.toFixed(2)}</p>
-            </div>
-            <TrendingUp className="h-12 w-12 opacity-80" />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Earnings Cards */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <Card className="bg-primary text-primary-foreground">
+          <CardContent className="p-4">
+            <p className="text-xs opacity-90 mb-1">Today's Earnings</p>
+            <p className="text-2xl font-bold">€{todayEarnings.toFixed(2)}</p>
+            <p className="text-xs opacity-75 mt-1">{completed.length} deliveries</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground mb-1">Pending</p>
+            <p className="text-2xl font-bold">{pickups.length + deliveries.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {pickups.length} pickups, {deliveries.length} drops
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="pickups" className="space-y-4">
@@ -64,14 +82,26 @@ export default function DriverDashboard() {
               </CardContent>
             </Card>
           ) : (
-            pickups.map((order) => (
-              <Link key={order.id} href={`/driver/orders/${order.id}`}>
+            <>
+              {pickups.length > 1 && (
+                <div className="bg-primary/10 text-primary p-3 rounded-lg mb-3">
+                  <p className="text-sm font-medium">📍 Optimized Route</p>
+                  <p className="text-xs opacity-90">Stops ordered by location for efficiency</p>
+                </div>
+              )}
+              {pickups.map((order, index) => (
+                <Link key={order.id} href={`/driver/orders/${order.id}`}>
                 <Card className="hover-elevate">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</p>
-                        <Badge className="bg-blue-500 text-white border-0 mt-1">Pickup</Badge>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <p className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</p>
+                          <Badge className="bg-blue-500 text-white border-0 mt-1">Pickup</Badge>
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">€{((order.totalCents || 0) / 100).toFixed(2)}</p>
@@ -88,8 +118,9 @@ export default function DriverDashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-              </Link>
-            ))
+                </Link>
+              ))}
+            </>
           )}
         </TabsContent>
 
@@ -102,14 +133,26 @@ export default function DriverDashboard() {
               </CardContent>
             </Card>
           ) : (
-            deliveries.map((order) => (
-              <Link key={order.id} href={`/driver/orders/${order.id}`}>
+            <>
+              {deliveries.length > 1 && (
+                <div className="bg-primary/10 text-primary p-3 rounded-lg mb-3">
+                  <p className="text-sm font-medium">📍 Optimized Route</p>
+                  <p className="text-xs opacity-90">Stops ordered by location for efficiency</p>
+                </div>
+              )}
+              {deliveries.map((order, index) => (
+                <Link key={order.id} href={`/driver/orders/${order.id}`}>
                 <Card className="hover-elevate">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</p>
-                        <Badge className="bg-green-500 text-white border-0 mt-1">Delivery</Badge>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <p className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</p>
+                          <Badge className="bg-green-500 text-white border-0 mt-1">Delivery</Badge>
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">€{((order.totalCents || 0) / 100).toFixed(2)}</p>
@@ -126,8 +169,9 @@ export default function DriverDashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-              </Link>
-            ))
+                </Link>
+              ))}
+            </>
           )}
         </TabsContent>
 

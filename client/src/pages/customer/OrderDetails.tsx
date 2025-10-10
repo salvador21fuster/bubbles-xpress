@@ -103,21 +103,55 @@ export default function OrderDetails() {
         {/* Status Timeline */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Order Status</CardTitle>
+            <CardTitle>Order Timeline</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${statusColors[order.state] || 'bg-gray-500'}`}>
-                  <Package className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold">{statusLabels[order.state] || order.state}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {statusDescriptions[order.state] || 'In progress'}
-                  </p>
-                </div>
-              </div>
+              {/* Timeline Steps */}
+              {[
+                { state: 'created', icon: Package, label: statusLabels['created'], desc: statusDescriptions['created'], time: order.createdAt },
+                { state: 'confirmed', icon: Package, label: statusLabels['confirmed'], desc: statusDescriptions['confirmed'], time: order.confirmedAt },
+                { state: 'picked_up', icon: Package, label: statusLabels['picked_up'], desc: statusDescriptions['picked_up'], time: order.pickedUpAt },
+                { state: 'at_origin_shop', icon: Package, label: statusLabels['at_origin_shop'], desc: statusDescriptions['at_origin_shop'] },
+                { state: 'washing', icon: Package, label: statusLabels['washing'], desc: statusDescriptions['washing'] },
+                { state: 'packed', icon: Package, label: statusLabels['packed'], desc: statusDescriptions['packed'] },
+                { state: 'out_for_delivery', icon: Package, label: statusLabels['out_for_delivery'], desc: statusDescriptions['out_for_delivery'] },
+                { state: 'delivered', icon: Package, label: statusLabels['delivered'], desc: statusDescriptions['delivered'], time: order.deliveredAt },
+              ].map((step, index, array) => {
+                const stateOrder = ['created', 'confirmed', 'picked_up', 'at_origin_shop', 'washing', 'packed', 'out_for_delivery', 'delivered'];
+                const currentIndex = stateOrder.indexOf(order.state);
+                const stepIndex = stateOrder.indexOf(step.state);
+                const isCompleted = stepIndex <= currentIndex;
+                const isCurrent = step.state === order.state;
+                const isLast = index === array.length - 1;
+
+                return (
+                  <div key={step.state} className="flex items-start gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                        isCompleted ? (statusColors[step.state] || 'bg-primary') : 'bg-muted'
+                      }`}>
+                        <step.icon className={`h-4 w-4 ${isCompleted ? 'text-white' : 'text-muted-foreground'}`} />
+                      </div>
+                      {!isLast && (
+                        <div className={`w-0.5 h-8 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
+                      )}
+                    </div>
+                    <div className="flex-1 pb-4">
+                      <p className={`font-semibold ${!isCompleted && 'text-muted-foreground'}`}>
+                        {step.label}
+                        {isCurrent && <span className="ml-2 text-xs text-primary">(Current)</span>}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{step.desc}</p>
+                      {step.time && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(step.time).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
