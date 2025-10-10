@@ -69,9 +69,14 @@ export default function Landing() {
       <WashingMachineLoader isVisible={isLoading} />
       
       {/* Top Bar */}
-      <div className="bg-[#2D2D2D] text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto text-center text-xs md:text-sm">
-          Professional, Reliable & Efficient • Trusted by 2,000+ Irish Customers
+      <div className="bg-[#2D2D2D] text-white py-2 px-4 overflow-hidden">
+        <div className="animate-marquee whitespace-nowrap text-xs md:text-sm">
+          <span className="inline-block">
+            Professional Laundry & Dry Cleaning Service • 24-Hour Turnaround • Serving Ireland & 20+ Cities • Wash, Dry & Fold • Ironing Service • Dry Cleaning • Bedding & Duvet Cleaning • Alterations & Repairs • Shoe Repair • Eco-Friendly Products • Free Collection & Delivery • Trusted by 2,000+ Irish Customers • 5-Star Rated • Over 50,000 Garments Cleaned • Professional Equipment • Expert Care • 
+          </span>
+          <span className="inline-block">
+            Professional Laundry & Dry Cleaning Service • 24-Hour Turnaround • Serving Ireland & 20+ Cities • Wash, Dry & Fold • Ironing Service • Dry Cleaning • Bedding & Duvet Cleaning • Alterations & Repairs • Shoe Repair • Eco-Friendly Products • Free Collection & Delivery • Trusted by 2,000+ Irish Customers • 5-Star Rated • Over 50,000 Garments Cleaned • Professional Equipment • Expert Care • 
+          </span>
         </div>
       </div>
 
