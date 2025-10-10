@@ -8,10 +8,11 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-10**: Customer and Driver apps complete - Mobile-first responsive web apps with order booking, tracking, pickup/delivery workflows
+- **2025-10-10**: All four user portals operational - Customer App (booking, order history), Driver App (pickups/deliveries, earnings), Shop Portal, Admin Portal
 - **2025-10-10**: Mr Bubbles logo integrated throughout application (landing page, shop portal, admin portal)
 - **2025-10-10**: Security hardening complete - Comprehensive Zod validation, EUR/VAT pricing (23% Ireland VAT), state machine enforcement, RBAC on all endpoints
 - **2025-10-10**: Complete database schema with all 12 tables implemented and seeded with initial data
-- **2025-10-10**: Frontend complete with Material Design system - Landing page, Shop Portal (Dashboard, Intake, Processing, Orders), Admin Portal (Dashboard, Transactions, Users, Policies)
 - **2025-10-10**: Backend fully implemented - PostgreSQL database, Replit Auth, all API endpoints, revenue split calculation engine
 
 ## User Preferences
@@ -24,7 +25,7 @@ Preferred communication style: Simple, everyday language.
 
 **Multi-Surface Application Design:**
 - **Web Portals (React + Vite + TypeScript):** Shop Portal and Admin Portal built with React, using Vite for bundling and development
-- **Mobile Apps (Planned):** React Native with Expo CLI for cross-platform iOS/Android customer and driver apps
+- **Mobile-First Web Apps:** Customer and Driver apps implemented as responsive web applications with mobile-optimized UI (no sidebar layout)
 - **Public Widget:** Embeddable booking form integrated into the main web application
 
 **UI Framework:**
@@ -54,6 +55,9 @@ Preferred communication style: Simple, everyday language.
 **Core API Endpoints:**
 - `/api/auth/*` - Authentication (login, user management)
 - `/api/orders` - Order CRUD operations
+- `/api/customer/orders` - Customer order history
+- `/api/driver/orders` - Driver pickup/delivery queue
+- `/api/services` - Service catalog (public)
 - `/api/scan` - QR scanning workflow management
 - `/api/orders/:id/bags` - Bag creation and tracking
 - `/api/orders/:id/subcontract` - Shop-to-shop subcontracting

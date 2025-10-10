@@ -18,9 +18,14 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
 import AdminPolicies from "@/pages/admin/Policies";
+import CustomerDashboard from "@/pages/customer/Dashboard";
+import CustomerNewOrder from "@/pages/customer/NewOrder";
+import CustomerOrderDetails from "@/pages/customer/OrderDetails";
+import DriverDashboard from "@/pages/driver/Dashboard";
+import DriverOrderDetails from "@/pages/driver/OrderDetails";
 
 function Router() {
-  const { isAuthenticated, isLoading, isShop, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isAdmin } = useAuth();
 
   if (isLoading) {
     return (
@@ -39,7 +44,35 @@ function Router() {
     );
   }
 
-  // Sidebar layout for authenticated users
+  // Customer and Driver apps use mobile-first layout (no sidebar)
+  if (isCustomer || isDriver) {
+    return (
+      <Switch>
+        {/* Customer Routes */}
+        {isCustomer && (
+          <>
+            <Route path="/customer" component={CustomerDashboard} />
+            <Route path="/customer/new-order" component={CustomerNewOrder} />
+            <Route path="/customer/orders/:id" component={CustomerOrderDetails} />
+            <Route path="/" component={CustomerDashboard} />
+          </>
+        )}
+
+        {/* Driver Routes */}
+        {isDriver && (
+          <>
+            <Route path="/driver" component={DriverDashboard} />
+            <Route path="/driver/orders/:id" component={DriverOrderDetails} />
+            <Route path="/" component={DriverDashboard} />
+          </>
+        )}
+
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
+
+  // Sidebar layout for Shop and Admin users
   const sidebarStyle = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",

@@ -556,6 +556,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============= CUSTOMER ROUTES =============
+  
+  // Get customer orders
+  app.get("/api/customer/orders", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const orders = await storage.getOrdersByCustomer(userId);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ============= DRIVER ROUTES =============
+  
+  // Get driver orders
+  app.get("/api/driver/orders", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'driver') {
+        return res.status(403).json({ message: "Forbidden: Driver access required" });
+      }
+
+      // Get all orders that need pickup or delivery
+      const allOrders = await storage.getAllOrders();
+      const driverOrders = allOrders.filter(o => 
+        o.state === 'confirmed' || o.state === 'packed' || o.state === 'out_for_delivery' || o.state === 'delivered'
+      );
+      res.json(driverOrders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ============= SERVICE ROUTES =============
+  
+  // Get all services (public endpoint for booking)
+  app.get("/api/services", async (req, res) => {
+    try {
+      const services = await storage.getAllServices();
+      res.json(services);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ============= SHOP ROUTES =============
   
   // Get orders for shop
