@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
-import heroImage from "@assets/c3c698ce-9153-4350-b5c7-18ba0974bc96_1760099867398.jpg";
+import heroImage from "@assets/5baf8ae6-cd6a-48cb-a285-24e3aaf90270_1760102010601.jpg";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 
 export default function Landing() {
@@ -110,11 +110,10 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="pt-16 md:pt-24 pb-0 bg-no-repeat relative min-h-[600px]"
+        className="pt-16 md:pt-24 pb-0 bg-cover bg-no-repeat relative min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
-          backgroundPosition: 'right center',
-          backgroundSize: 'auto 100%'
+          backgroundPosition: 'center center'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
