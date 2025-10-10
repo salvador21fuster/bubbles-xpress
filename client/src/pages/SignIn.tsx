@@ -14,9 +14,9 @@ import { useLocation } from "wouter";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: z.string().min(1, "Email, username, or phone is required"),
   password: z.string().min(1, "Password is required"),
-  role: z.enum(["customer", "driver"], { errorMap: () => ({ message: "Please select your role" }) }),
+  role: z.enum(["customer", "driver", "shop", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
 });
 
 type SignInForm = z.infer<typeof signInSchema>;
@@ -28,7 +28,7 @@ export default function SignIn() {
   const form = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
       role: undefined,
     },
@@ -46,8 +46,13 @@ export default function SignIn() {
       });
       
       // Redirect based on role, then reload to update auth state
-      const redirectPath = data.role === 'customer' ? '/customer' : '/driver';
-      window.location.href = redirectPath;
+      const redirectPaths = {
+        customer: '/customer',
+        driver: '/driver',
+        shop: '/shop',
+        admin: '/admin'
+      };
+      window.location.href = redirectPaths[data.role as keyof typeof redirectPaths] || '/';
     },
     onError: (error: any) => {
       toast({
@@ -85,16 +90,15 @@ export default function SignIn() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="identifier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email, Username, or Phone</FormLabel>
                       <FormControl>
                         <Input 
-                          type="email" 
-                          placeholder="your.email@example.com" 
+                          placeholder="Enter your email, username, or phone" 
                           {...field} 
-                          data-testid="input-email"
+                          data-testid="input-identifier"
                         />
                       </FormControl>
                       <FormMessage />
@@ -136,6 +140,8 @@ export default function SignIn() {
                         <SelectContent>
                           <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
                           <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
+                          <SelectItem value="shop" data-testid="option-shop">Shop / Franchise Owner</SelectItem>
+                          <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

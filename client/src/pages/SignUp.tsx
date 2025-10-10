@@ -13,11 +13,13 @@ import { useLocation } from "wouter";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 const signUpSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
+  phone: z.string().min(10, "Phone number is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["customer", "driver"], { errorMap: () => ({ message: "Please select your role" }) }),
+  role: z.enum(["customer", "driver", "shop", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
 });
 
 type SignUpForm = z.infer<typeof signUpSchema>;
@@ -30,6 +32,8 @@ export default function SignUp() {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       email: "",
+      username: "",
+      phone: "",
       password: "",
       firstName: "",
       lastName: "",
@@ -49,8 +53,13 @@ export default function SignUp() {
       });
       
       // Redirect based on role, then reload to update auth state
-      const redirectPath = data.role === 'customer' ? '/customer' : '/driver';
-      window.location.href = redirectPath;
+      const redirectPaths = {
+        customer: '/customer',
+        driver: '/driver',
+        shop: '/shop',
+        admin: '/admin'
+      };
+      window.location.href = redirectPaths[data.role as keyof typeof redirectPaths] || '/';
     },
     onError: (error: any) => {
       toast({
@@ -126,10 +135,47 @@ export default function SignUp() {
 
                 <FormField
                   control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="tel" 
+                          placeholder="+353 87 123 4567" 
+                          {...field} 
+                          data-testid="input-phone"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username (optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="johndoe" 
+                          {...field} 
+                          data-testid="input-username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email (optional)</FormLabel>
                       <FormControl>
                         <Input 
                           type="email" 
@@ -177,6 +223,8 @@ export default function SignUp() {
                         <SelectContent>
                           <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
                           <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
+                          <SelectItem value="shop" data-testid="option-shop">Shop / Franchise Owner</SelectItem>
+                          <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
