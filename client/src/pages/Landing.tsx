@@ -110,10 +110,11 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="pt-16 md:pt-24 pb-0 bg-cover bg-no-repeat relative min-h-[600px]"
+        className="pt-16 md:pt-24 pb-0 bg-no-repeat relative min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
-          backgroundPosition: 'center center'
+          backgroundPosition: 'right center',
+          backgroundSize: 'auto 100%'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
