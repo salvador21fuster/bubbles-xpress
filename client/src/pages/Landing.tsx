@@ -29,13 +29,13 @@ export default function Landing() {
       setIsLoading(true);
       try {
         return await apiRequest("POST", "/api/orders", {
-          customer: { id: 'guest' },
+          customer: { email: 'guest@example.com' },
           address: {
             line1: data.addressLine1,
             city: data.city,
             eircode: data.eircode,
           },
-          services: [{ service_id: data.service, qty: 1 }],
+          services: [{ service_id: data.service, quantity: 1 }],
           payment_method: 'card',
           notes: data.notes,
         });

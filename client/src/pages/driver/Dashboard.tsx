@@ -39,7 +39,39 @@ export default function DriverDashboard() {
         <p className="text-muted-foreground">Today's pickups and deliveries</p>
       </div>
 
-      {/* Earnings Cards */}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[1, 2].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-muted rounded w-2/3"></div>
+                    <div className="h-8 bg-muted rounded w-1/2"></div>
+                    <div className="h-2 bg-muted rounded w-3/4"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-muted rounded w-1/3"></div>
+                  <div className="h-8 bg-muted rounded w-1/2"></div>
+                  <div className="h-3 bg-muted rounded w-2/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Earnings Cards and Tabs */}
+      {!isLoading && (
+      <>
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Card className="bg-primary text-primary-foreground">
           <CardContent className="p-4">
@@ -207,6 +239,8 @@ export default function DriverDashboard() {
           )}
         </TabsContent>
       </Tabs>
+      </>
+      )}
     </div>
   );
 }

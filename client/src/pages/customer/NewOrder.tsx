@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Package } from "lucide-react";
-import type { Service } from "@shared/schema";
+import type { Service, Order } from "@shared/schema";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 import { useLoadingAction } from "@/hooks/use-loading-action";
 
@@ -69,9 +69,9 @@ export default function NewOrder() {
         payment_method: 'card',
         notes: data.notes,
       });
-      return response as any;
+      return response as Order;
     },
-    onSuccess: (order: any) => {
+    onSuccess: (order: Order) => {
       toast({
         title: "Order Created!",
         description: `Order #${order.id.slice(0, 8)} has been created successfully.`,
