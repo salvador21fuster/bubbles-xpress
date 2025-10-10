@@ -58,6 +58,7 @@ function updateUserSession(
 
 async function upsertUser(
   claims: any,
+  role?: string,
 ) {
   await storage.upsertUser({
     id: claims["sub"],
@@ -65,6 +66,7 @@ async function upsertUser(
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    role: role as 'customer' | 'driver' | 'shop' | 'admin' | undefined,
   });
 }
 
@@ -76,14 +78,48 @@ export async function setupAuth(app: Express) {
 
   const config = await getOidcConfig();
 
-  const verify: VerifyFunction = async (
+  const verify = async (
+    req: any,
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
+    userinfo: any,
+    done: passport.AuthenticateCallback
   ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    try {
+      const user = {};
+      updateUserSession(user, tokens);
+      
+      // Get requested role from session
+      const requestedRole = req?.session?.requestedRole;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUser(tokens.claims()["sub"]);
+      
+      // Only allow role assignment for new users or if changing from customer/driver
+      // Prevent unauthorized admin/shop role assignment
+      let finalRole = existingUser?.role;
+      if (!existingUser) {
+        // New user: only allow customer or driver roles
+        if (requestedRole === 'customer' || requestedRole === 'driver') {
+          finalRole = requestedRole as 'customer' | 'driver';
+        } else {
+          finalRole = 'customer'; // Default to customer
+        }
+      } else if (requestedRole && (requestedRole === 'customer' || requestedRole === 'driver')) {
+        // Existing user: allow switching between customer and driver only
+        if (existingUser.role === 'customer' || existingUser.role === 'driver') {
+          finalRole = requestedRole as 'customer' | 'driver';
+        }
+      }
+      
+      await upsertUser(tokens.claims(), finalRole);
+      if (req?.session) {
+        delete req.session.requestedRole;
+      }
+      done(null, user);
+    } catch (error) {
+      console.error('Authentication error:', error);
+      done(error as Error);
+    }
   };
 
   for (const domain of process.env
@@ -94,8 +130,9 @@ export async function setupAuth(app: Express) {
         config,
         scope: "openid email profile offline_access",
         callbackURL: `https://${domain}/api/callback`,
+        passReqToCallback: true,
       },
-      verify,
+      verify as any,
     );
     passport.use(strategy);
   }
@@ -104,6 +141,10 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    const role = req.query.role as string;
+    if (role && ['customer', 'driver', 'shop', 'admin'].includes(role)) {
+      (req.session as any).requestedRole = role;
+    }
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
@@ -111,9 +152,48 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+    passport.authenticate(`replitauth:${req.hostname}`, async (err: any, user: any) => {
+      if (err) {
+        console.error('Callback authentication error:', err);
+        return res.redirect("/api/login");
+      }
+      if (!user) {
+        console.error('Callback: No user returned from authentication');
+        return res.redirect("/api/login");
+      }
+      
+      req.logIn(user, async (loginErr) => {
+        if (loginErr) {
+          console.error('Login error:', loginErr);
+          return res.redirect("/api/login");
+        }
+        
+        try {
+          // Get user from database to check role
+          const dbUser = await storage.getUser(user.claims.sub);
+          
+          if (!dbUser) {
+            console.error('User not found in database after authentication');
+            return res.redirect('/');
+          }
+          
+          // Route based on role
+          if (dbUser.role === 'customer') {
+            return res.redirect('/customer');
+          } else if (dbUser.role === 'driver') {
+            return res.redirect('/driver');
+          } else if (dbUser.role === 'shop') {
+            return res.redirect('/shop');
+          } else if (dbUser.role === 'admin') {
+            return res.redirect('/admin');
+          } else {
+            return res.redirect('/');
+          }
+        } catch (error) {
+          console.error('Error getting user role:', error);
+          return res.redirect('/');
+        }
+      });
     })(req, res, next);
   });
 

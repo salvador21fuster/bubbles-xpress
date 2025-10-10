@@ -76,17 +76,28 @@ export default function Landing() {
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Professional laundry collection, processing, and delivery. Book your pickup in seconds.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" className="gap-2" asChild>
-              <a href="#booking" data-testid="button-book-now">
-                Book Now <ArrowRight className="h-5 w-5" />
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="/api/login" data-testid="button-login">
-                Sign In
-              </a>
-            </Button>
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button size="lg" className="gap-2" asChild>
+                <a href="#booking" data-testid="button-book-now">
+                  Book Now <ArrowRight className="h-5 w-5" />
+                </a>
+              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+              <Button size="lg" variant="outline" className="flex-1 bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+                <a href="/api/login?role=customer" data-testid="button-login-customer">
+                  <Package className="h-5 w-5 mr-2" />
+                  Customer Login
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" className="flex-1 bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+                <a href="/api/login?role=driver" data-testid="button-login-driver">
+                  <Truck className="h-5 w-5 mr-2" />
+                  Driver Login
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
