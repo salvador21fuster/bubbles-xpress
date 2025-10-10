@@ -4,13 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Truck, Package, CheckCircle, ArrowRight } from "lucide-react";
+import { Sparkles, Truck, Package, CheckCircle, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
-import { BubblesBackground } from "@/components/BubblesBackground";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 
 export default function Landing() {
@@ -65,69 +64,92 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#F5EDE4]">
       <WashingMachineLoader isVisible={isLoading} />
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-600 overflow-hidden">
-        <BubblesBackground />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/20 text-white backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">Ireland's Premier Laundry Service</span>
-          </div>
-          <div className="mb-8 flex justify-center">
-            <img 
-              src={logoImage} 
-              alt="Mr Bubbles Laundry & Linen Specialist" 
-              className="h-32 md:h-40 w-auto object-contain drop-shadow-2xl"
-            />
-          </div>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-lg">
-            Professional laundry collection, processing, and delivery. Book your pickup in seconds.
-          </p>
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-wrap gap-4 justify-center">
+      
+      {/* Top Bar */}
+      <div className="bg-[#2D2D2D] text-white py-2 px-4">
+        <div className="max-w-7xl mx-auto text-center text-xs md:text-sm">
+          Professional, Reliable & Efficient • Trusted by 2,000+ Irish Customers
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="bg-[#F5EDE4] border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img 
+                src={logoImage} 
+                alt="Mr Bubbles Express" 
+                className="h-12 w-auto object-contain"
+                data-testid="logo-image"
+              />
+            </div>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#services" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-services">SERVICES</a>
+              <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-pricing">PRICES</a>
+              <a href="#how-it-works" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-how-it-works">HOW IT WORKS</a>
+              <a href="/api/login?role=customer" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-login">SIGN IN</a>
               <Button 
-                size="lg" 
-                className="gap-2 bg-white text-primary hover:bg-white/90 border-white shadow-xl" 
+                className="bg-[#FFD700] text-black hover:bg-[#FFD700]/90 font-semibold px-6"
                 asChild
               >
-                <a href="#booking" data-testid="button-book-now">
-                  Book Now <ArrowRight className="h-5 w-5" />
+                <a href="#booking" data-testid="nav-book-now">BOOK NOW</a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                Laundry, Dry Cleaning & Ironing – Done in 24 Hours
+              </h1>
+              <p className="text-lg text-gray-700 mb-8">
+                Now serving Ireland & 20+ cities. Over 50,000 garments cleaned. 5-star rated by 2,000+ locals.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90 px-8 py-6 text-lg font-semibold"
+                asChild
+              >
+                <a href="#booking" data-testid="button-schedule-pickup">
+                  SCHEDULE YOUR PICKUP
+                  <span className="ml-2 text-xs block">IN NEXT 60 MINUTES</span>
                 </a>
               </Button>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="flex-1 bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white/20" 
-                asChild
-              >
-                <a href="/api/login?role=customer" data-testid="button-login-customer">
-                  <Package className="h-5 w-5 mr-2" />
-                  Customer Login
-                </a>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="flex-1 bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white/20" 
-                asChild
-              >
-                <a href="/api/login?role=driver" data-testid="button-login-driver">
-                  <Truck className="h-5 w-5 mr-2" />
-                  Driver Login
-                </a>
-              </Button>
+            <div className="flex justify-center items-center">
+              <div className="relative">
+                <div className="w-full h-96 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <Package className="h-32 w-32 mx-auto text-primary mb-4" />
+                    <p className="text-gray-600 font-medium">Professional Laundry Service</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Trust Bar */}
+      <section className="bg-[#2D2D2D] text-white py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center">
+            <h3 className="text-xl font-bold mb-2">A Trusted Choice for Laundry Services</h3>
+            <p className="text-sm opacity-90">Expert in Dry Cleaning • Bedding • Wash, Dry & Fold, Ironing, Alteration, Shoe Repair and more</p>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
-      <section className="py-20 px-4">
+      <section id="how-it-works" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">How It Works</h2>
           <div className="grid md:grid-cols-4 gap-8">
@@ -137,15 +159,15 @@ export default function Landing() {
               { icon: Sparkles, title: "We Clean", desc: "Professional processing at our facilities" },
               { icon: CheckCircle, title: "We Deliver", desc: "Fresh, clean laundry back to your door" },
             ].map((step, i) => (
-              <Card key={i} className="text-center hover-elevate">
+              <Card key={i} className="text-center hover-elevate bg-[#F5EDE4] border-gray-200">
                 <CardHeader>
                   <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                     <step.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <CardTitle>{step.title}</CardTitle>
+                  <CardTitle className="text-lg">{step.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{step.desc}</p>
+                  <p className="text-muted-foreground text-sm">{step.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -154,9 +176,9 @@ export default function Landing() {
       </section>
 
       {/* Booking Widget */}
-      <section id="booking" className="py-20 px-4 bg-muted/30">
+      <section id="booking" className="py-20 px-4 bg-[#F5EDE4]">
         <div className="max-w-2xl mx-auto">
-          <Card>
+          <Card className="border-gray-200">
             <CardHeader>
               <CardTitle className="text-2xl">Book Your Pickup</CardTitle>
               <CardDescription>Fill in your details and we'll handle the rest</CardDescription>
@@ -181,7 +203,7 @@ export default function Landing() {
                       id="city"
                       value={bookingData.city}
                       onChange={(e) => setBookingData({ ...bookingData, city: e.target.value })}
-                      placeholder="Drogheda"
+                      placeholder="Dublin"
                       required
                       data-testid="input-city"
                     />
@@ -204,10 +226,10 @@ export default function Landing() {
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="svc_laundry_kg">Laundry (per kg)</SelectItem>
-                      <SelectItem value="svc_dry_clean">Dry Cleaning</SelectItem>
-                      <SelectItem value="svc_shirt_press">Shirt Press</SelectItem>
-                      <SelectItem value="svc_iron">Ironing Service</SelectItem>
+                      <SelectItem value="svc_laundry_kg" data-testid="select-option-laundry">Laundry (per kg)</SelectItem>
+                      <SelectItem value="svc_dry_clean" data-testid="select-option-dry-clean">Dry Cleaning</SelectItem>
+                      <SelectItem value="svc_shirt_press" data-testid="select-option-shirt-press">Shirt Press</SelectItem>
+                      <SelectItem value="svc_iron" data-testid="select-option-ironing">Ironing Service</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -221,7 +243,12 @@ export default function Landing() {
                     data-testid="textarea-notes"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={bookingMutation.isPending} data-testid="button-submit-booking">
+                <Button 
+                  type="submit" 
+                  className="w-full bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90" 
+                  disabled={bookingMutation.isPending} 
+                  data-testid="button-submit-booking"
+                >
                   {bookingMutation.isPending ? "Submitting..." : "Submit Booking"}
                 </Button>
               </form>
@@ -230,10 +257,34 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Services Section */}
+      <section id="services" className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Our Services</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: "Wash & Fold", desc: "Professional cleaning for everyday items", testId: "service-wash-fold" },
+              { title: "Dry Cleaning", desc: "Expert care for delicate garments", testId: "service-dry-cleaning" },
+              { title: "Ironing Service", desc: "Crisp, professional pressing", testId: "service-ironing" },
+            ].map((service, i) => (
+              <Card key={i} className="hover-elevate bg-[#F5EDE4] border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">{service.desc}</p>
+                  <Button variant="outline" className="w-full" data-testid={`button-learn-more-${service.testId}`}>Learn More</Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Join Us Section */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-[#F5EDE4]">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-          <Card className="hover-elevate">
+          <Card className="hover-elevate border-gray-200">
             <CardHeader>
               <CardTitle className="text-xl">Become a Driver</CardTitle>
               <CardDescription>Flexible hours, great earnings</CardDescription>
@@ -243,11 +294,11 @@ export default function Landing() {
                 Join our driver network and earn on your schedule. Full training and equipment provided.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="/api/login" data-testid="link-driver-signup">Apply Now</a>
+                <a href="/api/login?role=driver" data-testid="link-driver-signup">Apply Now</a>
               </Button>
             </CardContent>
           </Card>
-          <Card className="hover-elevate">
+          <Card className="hover-elevate border-gray-200">
             <CardHeader>
               <CardTitle className="text-xl">Partner Launderette</CardTitle>
               <CardDescription>Grow your business with us</CardDescription>
@@ -257,7 +308,7 @@ export default function Landing() {
                 Join Ireland's premier laundry network. Access to more customers and streamlined operations.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="/api/login" data-testid="link-franchise-signup">Learn More</a>
+                <a href="/api/login?role=shop" data-testid="link-franchise-signup">Learn More</a>
               </Button>
             </CardContent>
           </Card>
@@ -265,8 +316,8 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t">
-        <div className="max-w-6xl mx-auto text-center text-sm text-muted-foreground">
+      <footer className="py-8 px-4 bg-[#2D2D2D] text-white">
+        <div className="max-w-6xl mx-auto text-center text-sm">
           <p>&copy; 2025 Mr Bubbles Express. All rights reserved.</p>
         </div>
       </footer>
