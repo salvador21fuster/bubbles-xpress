@@ -75,6 +75,11 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default('customer'),
   isSuperAdmin: boolean("is_super_admin").default(false), // Can access all portal types
   shopId: varchar("shop_id"), // If user is associated with a shop
+  // Driver availability fields
+  isActive: boolean("is_active").default(false), // Driver is currently available for pickups
+  lastActiveAt: timestamp("last_active_at"), // Last time driver was active
+  currentLatitude: decimal("current_latitude", { precision: 10, scale: 7 }), // Current location
+  currentLongitude: decimal("current_longitude", { precision: 10, scale: 7 }), // Current location
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
