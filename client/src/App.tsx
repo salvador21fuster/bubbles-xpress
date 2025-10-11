@@ -67,7 +67,7 @@ function Router() {
     return (
       <Switch>
         {/* Customer Routes */}
-        {isCustomer && (
+        {(isCustomer || isSuperAdmin) && (
           <>
             <Route path="/customer" component={CustomerDashboard} />
             <Route path="/customer/orders" component={CustomerDashboard} />
@@ -78,7 +78,7 @@ function Router() {
         )}
 
         {/* Driver Routes */}
-        {isDriver && (
+        {(isDriver || isSuperAdmin) && (
           <>
             <Route path="/driver" component={DriverDashboard} />
             <Route path="/driver/orders" component={DriverDashboard} />
@@ -115,7 +115,7 @@ function Router() {
           <main className="flex-1 overflow-auto p-6">
             <Switch>
               {/* Shop Routes (Original Mr Bubbles Shop Only) */}
-              {isShop && (
+              {(isShop || isSuperAdmin) && (
                 <>
                   <Route path="/shop" component={ShopDashboard} />
                   <Route path="/shop/orders" component={ShopOrders} />
@@ -128,7 +128,7 @@ function Router() {
               )}
 
               {/* Franchise Routes (Franchise Partners) */}
-              {isFranchise && (
+              {(isFranchise || isSuperAdmin) && (
                 <>
                   <Route path="/franchise" component={ShopDashboard} />
                   <Route path="/franchise/orders" component={ShopOrders} />
@@ -141,7 +141,7 @@ function Router() {
               )}
               
               {/* Admin Routes */}
-              {isAdmin && (
+              {(isAdmin || isSuperAdmin) && (
                 <>
                   <Route path="/admin" component={AdminDashboard} />
                   <Route path="/admin/transactions" component={AdminTransactions} />
