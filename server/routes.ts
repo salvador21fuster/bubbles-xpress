@@ -1027,7 +1027,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
-      if (user?.role !== 'shop') {
+      if (user?.role !== 'shop' && !user?.isSuperAdmin) {
         return res.status(403).json({ message: "Forbidden: Shop access required" });
       }
 
@@ -1038,6 +1038,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const orders = await storage.getOrdersByShop(shopId);
       res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get shop profile
+  app.get("/api/shop/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'shop' && !user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Forbidden: Shop access required" });
+      }
+
+      const shopId = user.shopId;
+      if (!shopId) {
+        return res.status(400).json({ message: "User not associated with a shop" });
+      }
+
+      const shop = await storage.getShop(shopId);
+      if (!shop) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+
+      res.json(shop);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update shop profile
+  app.patch("/api/shop/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'shop' && !user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Forbidden: Shop access required" });
+      }
+
+      const shopId = user.shopId;
+      if (!shopId) {
+        return res.status(400).json({ message: "User not associated with a shop" });
+      }
+
+      // Validate and update shop data
+      const updateData: Partial<InsertShop> = {};
+      
+      if (req.body.franchiseName !== undefined) updateData.franchiseName = req.body.franchiseName;
+      if (req.body.name !== undefined) updateData.name = req.body.name;
+      if (req.body.address !== undefined) updateData.address = req.body.address;
+      if (req.body.city !== undefined) updateData.city = req.body.city;
+      if (req.body.eircode !== undefined) updateData.eircode = req.body.eircode;
+      if (req.body.contactEmail !== undefined) updateData.contactEmail = req.body.contactEmail;
+      if (req.body.contactPhone !== undefined) updateData.contactPhone = req.body.contactPhone;
+      if (req.body.subscriptionType !== undefined) updateData.subscriptionType = req.body.subscriptionType;
+
+      const updatedShop = await storage.updateShop(shopId, updateData);
+      res.json(updatedShop);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

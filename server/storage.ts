@@ -85,6 +85,8 @@ export interface IStorage {
   // Shop operations
   createShop(shop: InsertShop): Promise<Shop>;
   getAllShops(): Promise<Shop[]>;
+  getShop(id: string): Promise<Shop | undefined>;
+  updateShop(id: string, updates: Partial<InsertShop>): Promise<Shop>;
 
   // Subcontract operations
   createSubcontract(subcontract: InsertSubcontract): Promise<Subcontract>;
@@ -383,6 +385,20 @@ export class DatabaseStorage implements IStorage {
 
   async getAllShops(): Promise<Shop[]> {
     return await db.select().from(shops);
+  }
+
+  async getShop(id: string): Promise<Shop | undefined> {
+    const [shop] = await db.select().from(shops).where(eq(shops.id, id));
+    return shop;
+  }
+
+  async updateShop(id: string, updates: Partial<InsertShop>): Promise<Shop> {
+    const [shop] = await db
+      .update(shops)
+      .set(updates)
+      .where(eq(shops.id, id))
+      .returning();
+    return shop;
   }
 
   // Subcontract operations
