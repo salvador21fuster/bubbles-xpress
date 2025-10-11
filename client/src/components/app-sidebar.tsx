@@ -48,7 +48,9 @@ export function AppSidebar() {
             alt="Mr Bubbles" 
             className="h-12 w-auto object-contain"
           />
-          <p className="text-xs text-muted-foreground capitalize text-center">{user?.role} Portal</p>
+          <p className="text-xs text-muted-foreground text-center">
+            {isAdmin ? 'Admin Portal' : isShop ? 'Shop Portal' : `${user?.role} Portal`}
+          </p>
         </div>
       </SidebarHeader>
       <SidebarContent>
