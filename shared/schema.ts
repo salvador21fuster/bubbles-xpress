@@ -300,11 +300,15 @@ export const splits = pgTable("splits", {
 
 export type Split = typeof splits.$inferSelect;
 
+// Invoice status enum
+export const invoiceStatusEnum = pgEnum("invoice_status", ["pending", "paid", "cancelled"]);
+
 // Invoices table
 export const invoices = pgTable("invoices", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").notNull(),
   invoiceNumber: varchar("invoice_number").unique().notNull(),
+  status: invoiceStatusEnum("status").notNull().default("pending"),
   
   subtotalCents: integer("subtotal_cents").notNull(),
   vatCents: integer("vat_cents").notNull(),
@@ -312,10 +316,13 @@ export const invoices = pgTable("invoices", {
   currency: varchar("currency").default('EUR'),
   
   pdfUrl: varchar("pdf_url"),
+  paidAt: timestamp("paid_at"),
   
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true });
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 
 // ============= RELATIONS =============

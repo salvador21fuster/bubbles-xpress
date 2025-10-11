@@ -224,6 +224,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Generate pending invoice
+      const invoiceNumber = `INV-${Date.now()}-${order.id.slice(0, 8)}`;
+      await storage.createInvoice({
+        orderId: order.id,
+        invoiceNumber,
+        status: 'pending' as const,
+        subtotalCents: order.subtotalCents || 0,
+        vatCents: order.vatCents || 0,
+        totalCents: order.totalCents || 0,
+        currency: 'EUR',
+        pdfUrl: null,
+        paidAt: null,
+      });
+
       res.json(order);
     } catch (error: any) {
       console.error("Error creating order:", error);
@@ -475,6 +489,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============= INVOICE ROUTES =============
   
+  // Get all invoices (Admin only)
+  app.get("/api/invoices", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'admin' && !user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Forbidden: Admin access required" });
+      }
+
+      const invoices = await storage.getAllInvoices();
+      res.json(invoices);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get invoice for an order
+  app.get("/api/orders/:id/invoice", async (req, res) => {
+    try {
+      const orderId = req.params.id;
+      const invoice = await storage.getInvoiceByOrder(orderId);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      res.json(invoice);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
   // Create invoice
   app.post("/api/orders/:id/invoice", isAuthenticated, async (req, res) => {
     try {
@@ -489,14 +536,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoice = await storage.createInvoice({
         orderId,
         invoiceNumber,
+        status: 'pending' as const,
         subtotalCents: order.subtotalCents || 0,
         vatCents: order.vatCents || 0,
         totalCents: order.totalCents || 0,
         currency: order.currency || 'EUR',
         pdfUrl: null,
+        paidAt: null,
       });
 
       res.json(invoice);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Mark invoice as paid (called after successful Stripe payment or by admin)
+  app.patch("/api/invoices/:id/mark-paid", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const invoiceId = req.params.id;
+      const { paymentIntentId } = req.body;
+
+      // Only admin/super admin can manually mark invoices as paid
+      // (Stripe webhook will also call this endpoint in production)
+      if (user?.role !== 'admin' && !user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Forbidden: Admin access required" });
+      }
+
+      const updatedInvoice = await storage.updateInvoiceStatus(invoiceId, 'paid', new Date());
+      
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // TODO: Store paymentIntentId for audit trail when Stripe integration is complete
+
+      res.json(updatedInvoice);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

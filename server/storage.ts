@@ -410,6 +410,15 @@ export class DatabaseStorage implements IStorage {
   async getAllInvoices(): Promise<Invoice[]> {
     return await db.select().from(invoices).orderBy(desc(invoices.createdAt));
   }
+
+  async updateInvoiceStatus(invoiceId: string, status: 'pending' | 'paid' | 'cancelled', paidAt?: Date): Promise<Invoice | undefined> {
+    const [invoice] = await db
+      .update(invoices)
+      .set({ status, paidAt: paidAt || null })
+      .where(eq(invoices.id, invoiceId))
+      .returning();
+    return invoice;
+  }
 }
 
 export const storage = new DatabaseStorage();
