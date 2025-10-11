@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MapPin, Package, Clock, CreditCard } from "lucide-react";
+import { ArrowLeft, MapPin, Package, Clock, CreditCard, CheckCircle2, Circle, Truck } from "lucide-react";
 import { LiveOrderMap } from "@/components/LiveOrderMap";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Order } from "@shared/schema";
@@ -141,9 +141,13 @@ export default function OrderDetails() {
                   <div key={step.state} className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                        isCompleted ? (statusColors[step.state] || 'bg-primary') : 'bg-muted'
+                        isCompleted ? 'bg-primary' : 'bg-muted'
                       }`}>
-                        <step.icon className={`h-4 w-4 ${isCompleted ? 'text-white' : 'text-muted-foreground'}`} />
+                        {isCompleted ? (
+                          <CheckCircle2 className="h-5 w-5 text-white" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
                       </div>
                       {!isLast && (
                         <div className={`w-0.5 h-8 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />

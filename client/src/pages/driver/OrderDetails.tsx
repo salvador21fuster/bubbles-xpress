@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera, Navigation, CheckCircle2, Circle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { QRScanner } from "@/components/QRScanner";
@@ -170,6 +170,75 @@ export default function DriverOrderDetails() {
             )}
           </CardContent>
         </Card>
+
+        {/* Progress Tracker (Pickup Only) */}
+        {isPickup && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Pickup Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {/* Step 1: Print Label */}
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                    labelPrinted ? 'bg-primary' : 'bg-muted'
+                  }`}>
+                    {labelPrinted ? (
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-semibold ${!labelPrinted && 'text-muted-foreground'}`}>
+                      Print QR Label
+                    </p>
+                    <p className="text-sm text-muted-foreground">Attach to laundry bag</p>
+                  </div>
+                </div>
+
+                {/* Step 2: On My Way */}
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                    onWay ? 'bg-primary' : 'bg-muted'
+                  }`}>
+                    {onWay ? (
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-semibold ${!onWay && 'text-muted-foreground'}`}>
+                      En Route to Customer
+                    </p>
+                    <p className="text-sm text-muted-foreground">Heading to {order.timeWindow} pickup</p>
+                  </div>
+                </div>
+
+                {/* Step 3: Pickup Confirmed */}
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                    order.state === 'picked_up' ? 'bg-primary' : 'bg-muted'
+                  }`}>
+                    {order.state === 'picked_up' ? (
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-semibold ${order.state !== 'picked_up' && 'text-muted-foreground'}`}>
+                      Pickup Confirmed
+                    </p>
+                    <p className="text-sm text-muted-foreground">QR scanned at customer location</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Workflow Steps */}
         {showScanner ? (
