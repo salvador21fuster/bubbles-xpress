@@ -49,6 +49,7 @@ const createScanSchema = z.object({
   type: z.enum(['pickup', 'handoff.to_shop', 'handoff.to_processing', 'intake', 'qc', 'pack', 'handoff.to_driver', 'delivery']),
   order_id: z.string().optional(),
   bag_id: z.string().optional(),
+  item_id: z.string().optional(),
   from_party: z.object({
     type: z.string(),
     id: z.string(),
@@ -62,6 +63,8 @@ const createScanSchema = z.object({
     lng: z.number(),
   }).optional(),
   weight_kg: z.number().optional(),
+  photo_url: z.string().optional(),
+  signature: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -164,6 +167,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Get specific user (for driver tracking)
+  app.get('/api/users/:id', isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 
@@ -392,6 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: data.type as any,
         orderId: data.order_id || null,
         bagId: data.bag_id || null,
+        itemId: data.item_id || null,
         scannedBy: userId,
         scannedByRole: user?.role || 'customer',
         latitude: data.geo?.lat ? data.geo.lat.toString() : null,
@@ -400,6 +417,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fromPartyId: data.from_party?.id || null,
         toPartyType: data.to_party?.type || null,
         toPartyId: data.to_party?.id || null,
+        photoUrl: data.photo_url || null,
+        signature: data.signature || null,
         notes: data.notes || null,
       });
 

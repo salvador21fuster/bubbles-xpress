@@ -1,11 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Phone, Package, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { QRScanner } from "@/components/QRScanner";
 import type { Order } from "@shared/schema";
 
 export default function DriverOrderDetails() {
@@ -13,6 +15,7 @@ export default function DriverOrderDetails() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/driver/orders/:id");
+  const [showScanner, setShowScanner] = useState(false);
 
   const { data: order, isLoading } = useQuery<Order>({
     queryKey: ["/api/orders", params?.id],
@@ -164,31 +167,45 @@ export default function DriverOrderDetails() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        {isPickup && (
-          <Button 
-            size="lg" 
-            className="w-full gap-2"
-            onClick={() => markPickedUpMutation.mutate()}
-            disabled={markPickedUpMutation.isPending}
-            data-testid="button-confirm-pickup"
-          >
-            <Package className="h-5 w-5" />
-            {markPickedUpMutation.isPending ? 'Confirming...' : 'Confirm Pickup'}
-          </Button>
-        )}
+        {/* Scanner or Action Buttons */}
+        {showScanner ? (
+          <QRScanner
+            scanType={isPickup ? 'pickup' : 'delivery'}
+            orderId={order.id}
+            onScanComplete={() => {
+              setShowScanner(false);
+              queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+              navigate('/driver');
+            }}
+            onCancel={() => setShowScanner(false)}
+          />
+        ) : (
+          <>
+            {isPickup && (
+              <Button 
+                size="lg" 
+                className="w-full gap-2"
+                onClick={() => setShowScanner(true)}
+                data-testid="button-scan-pickup"
+              >
+                <Camera className="h-5 w-5" />
+                Scan QR & Confirm Pickup
+              </Button>
+            )}
 
-        {isDelivery && (
-          <Button 
-            size="lg" 
-            className="w-full gap-2"
-            onClick={() => markDeliveredMutation.mutate()}
-            disabled={markDeliveredMutation.isPending}
-            data-testid="button-confirm-delivery"
-          >
-            <CheckCircle className="h-5 w-5" />
-            {markDeliveredMutation.isPending ? 'Confirming...' : 'Confirm Delivery'}
-          </Button>
+            {isDelivery && (
+              <Button 
+                size="lg" 
+                className="w-full gap-2"
+                onClick={() => setShowScanner(true)}
+                data-testid="button-scan-delivery"
+              >
+                <Camera className="h-5 w-5" />
+                Scan QR & Confirm Delivery
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>

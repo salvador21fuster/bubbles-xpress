@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, MapPin, Package, Clock, CreditCard } from "lucide-react";
+import { LiveOrderMap } from "@/components/LiveOrderMap";
 import type { Order } from "@shared/schema";
 
 const statusColors: Record<string, string> = {
@@ -55,6 +56,7 @@ export default function OrderDetails() {
   const { data: order, isLoading } = useQuery<Order>({
     queryKey: ["/api/orders", params?.id],
     enabled: !!params?.id,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds for real-time updates
   });
 
   if (isLoading) {
@@ -98,6 +100,11 @@ export default function OrderDetails() {
               {statusLabels[order.state] || order.state}
             </Badge>
           </div>
+        </div>
+
+        {/* Live Tracking Map */}
+        <div className="mb-6">
+          <LiveOrderMap orderId={order.id} />
         </div>
 
         {/* Status Timeline */}

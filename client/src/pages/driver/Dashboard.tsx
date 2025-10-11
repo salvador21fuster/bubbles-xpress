@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import type { Order, User } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useDriverLocation } from "@/hooks/useDriverLocation";
 
 // Simple route optimization: sort by city then address
 function optimizeRoute(orders: Order[]): Order[] {
@@ -26,15 +27,20 @@ export default function DriverDashboard() {
   
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/driver/orders"],
+    refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
 
   const { data: availableOrders = [], isLoading: isLoadingAvailable } = useQuery<Order[]>({
     queryKey: ["/api/driver/available-orders"],
+    refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
+
+  // Track driver location when online
+  const { isTracking } = useDriverLocation(user?.isActive || false);
 
   const acceptOrderMutation = useMutation({
     mutationFn: async (orderId: string) => {

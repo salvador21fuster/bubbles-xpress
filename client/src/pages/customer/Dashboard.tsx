@@ -35,6 +35,7 @@ const statusLabels: Record<string, string> = {
 export default function CustomerDashboard() {
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/customer/orders"],
+    refetchInterval: 10000, // Auto-refresh every 10 seconds for real-time updates
   });
 
   const activeOrders = orders.filter(o => o.state !== 'delivered' && o.state !== 'closed');
