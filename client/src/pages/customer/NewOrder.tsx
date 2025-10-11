@@ -13,16 +13,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Package, Users } from "lucide-react";
+import { ArrowLeft, Package, Users, User as UserIcon, Calendar, Clock } from "lucide-react";
 import type { Service, Order, User } from "@shared/schema";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 import { useLoadingAction } from "@/hooks/use-loading-action";
 
 const orderSchema = z.object({
+  // Customer contact
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  
+  // Pickup schedule
+  pickupDate: z.string().min(1, "Pickup date is required"),
+  timeWindow: z.string().min(1, "Please select a time window"),
+  
+  // Address
   addressLine1: z.string().min(1, "Address is required"),
   addressLine2: z.string().optional(),
   city: z.string().min(1, "City is required"),
   eircode: z.string().optional(),
+  
+  // Service
   serviceId: z.string().min(1, "Please select a service"),
   quantity: z.string().min(1, "Quantity is required"),
   notes: z.string().optional(),
@@ -46,6 +58,11 @@ export default function NewOrder() {
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
+      fullName: '',
+      email: '',
+      phone: '',
+      pickupDate: '',
+      timeWindow: '',
       addressLine1: '',
       addressLine2: '',
       city: '',
@@ -59,13 +76,19 @@ export default function NewOrder() {
   const createOrderMutation = useMutation({
     mutationFn: async (data: OrderFormData) => {
       const response = await apiRequest("POST", "/api/orders", {
-        customer: { email: 'customer@example.com' },
+        customer: { 
+          email: data.email,
+          fullName: data.fullName,
+          phone: data.phone,
+        },
         address: {
           line1: data.addressLine1,
           line2: data.addressLine2,
           city: data.city,
           eircode: data.eircode,
         },
+        pickupDate: data.pickupDate,
+        timeWindow: data.timeWindow,
         services: [{
           service_id: data.serviceId,
           quantity: parseFloat(data.quantity),
@@ -165,6 +188,111 @@ export default function NewOrder() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Customer Contact */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  Your Contact Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} data-testid="input-fullname" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="john@example.com" {...field} data-testid="input-email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="+353 87 123 4567" {...field} data-testid="input-phone" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pickup Schedule */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Pickup Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="pickupDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pickup Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} data-testid="input-pickup-date" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="timeWindow"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Time Window</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-time-window">
+                              <SelectValue placeholder="Select a time" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="9-12">9:00 AM - 12:00 PM</SelectItem>
+                            <SelectItem value="12-3">12:00 PM - 3:00 PM</SelectItem>
+                            <SelectItem value="3-6">3:00 PM - 6:00 PM</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Service Selection */}
             <Card>
               <CardHeader>
