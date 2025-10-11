@@ -51,13 +51,13 @@ export default function CustomerDashboard() {
       // Clear all cached data to prevent next user from seeing previous user's data
       queryClient.clear();
       
+      // Navigate to landing page
+      navigate("/");
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
       });
-      
-      // Force a full page reload to the landing page to ensure clean state
-      window.location.href = "/";
     },
     onError: () => {
       toast({

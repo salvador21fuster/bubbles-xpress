@@ -58,10 +58,10 @@ function Router() {
         {isCustomer && (
           <>
             <Route path="/customer" component={CustomerDashboard} />
+            <Route path="/customer/orders" component={CustomerDashboard} />
             <Route path="/customer/new-order" component={CustomerNewOrder} />
             <Route path="/customer/payment" component={CustomerPayment} />
             <Route path="/customer/orders/:id" component={CustomerOrderDetails} />
-            <Route path="/" component={CustomerDashboard} />
           </>
         )}
 
@@ -69,11 +69,13 @@ function Router() {
         {isDriver && (
           <>
             <Route path="/driver" component={DriverDashboard} />
+            <Route path="/driver/orders" component={DriverDashboard} />
             <Route path="/driver/orders/:id" component={DriverOrderDetails} />
-            <Route path="/" component={DriverDashboard} />
           </>
         )}
 
+        {/* Landing page accessible even when authenticated */}
+        <Route path="/" component={Landing} />
         <Route component={NotFound} />
       </Switch>
     );
