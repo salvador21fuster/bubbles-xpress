@@ -8,6 +8,10 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-11**: 3D Drogheda map visualization - Interactive map showing Mr Bubbles HQ on Bubbles Road with animated van, geofence boundary for pilot area, Uber-style tracking experience
+- **2025-10-11**: Pilot area restrictions - Booking form locked to "Drogheda, Louth" only, enforcing service area boundaries for pilot launch
+- **2025-10-11**: Camera QR scanning complete - html5-qrcode integration with live camera, auto-stop on scan, photo/signature capture, manual entry fallback
+- **2025-10-11**: Live GPS tracking operational - Real-time driver location updates, customer map view, 5-second polling for position updates
 - **2025-10-11**: Super admin feature implemented - benbubbles and ronanbubbles can sign into ALL portal types (customer, driver, shop, admin) by selecting the role at login
 - **2025-10-10**: Authentication system overhauled - Custom email/password auth with bcrypt, username/phone login support, all 4 roles (customer, driver, shop, admin)
 - **2025-10-10**: Admin users created - benbubbles and ronanbubbles admin accounts seeded for Admin Portal access
