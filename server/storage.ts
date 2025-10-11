@@ -32,7 +32,7 @@ import {
   type Invoice,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (supports both Replit Auth and email/password)
@@ -45,6 +45,10 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUser(id: string, updates: Partial<UpsertUser>): Promise<User>;
+  
+  // Driver availability operations
+  getActiveDrivers(): Promise<User[]>;
+  updateDriverAvailability(driverId: string, isActive: boolean, latitude?: number, longitude?: number): Promise<User>;
 
   // Order operations
   createOrder(order: InsertOrder): Promise<Order>;
@@ -180,6 +184,47 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  // Driver availability operations
+  async getActiveDrivers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(and(
+        eq(users.role, 'driver'),
+        eq(users.isActive, true)
+      ))
+      .orderBy(desc(users.lastActiveAt));
+  }
+
+  async updateDriverAvailability(
+    driverId: string,
+    isActive: boolean,
+    latitude?: number,
+    longitude?: number
+  ): Promise<User> {
+    const updates: Partial<UpsertUser> = {
+      isActive,
+      lastActiveAt: new Date(),
+    };
+
+    if (latitude !== undefined) {
+      updates.currentLatitude = latitude.toString();
+    }
+    if (longitude !== undefined) {
+      updates.currentLongitude = longitude.toString();
+    }
+
+    const [user] = await db
+      .update(users)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, driverId))
       .returning();
     return user;
   }

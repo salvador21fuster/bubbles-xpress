@@ -602,6 +602,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update driver availability (driver only)
+  app.patch("/api/driver/availability", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.role !== 'driver') {
+        return res.status(403).json({ message: "Forbidden: Driver access required" });
+      }
+
+      const { isActive, latitude, longitude } = req.body;
+
+      const updatedUser = await storage.updateDriverAvailability(
+        userId,
+        isActive,
+        latitude,
+        longitude
+      );
+
+      res.json(updatedUser);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get active drivers (public - for customers to see available drivers)
+  app.get("/api/drivers/active", async (req, res) => {
+    try {
+      const activeDrivers = await storage.getActiveDrivers();
+      res.json(activeDrivers);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ============= SERVICE ROUTES =============
   
   // Get all services (public endpoint for booking)
