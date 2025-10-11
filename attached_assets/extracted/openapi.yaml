@@ -1,0 +1,129 @@
+openapi: 3.0.3
+info:
+  title: Mr Bubbles Express API
+  version: 1.0.0
+servers:
+  - url: https://api.bubblesxpress.com
+paths:
+  /items:
+    get:
+      summary: Get item catalog and prices
+      responses:
+        '200':
+          description: OK
+  /pricing:
+    get:
+      summary: Get pricing config (VAT, min_order, services)
+      responses:
+        '200':
+          description: OK
+  /checkout/summary:
+    get:
+      summary: Calculate cart summary
+      parameters:
+        - in: query
+          name: cartId
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cart totals
+  /checkout/apply-promo:
+    post:
+      summary: Apply a promo code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartId: { type: string }
+                code: { type: string }
+      responses: { '200': { description: OK } }
+  /checkout/set-tip:
+    post:
+      summary: Set tip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartId: { type: string }
+                tipAmount: { type: number }
+      responses: { '200': { description: OK } }
+  /orders/confirm:
+    post:
+      summary: Confirm order and lock prices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartId: { type: string }
+                addressId: { type: string }
+                deliveryOption: { type: string }
+                slotId: { type: string }
+      responses: { '200': { description: OK } }
+  /payments/intent:
+    post:
+      summary: Create Stripe PaymentIntent (supports Apple Pay)
+      requestBody: { required: true, content: { application/json: {} } }
+      responses: { '200': { description: OK } }
+  /driver/order/{id}/accept:
+    post:
+      summary: Accept order and generate bag labels
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bag_count: { type: integer }
+      responses: { '200': { description: JSON with label payloads } }
+  /driver/order/{id}/print_labels:
+    post:
+      summary: Request printable artifacts for labels
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format: { type: string, enum: [escpos, pdf, png] }
+                bag_count: { type: integer }
+      responses: { '200': { description: OK } }
+  /order/{id}/labels:
+    get:
+      summary: Reprint labels for an order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+  /scan/intake:
+    post:
+      summary: Mark bag as received at shop
+      requestBody: { required: true, content: { application/json: {} } }
+      responses: { '200': { description: OK } }
+  /scan/deliver:
+    post:
+      summary: Mark bag as delivered
+      requestBody: { required: true, content: { application/json: {} } }
+      responses: { '200': { description: OK } }

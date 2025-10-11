@@ -1,0 +1,26 @@
+{
+  "currency": "EUR",
+  "items": [
+    {
+      "code": "DRESS",
+      "qty": 1,
+      "price": 19.6
+    },
+    {
+      "code": "WDF",
+      "kg": 3.0,
+      "price_per_kg": 3.5
+    }
+  ],
+  "fees": {
+    "delivery_fee": 3.5,
+    "service_fee": 1.41,
+    "small_order_fee": 0.0
+  },
+  "discounts": {
+    "promo": -3.0
+  },
+  "tip": 2.0,
+  "vat": 7.86,
+  "total": 41.02
+}

@@ -1,0 +1,15 @@
+{
+  "order_id": "MBX-2025-0001729",
+  "bag_count": 3,
+  "labels": [
+    {
+      "payload": "mbx://bag?v=1&oid=MBX-2025-0001729&bid=1&bc=3&cid=CUST-102&ts=2025-10-11T23:50:00Z&sig=..."
+    },
+    {
+      "payload": "mbx://bag?v=1&oid=MBX-2025-0001729&bid=2&bc=3&cid=CUST-102&ts=2025-10-11T23:50:01Z&sig=..."
+    },
+    {
+      "payload": "mbx://bag?v=1&oid=MBX-2025-0001729&bid=3&bc=3&cid=CUST-102&ts=2025-10-11T23:50:02Z&sig=..."
+    }
+  ]
+}
