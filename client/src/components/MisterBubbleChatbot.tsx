@@ -23,17 +23,17 @@ const knowledgeBase = {
   // Franchise Info
   franchise: {
     keywords: ["franchise", "partner", "join", "tier", "silver", "gold", "subscription", "fee", "percentage"],
-    response: "We offer 3 franchise tiers:\n\n🆓 **Free Tier**: Limited access, 25% fee to Mr Bubbles\n\n🥈 **Silver (€99/month or €750/year)**: All training, equipment & clothing, 15% fee\n\n🥇 **Gold (€299/month or €2500/year)**: Ultimate access, premium training, all equipment, 5% fee\n\nReady to join? Sign up as a franchise partner to get started!"
+    response: "We offer 3 franchise tiers:\n\n• Free Tier: Limited access, 25% fee to Mr Bubbles\n\n• Silver (€99/month or €750/year): All training, equipment & clothing, 15% fee\n\n• Gold (€299/month or €2500/year): Ultimate access, premium training, all equipment, 5% fee\n\nReady to join? Sign up as a franchise partner to get started!"
   },
   // Order Process
   ordering: {
     keywords: ["order", "book", "pickup", "delivery", "schedule", "time", "when", "how long"],
-    response: "Booking is easy! 📦\n\n1. Select your pickup time (we offer morning/afternoon/evening slots)\n2. We collect your laundry from your door\n3. Items are washed, dried & folded professionally\n4. We deliver back to you within 24-48 hours\n\nYou can track your order in real-time through the app!"
+    response: "Booking is easy!\n\n1. Select your pickup time (we offer morning/afternoon/evening slots)\n2. We collect your laundry from your door\n3. Items are washed, dried & folded professionally\n4. We deliver back to you within 24-48 hours\n\nYou can track your order in real-time through the app!"
   },
   // Location
   location: {
     keywords: ["area", "location", "drogheda", "where", "coverage", "deliver", "pilot"],
-    response: "We're currently operating in **Drogheda, Louth** as our pilot area! 🚐 Our headquarters is on Bubbles Road. We're expanding soon to other areas in Ireland. Want to bring Mr Bubbles to your area? Contact us about franchise opportunities!"
+    response: "We're currently operating in Drogheda, Louth as our pilot area. Our headquarters is on Bubbles Road. We're expanding soon to other areas in Ireland. Want to bring Mr Bubbles to your area? Contact us about franchise opportunities!"
   },
   // Payment
   payment: {
@@ -43,12 +43,12 @@ const knowledgeBase = {
   // Driver Info
   driver: {
     keywords: ["driver", "job", "work", "earn", "requirements", "apply"],
-    response: "Join our driver team! 🚗\n\nDrivers earn competitive rates plus tips. Requirements:\n• Valid driver's license\n• Own vehicle\n• Smartphone for app\n• Clean driving record\n\nSign up as a driver to get started. We provide training, branded gear, and flexible hours!"
+    response: "Join our driver team!\n\nDrivers earn competitive rates plus tips. Requirements:\n• Valid driver's license\n• Own vehicle\n• Smartphone for app\n• Clean driving record\n\nSign up as a driver to get started. We provide training, branded gear, and flexible hours!"
   },
   // Tracking
   tracking: {
     keywords: ["track", "status", "where", "gps", "location", "follow"],
-    response: "Track your order in real-time! 📍\n\nYou can see:\n• Driver's live GPS location\n• Order status updates (collected → washing → drying → delivering)\n• Estimated delivery time\n• QR code scanning confirmations\n\nJust open your order in the customer app to see live tracking!"
+    response: "Track your order in real-time!\n\nYou can see:\n• Driver's live GPS location\n• Order status updates (collected → washing → drying → delivering)\n• Estimated delivery time\n• QR code scanning confirmations\n\nJust open your order in the customer app to see live tracking!"
   },
   // QR Scanning
   scanning: {
@@ -58,22 +58,22 @@ const knowledgeBase = {
   // Training
   training: {
     keywords: ["training", "learn", "course", "education", "video", "guide"],
-    response: "We provide comprehensive training! 📚\n\n**For Drivers**: Pickup/delivery procedures, customer service, QR scanning, safety protocols\n\n**For Franchises**: Business setup, equipment operation, quality standards, marketing\n\nAll training materials include videos, guides, and hands-on support. Silver & Gold tier franchises get full access!"
+    response: "We provide comprehensive training!\n\nFor Drivers: Pickup/delivery procedures, customer service, QR scanning, safety protocols\n\nFor Franchises: Business setup, equipment operation, quality standards, marketing\n\nAll training materials include videos, guides, and hands-on support. Silver & Gold tier franchises get full access!"
   },
   // Contact/Support
   support: {
     keywords: ["help", "support", "contact", "issue", "problem", "question", "phone", "email"],
-    response: "I'm here to help! 💙\n\nFor immediate support:\n• Chat with me anytime\n• Call: +353 XX XXX XXXX\n• Email: support@mrbubbles.ie\n\n**For Franchises**: Gold tier gets 24/7 premium support, Silver gets priority support, Free tier gets standard email support."
+    response: "I'm here to help!\n\nFor immediate support:\n• Chat with me anytime\n• Call: +353 XX XXX XXXX\n• Email: support@mrbubbles.ie\n\nFor Franchises: Gold tier gets 24/7 premium support, Silver gets priority support, Free tier gets standard email support."
   },
   // General greeting
   greeting: {
     keywords: ["hello", "hi", "hey", "good", "morning", "afternoon", "evening"],
-    response: "Hello! I'm Mister Bubble, your friendly laundry assistant! 🫧 How can I help you today? I can tell you about our services, franchise opportunities, order tracking, or anything else about Mr Bubbles Express!"
+    response: "Hello! I'm Mister Bubble, your friendly laundry assistant. How can I help you today? I can tell you about our services, franchise opportunities, order tracking, or anything else about Mr Bubbles Express!"
   },
   // Thanks
   thanks: {
     keywords: ["thank", "thanks", "appreciate"],
-    response: "You're very welcome! Happy to help! 😊 Is there anything else you'd like to know about Mr Bubbles Express?"
+    response: "You're very welcome! Happy to help! Is there anything else you'd like to know about Mr Bubbles Express?"
   }
 };
 
@@ -96,7 +96,7 @@ export default function MisterBubbleChatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      text: "Hi! I'm Mister Bubble 🫧 Your AI assistant for Mr Bubbles Express. How can I help you today?",
+      text: "Hi! I'm Mister Bubble - Your AI assistant for Mr Bubbles Express. How can I help you today?",
       sender: "bot",
       timestamp: new Date(),
     }

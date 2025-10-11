@@ -8,6 +8,11 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-11**: Mister Bubble AI Chatbot - Floating chatbot on all pages/dashboards with comprehensive knowledge base covering services, franchise tiers, ordering, tracking, payments, and support
+- **2025-10-11**: Franchise subscription tiers implemented - Free (25% fee), Silver (€99/month or €750/year, 15% fee), Gold (€299/month or €2500/year, 5% fee) with full benefits display in profile
+- **2025-10-11**: Franchise signup flow complete - 3-step wizard with tier selection, billing cycle choice, and fake payment processing before Stripe integration
+- **2025-10-11**: Role separation complete - "Shop" role for original Mr Bubbles location, "Franchise" role for partner locations with separate portals and signup flows
+- **2025-10-11**: Landing page booking section redesigned - Blue and yellow gradient background with animated floating bubble decorations
 - **2025-10-11**: 3D Drogheda map visualization - Interactive map showing Mr Bubbles HQ on Bubbles Road with animated van, geofence boundary for pilot area, Uber-style tracking experience
 - **2025-10-11**: Pilot area restrictions - Booking form locked to "Drogheda, Louth" only, enforcing service area boundaries for pilot launch
 - **2025-10-11**: Camera QR scanning complete - html5-qrcode integration with live camera, auto-stop on scan, photo/signature capture, manual entry fallback
