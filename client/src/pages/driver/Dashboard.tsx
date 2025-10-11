@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, MapPin, Navigation, TrendingUp, Power } from "lucide-react";
-import { Link } from "wouter";
+import { Package, MapPin, Navigation, TrendingUp, Power, LogOut } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import type { Order, User } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,7 @@ function optimizeRoute(orders: Order[]): Order[] {
 
 export default function DriverDashboard() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/driver/orders"],
@@ -41,6 +42,31 @@ export default function DriverDashboard() {
 
   // Track driver location when online
   const { isTracking } = useDriverLocation(user?.isActive || false);
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      // Clear all cached data to prevent next user from seeing previous user's data
+      queryClient.clear();
+      
+      // Navigate to landing page
+      navigate("/");
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
   const acceptOrderMutation = useMutation({
     mutationFn: async (orderId: string) => {
@@ -96,9 +122,21 @@ export default function DriverDashboard() {
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Driver Dashboard</h1>
-        <p className="text-muted-foreground">Today's pickups and deliveries</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Driver Dashboard</h1>
+          <p className="text-muted-foreground">Today's pickups and deliveries</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
+          data-testid="button-logout"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
       </div>
 
       {/* Availability Toggle */}
