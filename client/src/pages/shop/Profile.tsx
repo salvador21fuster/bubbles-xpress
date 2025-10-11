@@ -10,13 +10,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Building2, CreditCard, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import type { Shop } from "@shared/schema";
 
 export default function ShopProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: shop, isLoading } = useQuery({
+  const { data: shop, isLoading } = useQuery<Shop>({
     queryKey: ['/api/shop/profile'],
     enabled: !!user?.shopId,
   });

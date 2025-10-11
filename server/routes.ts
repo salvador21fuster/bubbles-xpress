@@ -7,6 +7,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { signUpSchema, signInSchema, hashPassword, verifyPassword } from "./auth";
 import { z } from "zod";
 import { generateQRPayload, generateQRCode, parseQRPayload } from "./utils/qrcode";
+import type { InsertShop } from "@shared/schema";
 
 // ============= VALIDATION SCHEMAS =============
 

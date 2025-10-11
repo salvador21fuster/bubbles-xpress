@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, MapPin, Navigation, TrendingUp, Power, LogOut } from "lucide-react";
+import { Package, MapPin, Navigation, TrendingUp, Power, LogOut, GraduationCap } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { Order, User } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -135,6 +135,16 @@ export default function DriverDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <RoleSwitcher />
+          <Link href="/driver/training">
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="button-training"
+            >
+              <GraduationCap className="h-4 w-4 mr-2" />
+              Training
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="sm"
