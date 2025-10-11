@@ -326,7 +326,7 @@ export default function Landing() {
                 Join Ireland's premier laundry network. Access to more customers and streamlined operations.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="/api/login?role=shop" data-testid="link-franchise-signup">Learn More</a>
+                <a href="/signup" data-testid="link-franchise-signup">Apply Now</a>
               </Button>
             </CardContent>
           </Card>
