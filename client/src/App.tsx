@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
@@ -29,7 +30,8 @@ import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 
 function Router() {
-  const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isAdmin, isSuperAdmin } = useAuth();
+  const [location] = useLocation();
 
   if (isLoading) {
     return (
@@ -50,8 +52,12 @@ function Router() {
     );
   }
 
-  // Customer and Driver apps use mobile-first layout (no sidebar)
-  if (isCustomer || isDriver) {
+  // Determine if we should use mobile or sidebar layout based on current route
+  const isMobileRoute = location.startsWith('/customer') || location.startsWith('/driver');
+  const shouldUseMobileLayout = (isCustomer || isDriver) && !isSuperAdmin ? true : isMobileRoute;
+
+  // Mobile layout for Customer/Driver (or super admin viewing customer/driver)
+  if (shouldUseMobileLayout) {
     return (
       <Switch>
         {/* Customer Routes */}
@@ -81,7 +87,7 @@ function Router() {
     );
   }
 
-  // Sidebar layout for Shop and Admin users
+  // Sidebar layout for Shop/Admin users (or super admin viewing shop/admin)
   const sidebarStyle = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
@@ -94,7 +100,10 @@ function Router() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between p-4 border-b">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <RoleSwitcher />
+              <ThemeToggle />
+            </div>
           </header>
           <main className="flex-1 overflow-auto p-6">
             <Switch>

@@ -7,6 +7,7 @@ import { Link, useLocation } from "wouter";
 import type { Order } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 
 const statusColors: Record<string, string> = {
   'created': 'bg-gray-500',
@@ -80,17 +81,20 @@ export default function CustomerDashboard() {
             <h1 className="text-2xl font-bold mb-2">My Orders</h1>
             <p className="text-muted-foreground">Track your laundry orders</p>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-            data-testid="button-logout"
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <RoleSwitcher />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              data-testid="button-logout"
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 

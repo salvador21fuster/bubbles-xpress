@@ -10,6 +10,7 @@ import type { Order, User } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useDriverLocation } from "@/hooks/useDriverLocation";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 
 // Simple route optimization: sort by city then address
 function optimizeRoute(orders: Order[]): Order[] {
@@ -127,16 +128,19 @@ export default function DriverDashboard() {
           <h1 className="text-2xl font-bold mb-2">Driver Dashboard</h1>
           <p className="text-muted-foreground">Today's pickups and deliveries</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => logoutMutation.mutate()}
-          disabled={logoutMutation.isPending}
-          data-testid="button-logout"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
-        </Button>
+        <div className="flex items-center gap-2">
+          <RoleSwitcher />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-logout"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Availability Toggle */}
