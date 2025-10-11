@@ -147,7 +147,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      res.json(user);
+      
+      // For super admins, return the active role they signed in as
+      if (user && user.isSuperAdmin && req.user.activeRole) {
+        res.json({
+          ...user,
+          role: req.user.activeRole,
+        });
+      } else {
+        res.json(user);
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -817,7 +826,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: user.email || user.username,
           first_name: user.firstName,
           last_name: user.lastName,
-        }
+        },
+        // Store the active role for super admins
+        activeRole: sessionRole,
       };
 
       res.json({
