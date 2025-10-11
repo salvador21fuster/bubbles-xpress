@@ -41,6 +41,13 @@ export default function SignUp() {
     },
   });
 
+  // Watch for franchise selection and redirect
+  const selectedRole = form.watch("role");
+  
+  if (selectedRole === "franchise") {
+    setLocation("/franchise-signup");
+  }
+
   const signUpMutation = useMutation({
     mutationFn: async (data: SignUpForm) => {
       const response = await apiRequest("POST", "/api/auth/signup", data);
