@@ -65,7 +65,7 @@ export default function NewOrder() {
       timeWindow: '',
       addressLine1: '',
       addressLine2: '',
-      city: '',
+      city: 'Drogheda, Louth',
       eircode: '',
       serviceId: '',
       quantity: '1',
@@ -407,10 +407,17 @@ export default function NewOrder() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Dublin" {...field} data-testid="input-city" />
-                        </FormControl>
+                        <FormLabel>City (Pilot Area)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-city">
+                              <SelectValue placeholder="Select city" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Drogheda, Louth">Drogheda, Louth</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
