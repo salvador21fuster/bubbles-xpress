@@ -1,166 +1,219 @@
-# Mr Bubbles Express - Design Guidelines
+# Mr Bubbles Express - Uber Eats Style Design Guidelines
 
-## Design Approach: Material Design System with Custom Branding
+## Overview
+The Customer and Driver apps follow Uber Eats design patterns exactly - mobile-first, clean, and optimized for iOS App Store and Google Play Store deployment.
 
-**Rationale**: Given the multi-surface operational platform with complex workflows, real-time tracking, and role-based interfaces, we're adopting Material Design principles for consistency, clarity, and efficiency. The system prioritizes usability and information hierarchy while maintaining brand personality through strategic color and typography choices.
+## Color Palette
 
-**Key References**: Material Design 3, Uber Driver App (operational efficiency), Linear (clean data presentation)
+### Primary Colors
+- **Uber Green (Primary Action)**: `#06C167` - Main CTA buttons, active states
+- **Black (Secondary Action)**: `#000000` - Secondary buttons, navigation
+- **White (Background)**: `#FFFFFF` - Main background, cards
 
----
+### Text Colors
+- **Primary Text**: `#000000` - Headings, main content
+- **Secondary Text**: `#6B7280` - Descriptions, metadata
+- **Tertiary Text**: `#9CA3AF` - Hints, placeholders
+- **Link/Action Text**: `#06C167` - Interactive text elements
 
-## Core Design Elements
+### System Colors
+- **Background**: `#F9FAFB` - Page background (very subtle gray)
+- **Card Background**: `#FFFFFF` - White cards with subtle shadow
+- **Border**: `#E5E7EB` - Dividers, card borders
+- **Error**: `#EF4444` - Error states
+- **Success**: `#06C167` - Success states
 
-### A. Color Palette
+## Typography
 
-**Light Mode:**
-- Primary: `210 100% 50%` (Vibrant blue - trust, cleanliness, reliability)
-- Primary Container: `210 100% 95%` (Light blue backgrounds)
-- Secondary: `180 60% 45%` (Teal - fresh, clean laundry association)
-- Surface: `0 0% 100%` (Pure white)
-- Surface Variant: `210 20% 97%` (Subtle gray backgrounds)
-- Outline: `210 15% 85%` (Borders, dividers)
-- Error: `0 85% 60%` (Alert states)
-- Success: `145 65% 45%` (Completed states)
-- Warning: `40 95% 55%` (Pending actions)
+### Font Family
+- **Primary (iOS)**: `SF Pro Text, SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif`
+- **Primary (Android)**: `Roboto, -apple-system, BlinkMacSystemFont, sans-serif`
+- **Fallback**: System fonts for web/cross-platform compatibility
+- SF Pro is the standard Uber Eats font on iOS, Roboto on Android
 
-**Dark Mode:**
-- Primary: `210 100% 65%` (Brighter blue for contrast)
-- Primary Container: `210 80% 20%` (Deep blue containers)
-- Secondary: `180 50% 55%` (Lighter teal)
-- Surface: `210 15% 10%` (Very dark blue-gray)
-- Surface Variant: `210 15% 15%` (Elevated surfaces)
-- Outline: `210 10% 30%` (Dark mode borders)
+### Font Sizes
+- **Page Title**: `28px` / `font-bold` - Main page headers
+- **Section Title**: `20px` / `font-semibold` - Section headers
+- **Card Title**: `16px` / `font-semibold` - Product names
+- **Body Text**: `14px` / `font-normal` - Descriptions
+- **Small Text**: `12px` / `font-normal` - Metadata, helper text
+- **Button Text**: `16px` / `font-semibold` - All buttons
 
-**Semantic Status Colors:**
-- In Transit: `210 100% 50%` (Primary blue)
-- Processing: `280 60% 55%` (Purple)
-- Completed: `145 65% 45%` (Green)
-- Issue/Delayed: `0 85% 60%` (Red)
+### Font Weights
+- **Bold**: `700` - Page titles, emphasis
+- **Semibold**: `600` - Headings, buttons, card titles
+- **Normal**: `400` - Body text, descriptions
 
-### B. Typography
+## Spacing & Layout
 
-**Font Stack:**
-- Primary: 'Inter' via Google Fonts (Clean, modern, excellent readability)
-- Monospace: 'JetBrains Mono' for order IDs, QR codes, technical data
+### Padding
+- **Page Container**: `16px` horizontal padding
+- **Card Padding**: `16px` all sides
+- **Button Padding**: `16px` vertical, `24px` horizontal
+- **Section Spacing**: `24px` between major sections
+- **Item Spacing**: `12px` between list items
 
-**Scale & Weights:**
-- Display: 2.5rem / 600 weight (Hero titles on public site)
-- H1: 2rem / 600 (Page titles)
-- H2: 1.5rem / 600 (Section headers)
-- H3: 1.25rem / 600 (Card titles, subsections)
-- Body: 1rem / 400 (Primary content)
-- Body Small: 0.875rem / 400 (Captions, metadata)
-- Label: 0.75rem / 500 (Form labels, uppercase)
-- Technical: 0.875rem / 400 monospace (IDs, codes)
+### Border Radius
+- **All Components**: `8px` - Universal Uber Eats standard
+  - Buttons: 8px
+  - Cards: 8px
+  - Input Fields: 8px
+  - Product Images: 8px
+  - Modals: 8px
+  - Containers: 8px
 
-### C. Layout System
+### Shadows
+- **Card Shadow**: `0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)` - Subtle elevation
+- **Button Shadow**: None - Flat design
+- **Modal Shadow**: `0 10px 25px rgba(0, 0, 0, 0.15)` - Modal overlays
 
-**Spacing Primitives**: Use Tailwind units of `2, 4, 6, 8, 12, 16, 20` for consistent rhythm
-- Micro spacing: `2` (8px) - icon-to-text gaps
-- Standard spacing: `4` (16px) - between related elements
-- Section spacing: `8` (32px) - between distinct sections
-- Large gaps: `12-20` (48-80px) - major layout divisions
+## Components
 
-**Grid System:**
-- Mobile: Single column with 4-unit padding
-- Tablet: 2-column adaptive layouts
-- Desktop: 12-column grid, max-width container of 1280px
+### Buttons
 
-**Portal Layouts:**
-- Shop/Admin: Sidebar navigation (240px fixed) + main content area
-- Mobile Apps: Bottom tab navigation (56px height)
-- Forms: Max-width 640px for optimal scanning
+#### Primary Button (Uber Green)
+```
+- Background: #06C167
+- Text: White (#FFFFFF)
+- Border Radius: 8px
+- Padding: 16px 24px
+- Font: 16px semibold
+- Height: 56px (mobile touch-friendly)
+- Full width on mobile
+```
 
-### D. Component Library
+#### Secondary Button (Black)
+```
+- Background: #000000
+- Text: White (#FFFFFF)
+- Border Radius: 8px
+- Padding: 16px 24px
+- Font: 16px semibold
+- Height: 56px
+```
 
-**Navigation:**
-- Mobile: Bottom tabs with icons + labels, 4-5 primary sections
-- Web Portals: Left sidebar with collapsible groups, active state indicators
-- Top App Bar: Fixed with role badge, notifications, profile menu
+#### Ghost Button (Outline)
+```
+- Background: Transparent
+- Border: 1px solid #E5E7EB
+- Text: #000000
+- Border Radius: 8px
+- Padding: 12px 16px
+```
 
-**Order/Tracking Cards:**
-- Compact List View: Status badge + order ID + timestamp + customer name
-- Expanded Detail: Timeline component showing state progression with timestamps
-- Map Integration: Full-width embedded map with live GPS markers
+### Product Cards
+```
+- Background: White
+- Border Radius: 8px (Uber Eats standard)
+- Shadow: Subtle card shadow
+- Image: Square or 4:3 ratio, 8px border radius
+- Title: 16px semibold black
+- Price: 14px semibold black
+- Description: 12px gray
+- Padding: 12px
+```
 
-**Data Display:**
-- Status Badges: Rounded pills with semantic colors, 12px padding
-- State Timeline: Vertical stepper with icons, connecting lines, timestamps
-- Metrics Dashboard: Grid of stat cards (4-column on desktop, 1-column mobile)
-- Tables: Zebra striping, sticky headers, action menus on rows
+### Quantity Controls
+```
+- Container: Flexbox horizontal
+- Minus Button: 32px x 32px, border 1px #E5E7EB, centered "-" icon
+- Quantity Display: 32px width, centered, 16px semibold
+- Plus Button: 32px x 32px, border 1px #E5E7EB, centered "+" icon
+```
 
-**Forms & Inputs:**
-- Material Design outlined inputs with floating labels
-- Scan buttons: Large (56px height) with scanner icon, primary color
-- Dark mode: All form inputs with proper contrast backgrounds (Surface Variant)
-- Validation: Inline error messages below fields, error outline color
+### Bottom Action Bar
+```
+- Position: Fixed bottom
+- Background: White
+- Padding: 16px
+- Border Top: 1px solid #E5E7EB
+- Button: Full width primary green button
+- Safe area padding for iOS notch
+```
 
-**Action Buttons:**
-- Primary: Filled buttons for main actions (Scan, Confirm, Create)
-- Secondary: Outlined buttons for alternatives
-- Scan/Print Actions: Prominent FAB (Floating Action Button) in bottom-right
-- Min touch target: 48px for mobile accessibility
+### Cart/Checkout Summary
+```
+- Background: White card
+- Each row: Flexbox space-between
+- Label: 14px normal gray
+- Value: 14px semibold black
+- Total row: 16px bold black
+- Divider: 1px solid #E5E7EB
+```
 
-**Modals & Overlays:**
-- Sheet modals from bottom on mobile
-- Centered dialogs on desktop
-- Backdrop: `0 0% 0%` at 60% opacity
-- Max-width: 480px for decision dialogs, 800px for forms
+## Mobile Optimization
 
-### E. Animations
+### Touch Targets
+- **Minimum Height**: 44px (iOS) / 48px (Android)
+- **Buttons**: 56px height for primary actions
+- **Interactive Elements**: Minimum 44px x 44px
 
-**Purposeful Motion Only:**
-- State transitions: Subtle 200ms ease-in-out color changes
-- Sheet modals: Slide up animation 300ms
-- Scan success: Brief checkmark animation (500ms)
-- GPS marker: Pulse effect for active delivery
-- Page transitions: 150ms fade (mobile apps)
-- NO decorative animations - every motion serves a function
+### Responsive Breakpoints
+- **Mobile**: < 768px (primary focus)
+- **Tablet**: 768px - 1024px
+- **Desktop**: > 1024px (secondary)
 
----
+### Safe Areas
+- **Top Safe Area**: Account for iOS status bar
+- **Bottom Safe Area**: Account for iOS home indicator
+- **Side Safe Areas**: Minimum 16px padding
 
-## Surface-Specific Guidelines
+## Icon System
+- Use **Lucide React** icons
+- Icon Size: 20px for inline, 24px for prominent actions
+- Icon Color: Inherit from parent text color
+- Icon Weight: 2px stroke width
 
-### Customer Mobile App
-- Hero: Full-width order status card with live map when in transit
-- Services selection: Grid of service cards with icons, pricing
-- Photo upload: Gallery view with camera integration
-- Receipt: Expandable accordion showing bag/item breakdown
+## Interactions
 
-### Driver Mobile App  
-- Priority: Large scan button always accessible via FAB
-- Job cards: Swipeable list with accept/decline actions
-- Navigation: Integrated turn-by-turn directions
-- Offline indicator: Persistent banner when disconnected
+### Hover States (Desktop)
+- **Buttons**: Darken by 5% (`#05A858` for green)
+- **Cards**: Slight shadow increase
+- **Links**: Underline
 
-### Shop Portal (Web)
-- Dashboard: Real-time queue of orders by state (AT_SHOP, PROCESSING, etc.)
-- Intake flow: Large QR scanner viewport + weight input form side-by-side
-- Subcontract modal: Shop selector with terms display
-- Processing board: Kanban-style columns for WASH/DRY/PRESS states
+### Active/Press States
+- **Buttons**: Scale 0.98, brief opacity to 0.9
+- **Cards**: Slight scale 0.99
+- **Quick feedback**: 100ms transition
 
-### Admin Portal (Web - Owners Only)
-- Security: MFA badge in header, session timeout indicator
-- Transactions table: Filterable, sortable with inline split details
-- User records: Searchable cards with activity timeline
-- Analytics: Dashboard with time-range selectors, export buttons
-- Charts: Line graphs for revenue, bar charts for volumes (using Chart.js)
+### Loading States
+- **Buttons**: Show spinner, disable interaction
+- **Skeleton**: Animated gray pulse for content loading
+- **Full Page**: Centered spinner with Mr Bubbles branding
 
-### Public Site/Booking Widget
-- Hero: Full-viewport image of clean laundry with overlay CTA
-- Services showcase: 3-column grid on desktop with pricing cards
-- How It Works: 4-step visual timeline with icons
-- Driver/Franchise signup: Prominent dual CTAs with contrasting treatments
-- Booking form: Embedded widget with service selector, address autocomplete
+## Image Guidelines
+- **Product Images**: Clean white background, professional photography
+- **Aspect Ratio**: Square (1:1) or 4:3 for products
+- **Quality**: High resolution (2x for retina displays)
+- **Format**: WebP with JPG fallback
+- **Lazy Loading**: Enabled for all images below fold
 
----
+## Accessibility
+- **Contrast Ratio**: Minimum 4.5:1 for text
+- **Focus States**: Visible 2px outline for keyboard navigation
+- **Touch Targets**: Minimum 44px x 44px
+- **Alt Text**: Descriptive alt text for all images
+- **ARIA Labels**: For icon-only buttons
 
-## Images
+## Platform-Specific
 
-**Hero Image**: Use high-quality lifestyle photography of freshly laundered clothes, neatly folded or hanging, with soft natural lighting. Image should convey cleanliness, care, and professional service. Place in full-viewport hero section with dark gradient overlay for text legibility.
+### iOS
+- Use native iOS safe area insets
+- Haptic feedback on button press
+- Native date/time pickers
+- Apple Pay integration
 
-**Service Icons**: Custom illustrated icons for each service type (wash, dry clean, press, fold) in the primary blue color palette.
+### Android
+- Material Design ripple effects
+- Native Android back button support
+- Google Pay integration
 
-**Driver/Shop Photos**: Authentic photography showing drivers with labeled bags, shops with processing equipment - building trust through transparency.
-
-**State Indicator Icons**: Consistent iconography for order states (package for pickup, truck for transit, washer for processing, checkmark for complete).
+## Best Practices
+1. **Mobile First**: Design for smallest screen, scale up
+2. **Touch Friendly**: Large tap targets, generous spacing
+3. **Fast Loading**: Optimize images, lazy load below fold
+4. **Clear Actions**: Single primary action per screen
+5. **Visual Hierarchy**: Use size, weight, and color to guide users
+6. **Consistent Spacing**: Use 4px, 8px, 12px, 16px, 24px, 32px scale
+7. **Error Prevention**: Validate inputs, confirm destructive actions
+8. **Feedback**: Always acknowledge user actions immediately

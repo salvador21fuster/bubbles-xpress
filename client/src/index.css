@@ -48,9 +48,13 @@
 
   --popover-border: 210 15% 86%;
 
-  --primary: 210 100% 50%;
+  /* Uber Eats Green */
+  --uber-green: 145 95% 39%;
+  --uber-green-dark: 145 95% 32%;
+  
+  --primary: 145 95% 39%;
 
-  --primary-foreground: 210 100% 98%;
+  --primary-foreground: 0 0% 100%;
 
   --secondary: 210 18% 90%;
 
@@ -166,9 +170,10 @@
 
   --popover-border: 210 12% 24%;
 
-  --primary: 210 100% 50%;
+  /* Uber Eats Green for Dark Mode */
+  --primary: 145 95% 45%;
 
-  --primary-foreground: 210 100% 98%;
+  --primary-foreground: 0 0% 100%;
 
   --secondary: 210 18% 20%;
 
