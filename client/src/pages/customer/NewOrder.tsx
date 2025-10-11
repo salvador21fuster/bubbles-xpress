@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -47,6 +47,10 @@ export default function NewOrder() {
   const { toast } = useToast();
   const { isLoading, withLoading } = useLoadingAction();
 
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
+  });
+
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
@@ -59,8 +63,8 @@ export default function NewOrder() {
     resolver: zodResolver(orderSchema),
     defaultValues: {
       fullName: '',
-      email: '',
-      phone: '',
+      email: currentUser?.email || '',
+      phone: currentUser?.phone || '',
       pickupDate: '',
       timeWindow: '',
       addressLine1: '',
@@ -73,10 +77,18 @@ export default function NewOrder() {
     },
   });
 
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.email) form.setValue('email', currentUser.email);
+      if (currentUser.phone) form.setValue('phone', currentUser.phone);
+    }
+  }, [currentUser, form]);
+
   const createOrderMutation = useMutation({
     mutationFn: async (data: OrderFormData) => {
       const response = await apiRequest("POST", "/api/orders", {
         customer: { 
+          id: currentUser?.id,
           email: data.email,
           fullName: data.fullName,
           phone: data.phone,
