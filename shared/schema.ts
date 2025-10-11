@@ -73,6 +73,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   hashedPassword: varchar("hashed_password"), // For email/password auth
   role: userRoleEnum("role").notNull().default('customer'),
+  isSuperAdmin: boolean("is_super_admin").default(false), // Can access all portal types
   shopId: varchar("shop_id"), // If user is associated with a shop
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
