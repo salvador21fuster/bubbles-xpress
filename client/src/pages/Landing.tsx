@@ -194,7 +194,7 @@ export default function Landing() {
       </section>
 
       {/* Trust Bar */}
-      <section className="bg-[#2D2D2D] text-white py-4 md:py-6">
+      <section className="bg-[#2D2D2D] text-white py-4 md:py-6 -mt-16 md:mt-0 relative z-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center">
             <h3 className="text-base md:text-xl font-bold mb-1 md:mb-2">A Trusted Choice for Laundry Services</h3>
