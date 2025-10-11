@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, MapPin, Package, Clock, CreditCard, CheckCircle2, Circle, Truck } from "lucide-react";
 import { LiveOrderMap } from "@/components/LiveOrderMap";
-import { DroghedaMap } from "@/components/DroghedaMap";
+import { RealDroghedaMap } from "@/components/RealDroghedaMap";
 import type { Order } from "@shared/schema";
 
 const statusColors: Record<string, string> = {
@@ -106,7 +106,7 @@ export default function OrderDetails() {
         {/* Live Tracking Map */}
         <div className="mb-6">
           {order.state === 'confirmed' ? (
-            <DroghedaMap showDriverVan={true} orderStatus={order.state} />
+            <RealDroghedaMap height="350px" />
           ) : (
             <LiveOrderMap orderId={order.id} />
           )}

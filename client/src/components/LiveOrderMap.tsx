@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Navigation, Clock } from 'lucide-react';
+import { RealDroghedaMap } from '@/components/RealDroghedaMap';
 import type { Order, User } from '@shared/schema';
 
 interface LiveOrderMapProps {
@@ -62,34 +63,13 @@ export function LiveOrderMap({ orderId }: LiveOrderMapProps) {
 
   return (
     <div className="space-y-4">
-      {/* Map Placeholder */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="relative h-64 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
-            {/* Simplified map visualization */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="relative">
-                  {driverLocation ? (
-                    <>
-                      <Navigation className="h-16 w-16 text-primary mx-auto animate-pulse" />
-                      <p className="text-sm font-medium mt-2">Driver en route</p>
-                      <p className="text-xs text-muted-foreground">
-                        {driverLocation.latitude.toFixed(4)}, {driverLocation.longitude.toFixed(4)}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="h-16 w-16 text-muted-foreground mx-auto" />
-                      <p className="text-sm text-muted-foreground mt-2">Waiting for driver location...</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Real Map with Live Tracking */}
+      <RealDroghedaMap 
+        height="400px"
+        showDriverLocation={!!driverLocation}
+        driverLat={driverLocation?.latitude}
+        driverLng={driverLocation?.longitude}
+      />
 
       {/* Status Info */}
       <Card>

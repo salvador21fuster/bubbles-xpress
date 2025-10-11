@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { QRScanner } from "@/components/QRScanner";
 import { QRLabelPrinter } from "@/components/QRLabelPrinter";
-import { DroghedaMap } from "@/components/DroghedaMap";
+import { RealDroghedaMap } from "@/components/RealDroghedaMap";
 import type { Order } from "@shared/schema";
 
 export default function DriverOrderDetails() {
@@ -276,7 +276,7 @@ export default function DriverOrderDetails() {
             {/* Step 2: Customer Location Map & On Way Button (Pickup) */}
             {isPickup && labelPrinted && !onWay && (
               <div className="space-y-4">
-                <DroghedaMap showDriverVan={false} orderStatus="confirmed" />
+                <RealDroghedaMap height="350px" />
                 
                 <Button 
                   size="lg" 
