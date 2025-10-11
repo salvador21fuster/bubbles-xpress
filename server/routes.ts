@@ -442,6 +442,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           if (newState) {
             await storage.updateOrderState(data.order_id, newState);
+            
+            // If pickup scan, update invoice status to mark collection
+            if (data.type === 'pickup') {
+              const invoice = await storage.getInvoiceByOrder(data.order_id);
+              if (invoice) {
+                // Mark invoice as 'paid' (collected) when pickup scan completes
+                await storage.updateInvoiceStatus(invoice.id, 'paid', new Date());
+              }
+            }
           }
         }
       }

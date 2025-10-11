@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera, Navigation } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { QRScanner } from "@/components/QRScanner";
+import { QRLabelPrinter } from "@/components/QRLabelPrinter";
+import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Order } from "@shared/schema";
 
 export default function DriverOrderDetails() {
@@ -16,6 +18,8 @@ export default function DriverOrderDetails() {
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/driver/orders/:id");
   const [showScanner, setShowScanner] = useState(false);
+  const [labelPrinted, setLabelPrinted] = useState(false);
+  const [onWay, setOnWay] = useState(false);
 
   const { data: order, isLoading } = useQuery<Order>({
     queryKey: ["/api/orders", params?.id],
@@ -167,7 +171,7 @@ export default function DriverOrderDetails() {
           </CardContent>
         </Card>
 
-        {/* Scanner or Action Buttons */}
+        {/* Workflow Steps */}
         {showScanner ? (
           <QRScanner
             scanType={isPickup ? 'pickup' : 'delivery'}
@@ -176,13 +180,55 @@ export default function DriverOrderDetails() {
               setShowScanner(false);
               queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
               queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+              toast({
+                title: isPickup ? "Pickup Confirmed" : "Delivery Confirmed",
+                description: isPickup ? "Laundry collected successfully" : "Order delivered successfully",
+              });
               navigate('/driver');
             }}
             onCancel={() => setShowScanner(false)}
           />
         ) : (
-          <>
-            {isPickup && (
+          <div className="space-y-6">
+            {/* Step 1: Print Label (Pickup Only) */}
+            {isPickup && !labelPrinted && (
+              <QRLabelPrinter 
+                order={order} 
+                onPrintComplete={() => {
+                  setLabelPrinted(true);
+                  toast({
+                    title: "Label Printed",
+                    description: "You can now start the pickup",
+                  });
+                }}
+              />
+            )}
+
+            {/* Step 2: Customer Location Map & On Way Button (Pickup) */}
+            {isPickup && labelPrinted && !onWay && (
+              <div className="space-y-4">
+                <DroghedaMap showDriverVan={false} orderStatus="confirmed" />
+                
+                <Button 
+                  size="lg" 
+                  className="w-full gap-2"
+                  onClick={() => {
+                    setOnWay(true);
+                    toast({
+                      title: "En Route",
+                      description: `Heading to pickup in ${order.timeWindow} window`,
+                    });
+                  }}
+                  data-testid="button-on-way"
+                >
+                  <Navigation className="h-5 w-5" />
+                  I'm On My Way
+                </Button>
+              </div>
+            )}
+
+            {/* Step 3: Scan QR at Customer Location (Pickup) */}
+            {isPickup && onWay && (
               <Button 
                 size="lg" 
                 className="w-full gap-2"
@@ -194,6 +240,7 @@ export default function DriverOrderDetails() {
               </Button>
             )}
 
+            {/* Delivery Flow */}
             {isDelivery && (
               <Button 
                 size="lg" 
@@ -205,7 +252,7 @@ export default function DriverOrderDetails() {
                 Scan QR & Confirm Delivery
               </Button>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
