@@ -804,12 +804,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Check role matches
-      if (user.role !== role) {
+      // Check role matches (skip check for super admins)
+      if (!user.isSuperAdmin && user.role !== role) {
         return res.status(403).json({ message: `This account is registered as ${user.role}` });
       }
 
-      // Create session
+      // Create session (use requested role for super admins)
+      const sessionRole = user.isSuperAdmin ? role : user.role;
       (req as any).session.user = {
         claims: {
           sub: user.id,
@@ -826,7 +827,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: user.phone,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        role: sessionRole, // Return the role they're signing in as
+        isSuperAdmin: user.isSuperAdmin,
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
