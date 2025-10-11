@@ -12,7 +12,7 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 - **2025-10-11**: Pilot area restrictions - Booking form locked to "Drogheda, Louth" only, enforcing service area boundaries for pilot launch
 - **2025-10-11**: Camera QR scanning complete - html5-qrcode integration with live camera, auto-stop on scan, photo/signature capture, manual entry fallback
 - **2025-10-11**: Live GPS tracking operational - Real-time driver location updates, customer map view, 5-second polling for position updates
-- **2025-10-11**: Super admin feature implemented - benbubbles and ronanbubbles can sign into ALL portal types (customer, driver, shop, admin) by selecting the role at login
+- **2025-10-11**: Super admin role switching complete - benbubbles and ronanbubbles can access ALL portal types (customer, driver, shop, admin) without logging out, using RoleSwitcher dropdown in header
 - **2025-10-10**: Authentication system overhauled - Custom email/password auth with bcrypt, username/phone login support, all 4 roles (customer, driver, shop, admin)
 - **2025-10-10**: Admin users created - benbubbles and ronanbubbles admin accounts seeded for Admin Portal access
 - **2025-10-10**: Admin Portal enhanced - Complete oversight with Dashboard, Transactions, Invoices, Users, and Policies pages

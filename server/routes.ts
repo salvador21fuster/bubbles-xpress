@@ -778,9 +778,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update driver availability
   app.post("/api/driver/availability", isAuthenticated, async (req: any, res) => {
     try {
-      // Debug logging
-      console.log('Driver availability - req.user:', JSON.stringify(req.user, null, 2));
-      
       if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
         return res.status(403).json({ message: "Driver access required" });
       }

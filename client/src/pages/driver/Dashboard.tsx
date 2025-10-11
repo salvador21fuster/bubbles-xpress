@@ -94,13 +94,13 @@ export default function DriverDashboard() {
     mutationFn: async (isActive: boolean) => {
       return await apiRequest("POST", "/api/driver/availability", { isActive });
     },
-    onSuccess: () => {
+    onSuccess: (_data, isActive) => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
-        title: user?.isActive ? "You're now offline" : "You're now online",
-        description: user?.isActive 
-          ? "You won't receive new pickup requests" 
-          : "You'll be visible to customers looking for drivers",
+        title: isActive ? "You're now online" : "You're now offline",
+        description: isActive 
+          ? "You'll be visible to customers looking for drivers"
+          : "You won't receive new pickup requests",
       });
     },
     onError: () => {
