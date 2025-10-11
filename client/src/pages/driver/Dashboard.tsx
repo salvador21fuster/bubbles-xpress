@@ -94,8 +94,9 @@ export default function DriverDashboard() {
     mutationFn: async (isActive: boolean) => {
       return await apiRequest("POST", "/api/driver/availability", { isActive });
     },
-    onSuccess: (_data, isActive) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    onSuccess: async (_data, isActive) => {
+      // Force refetch to get updated user data (bypasses 304 cache)
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: isActive ? "You're now online" : "You're now offline",
         description: isActive 
