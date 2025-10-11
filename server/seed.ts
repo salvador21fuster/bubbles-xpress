@@ -145,8 +145,13 @@ export async function seedDatabase() {
             lastName: admin.lastName,
             hashedPassword,
             role: admin.role,
+            isSuperAdmin: true, // Super admins can access all portal types
           });
-          console.log(`✅ Created admin user: ${admin.username}`);
+          console.log(`✅ Created super admin user: ${admin.username}`);
+        } else {
+          // Update existing admin users to be super admins
+          await storage.updateUser(existingUser.id, { isSuperAdmin: true });
+          console.log(`✅ Updated ${admin.username} to super admin`);
         }
       } catch (error) {
         console.error(`❌ Error creating admin user ${admin.username}:`, error);
