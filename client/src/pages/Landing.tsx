@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Truck, Package, CheckCircle, ChevronRight } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sparkles, Truck, Package, CheckCircle, ChevronRight, Menu, UserCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -142,17 +143,36 @@ export default function Landing() {
                 data-testid="logo-image"
               />
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#services" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-services">SERVICES</a>
-              <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-pricing">PRICES</a>
-              <a href="#how-it-works" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-how-it-works">HOW IT WORKS</a>
-              <a href="/signin" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-login">SIGN IN</a>
-              <Button 
-                className="bg-[#FFD700] text-black hover:bg-[#FFD700]/90 font-semibold px-6"
-                asChild
-              >
-                <a href="#booking" data-testid="nav-book-now">BOOK NOW</a>
-              </Button>
+            <div className="flex items-center gap-4 md:gap-8">
+              <div className="hidden md:flex items-center gap-8">
+                <a href="#services" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-services">SERVICES</a>
+                <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-pricing">PRICES</a>
+                <a href="#how-it-works" className="text-sm font-medium text-gray-700 hover:text-primary" data-testid="nav-how-it-works">HOW IT WORKS</a>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="rounded-full" data-testid="nav-account-menu">
+                    <UserCircle className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <a href="/signin" className="cursor-pointer" data-testid="nav-signin">
+                      Sign In
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="/signup" className="cursor-pointer" data-testid="nav-signup">
+                      Sign Up
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="#booking" className="cursor-pointer" data-testid="nav-book-now">
+                      Book Now
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
