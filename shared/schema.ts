@@ -119,9 +119,12 @@ export const shops = pgTable("shops", {
   // Franchise/Subscription details
   ownerId: varchar("owner_id"), // User ID of the shop owner
   franchiseName: varchar("franchise_name"), // Business/franchise name
+  subscriptionTier: varchar("subscription_tier"), // 'free', 'silver', 'gold'
   subscriptionType: varchar("subscription_type"), // 'monthly' or 'yearly'
   subscriptionFee: integer("subscription_fee"), // Fee in cents (EUR)
+  mrBubblesFeePercentage: integer("mr_bubbles_fee_percentage"), // Percentage fee to Mr Bubbles (5, 15, 25)
   subscriptionStatus: varchar("subscription_status").default('active'), // 'active', 'suspended', 'cancelled'
+  paymentProcessed: boolean("payment_processed").default(false), // Fake payment confirmation
   
   createdAt: timestamp("created_at").defaultNow(),
 });
