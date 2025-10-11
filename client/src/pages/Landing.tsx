@@ -178,8 +178,16 @@ export default function Landing() {
       </section>
 
       {/* Booking Widget */}
-      <section id="booking" className="py-20 px-4 bg-[#F5EDE4]">
-        <div className="max-w-2xl mx-auto">
+      <section id="booking" className="py-20 px-4 bg-gradient-to-br from-blue-500 via-blue-400 to-yellow-300 relative overflow-hidden">
+        {/* Decorative Bubbles */}
+        <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/20 blur-xl animate-pulse" />
+        <div className="absolute top-32 right-20 w-32 h-32 rounded-full bg-yellow-200/30 blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-20 left-32 w-24 h-24 rounded-full bg-blue-300/30 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-40 right-16 w-16 h-16 rounded-full bg-white/25 blur-lg animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/2 left-1/4 w-28 h-28 rounded-full bg-yellow-100/20 blur-2xl animate-pulse" style={{ animationDelay: '0.8s' }} />
+        <div className="absolute top-1/3 right-1/3 w-20 h-20 rounded-full bg-blue-200/25 blur-xl animate-pulse" style={{ animationDelay: '1.2s' }} />
+        
+        <div className="max-w-2xl mx-auto relative z-10">
           <Card className="border-gray-200">
             <CardHeader>
               <CardTitle className="text-2xl">Book Your Pickup</CardTitle>
