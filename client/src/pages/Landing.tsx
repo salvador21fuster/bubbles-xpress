@@ -5,13 +5,63 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, Truck, Package, CheckCircle, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 import heroImage from "@assets/aae38cdd-27b3-45da-865a-20f84aaf2aa7_1760102196289.jpg";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
+import video1 from "@assets/Lightning-Fast Delivery Zero Hassle, Total Flexibility – We Sync with Your Life Savor the ultimate convenience in laundry and dry cleaning with our lightning-quick 24-hour turnaround. Pick a picku (6)_1760193095528.mp4";
+import video2 from "@assets/Lightning-Fast Delivery Zero Hassle, Total Flexibility – We Sync with Your Life Savor the ultimate convenience in laundry and dry cleaning with our lightning-quick 24-hour turnaround. Pick a picku (7)_1760193095527.mp4";
+import video3 from "@assets/Lightning-Fast Delivery Zero Hassle, Total Flexibility – We Sync with Your Life Savor the ultimate convenience in laundry and dry cleaning with our lightning-quick 24-hour turnaround. Pick a picku (8)_1760193095529.mp4";
+
+function VideoPlayer({ src, testId }: { src: string; testId: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isInView || isHovering) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isInView, isHovering]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      loop
+      muted
+      playsInline
+      className="w-full rounded-lg shadow-lg"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      data-testid={testId}
+    />
+  );
+}
 
 export default function Landing() {
   const { toast } = useToast();
@@ -154,7 +204,7 @@ export default function Landing() {
       <section id="how-it-works" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-16">
             {[
               { icon: Package, title: "Book Online", desc: "Schedule your pickup in 60 seconds" },
               { icon: Truck, title: "We Collect", desc: "Driver picks up and weighs your laundry" },
@@ -173,6 +223,13 @@ export default function Landing() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          {/* Video Demonstrations */}
+          <div className="max-w-4xl mx-auto space-y-8">
+            <VideoPlayer src={video1} testId="video-how-it-works-1" />
+            <VideoPlayer src={video2} testId="video-how-it-works-2" />
+            <VideoPlayer src={video3} testId="video-how-it-works-3" />
           </div>
         </div>
       </section>
