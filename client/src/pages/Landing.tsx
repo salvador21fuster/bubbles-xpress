@@ -115,7 +115,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5EDE4]">
+    <div className="min-h-screen bg-[#F5EDE4] overflow-x-hidden">
       <WashingMachineLoader isVisible={isLoading} />
       
       {/* Top Bar */}
@@ -138,7 +138,7 @@ export default function Landing() {
               <img 
                 src={logoImage} 
                 alt="Mr Bubbles Express" 
-                className="h-12 w-auto object-contain"
+                className="h-8 md:h-12 w-auto object-contain"
                 data-testid="logo-image"
               />
             </div>
@@ -160,29 +160,32 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section 
-        className="pt-16 md:pt-24 pb-0 bg-cover bg-no-repeat relative min-h-[600px]"
+        className="pt-8 md:pt-24 pb-8 md:pb-0 bg-cover bg-no-repeat bg-center relative min-h-[400px] md:min-h-[600px]"
         style={{ 
           backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
           backgroundPosition: 'center center'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 relative z-10 h-full">
-          <div className="grid md:grid-cols-2 gap-12 items-center h-full">
-            <div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center h-full">
+            <div className="max-w-full">
+              <h1 className="text-2xl sm:text-3xl md:text-6xl font-bold text-gray-900 leading-tight mb-4 md:mb-6">
                 Laundry, Dry Cleaning & Ironing – Done in 24 Hours
               </h1>
-              <p className="text-lg text-gray-700 mb-8">
+              <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-4 md:mb-8">
                 Now serving Ireland & 20+ cities. Over 50,000 garments cleaned. 5-star rated by 2,000+ locals.
               </p>
               <Button 
-                size="lg" 
-                className="bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90 px-8 py-6 text-lg font-semibold"
+                size="default"
+                className="bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90 w-full sm:w-auto px-4 sm:px-6 md:px-8 py-3 md:py-6 text-sm md:text-lg font-semibold"
                 asChild
               >
                 <a href="#booking" data-testid="button-schedule-pickup">
-                  SCHEDULE YOUR PICKUP
-                  <span className="ml-2 text-xs block">IN NEXT 60 MINUTES</span>
+                  <span className="flex flex-col items-center sm:flex-row sm:items-center">
+                    <span>SCHEDULE YOUR PICKUP</span>
+                    <span className="text-xs mt-1 sm:mt-0 sm:ml-2">IN NEXT 60 MINUTES</span>
+                  </span>
                 </a>
               </Button>
             </div>
@@ -191,11 +194,11 @@ export default function Landing() {
       </section>
 
       {/* Trust Bar */}
-      <section className="bg-[#2D2D2D] text-white py-6">
+      <section className="bg-[#2D2D2D] text-white py-4 md:py-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center">
-            <h3 className="text-xl font-bold mb-2">A Trusted Choice for Laundry Services</h3>
-            <p className="text-sm opacity-90">Expert in Dry Cleaning • Bedding • Wash, Dry & Fold, Ironing, Alteration, Shoe Repair and more</p>
+            <h3 className="text-base md:text-xl font-bold mb-1 md:mb-2">A Trusted Choice for Laundry Services</h3>
+            <p className="text-xs md:text-sm opacity-90">Expert in Dry Cleaning • Bedding • Wash, Dry & Fold, Ironing, Alteration, Shoe Repair and more</p>
           </div>
         </div>
       </section>
