@@ -67,6 +67,24 @@ export default function ShopProfile() {
     ? `€${(shop.subscriptionFee / 100).toFixed(2)}`
     : 'Not set';
 
+  const getTierName = (tier: string | undefined) => {
+    if (!tier) return 'Not set';
+    return tier.charAt(0).toUpperCase() + tier.slice(1);
+  };
+
+  const getTierBenefits = (tier: string | undefined) => {
+    switch (tier) {
+      case 'free':
+        return ['Limited access', 'Basic dashboard access', 'Standard support'];
+      case 'silver':
+        return ['All training materials', 'Equipment & clothing', 'Accessories included', 'Priority support'];
+      case 'gold':
+        return ['Ultimate access', 'Premium training', 'All equipment & clothing', 'Marketing materials', '24/7 premium support'];
+      default:
+        return [];
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
@@ -176,7 +194,33 @@ export default function ShopProfile() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="subscriptionType">Subscription Type</Label>
+              <Label>Subscription Tier</Label>
+              <div className="mt-2 flex items-center gap-2">
+                <Badge 
+                  variant={shop?.subscriptionTier === 'gold' ? 'default' : shop?.subscriptionTier === 'silver' ? 'secondary' : 'outline'}
+                  data-testid="badge-subscription-tier"
+                  className="text-base py-1 px-3"
+                >
+                  {getTierName(shop?.subscriptionTier ?? undefined)}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {shop?.mrBubblesFeePercentage ? `${shop.mrBubblesFeePercentage}% fee to Mr Bubbles` : ''}
+                </span>
+              </div>
+              {shop?.subscriptionTier && getTierBenefits(shop.subscriptionTier).length > 0 && (
+                <ul className="mt-3 space-y-1">
+                  {getTierBenefits(shop.subscriptionTier).map((benefit, idx) => (
+                    <li key={idx} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="subscriptionType">Billing Cycle</Label>
               {isEditing ? (
                 <Select
                   value={formData.subscriptionType}
