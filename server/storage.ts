@@ -32,7 +32,7 @@ import {
   type Invoice,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (supports both Replit Auth and email/password)
@@ -56,6 +56,9 @@ export interface IStorage {
   getAllOrders(): Promise<Order[]>;
   getOrdersByShop(shopId: string): Promise<Order[]>;
   getOrdersByCustomer(customerId: string): Promise<Order[]>;
+  getOrdersByDriver(driverId: string): Promise<Order[]>;
+  getAvailableOrdersForDriver(): Promise<Order[]>;
+  assignOrderToDriver(orderId: string, driverId: string): Promise<Order>;
   updateOrderState(id: string, state: string): Promise<Order>;
 
   // Bag operations
@@ -258,6 +261,43 @@ export class DatabaseStorage implements IStorage {
       .from(orders)
       .where(eq(orders.customerId, customerId))
       .orderBy(desc(orders.createdAt));
+  }
+
+  async getOrdersByDriver(driverId: string): Promise<Order[]> {
+    return await db
+      .select()
+      .from(orders)
+      .where(eq(orders.driverId, driverId))
+      .orderBy(desc(orders.createdAt));
+  }
+
+  async getAvailableOrdersForDriver(): Promise<Order[]> {
+    return await db
+      .select()
+      .from(orders)
+      .where(and(
+        eq(orders.state, 'confirmed'),
+        isNull(orders.driverId)
+      ))
+      .orderBy(desc(orders.createdAt));
+  }
+
+  async assignOrderToDriver(orderId: string, driverId: string): Promise<Order> {
+    // Use conditional update to prevent race conditions
+    const [order] = await db
+      .update(orders)
+      .set({ driverId, updatedAt: new Date() })
+      .where(and(
+        eq(orders.id, orderId),
+        isNull(orders.driverId) // Only assign if no driver is assigned yet
+      ))
+      .returning();
+    
+    if (!order) {
+      throw new Error("Order not available - already assigned or not found");
+    }
+    
+    return order;
   }
 
   async updateOrderState(id: string, state: string): Promise<Order> {

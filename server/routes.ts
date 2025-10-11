@@ -579,6 +579,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============= DRIVER ROUTES =============
+  
+  // Get available orders for driver
+  app.get("/api/driver/available-orders", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Driver access required" });
+      }
+
+      const orders = await storage.getAvailableOrdersForDriver();
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get driver's orders
+  app.get("/api/driver/orders", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Driver access required" });
+      }
+
+      const orders = await storage.getOrdersByDriver(req.user.id);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Accept an order
+  app.post("/api/driver/accept-order", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Driver access required" });
+      }
+
+      const { orderId } = req.body;
+      if (!orderId) {
+        return res.status(400).json({ message: "Order ID required" });
+      }
+
+      // Check if order is available
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      if (order.state !== 'confirmed') {
+        return res.status(400).json({ message: "Order is not available for pickup" });
+      }
+
+      if (order.driverId) {
+        return res.status(400).json({ message: "Order already assigned to another driver" });
+      }
+
+      // Assign order to driver
+      const updatedOrder = await storage.assignOrderToDriver(orderId, req.user.id);
+      res.json(updatedOrder);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update driver availability
+  app.post("/api/driver/availability", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Driver access required" });
+      }
+
+      const { isActive, latitude, longitude } = req.body;
+      
+      const updatedDriver = await storage.updateDriverAvailability(
+        req.user.id,
+        isActive,
+        latitude,
+        longitude
+      );
+
+      res.json(updatedDriver);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update driver location
+  app.post("/api/driver/location", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user?.role !== 'driver' && !req.user?.isSuperAdmin) {
+        return res.status(403).json({ message: "Driver access required" });
+      }
+
+      const { latitude, longitude } = req.body;
+
+      // Allow 0 values for latitude/longitude (valid coordinates)
+      if (latitude === undefined || latitude === null || longitude === undefined || longitude === null) {
+        return res.status(400).json({ message: "Latitude and longitude required" });
+      }
+
+      const updatedDriver = await storage.updateDriverAvailability(
+        req.user.id,
+        req.user.isActive || false,
+        latitude,
+        longitude
+      );
+
+      res.json(updatedDriver);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ============= PAYMENT ROUTES (Mock) =============
   
   // Process mock payment

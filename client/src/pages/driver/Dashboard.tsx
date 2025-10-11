@@ -28,13 +28,38 @@ export default function DriverDashboard() {
     queryKey: ["/api/driver/orders"],
   });
 
+  const { data: availableOrders = [], isLoading: isLoadingAvailable } = useQuery<Order[]>({
+    queryKey: ["/api/driver/available-orders"],
+  });
+
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
 
+  const acceptOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      return await apiRequest("POST", "/api/driver/accept-order", { orderId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/available-orders"] });
+      toast({
+        title: "Order Accepted",
+        description: "The order has been assigned to you",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to accept order",
+        description: error.message || "Something went wrong",
+      });
+    },
+  });
+
   const availabilityMutation = useMutation({
     mutationFn: async (isActive: boolean) => {
-      return await apiRequest("PATCH", "/api/driver/availability", { isActive });
+      return await apiRequest("POST", "/api/driver/availability", { isActive });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -150,8 +175,11 @@ export default function DriverDashboard() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="pickups" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="available" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="available" data-testid="tab-available">
+            Available ({availableOrders.length})
+          </TabsTrigger>
           <TabsTrigger value="pickups" data-testid="tab-pickups">
             Pickups ({pickups.length})
           </TabsTrigger>
@@ -162,6 +190,67 @@ export default function DriverDashboard() {
             Completed ({completed.length})
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="available" className="space-y-3">
+          {isLoadingAvailable ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-4 bg-muted rounded w-1/3"></div>
+                      <div className="h-8 bg-muted rounded w-1/2"></div>
+                      <div className="h-3 bg-muted rounded w-2/3"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : availableOrders.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">No orders available</p>
+                <p className="text-sm text-muted-foreground mt-1">Check back soon for new pickup requests</p>
+              </CardContent>
+            </Card>
+          ) : (
+            availableOrders.map((order) => (
+              <Card key={order.id} className="hover-elevate">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</p>
+                      <Badge className="bg-orange-500 text-white border-0 mt-1">Awaiting Driver</Badge>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">€{((order.totalCents || 0) / 100).toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">+€{(((order.totalCents || 0) * 0.1) / 100).toFixed(2)} commission</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm mb-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{order.addressLine1}, {order.city}</span>
+                  </div>
+                  {order.pickupDate && order.timeWindow && (
+                    <div className="text-sm text-muted-foreground mb-3">
+                      <p>Pickup: {order.pickupDate} • {order.timeWindow}</p>
+                    </div>
+                  )}
+                  <Button 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => acceptOrderMutation.mutate(order.id)}
+                    disabled={acceptOrderMutation.isPending}
+                    data-testid={`button-accept-order-${order.id}`}
+                  >
+                    {acceptOrderMutation.isPending ? "Accepting..." : "Accept Order"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
 
         <TabsContent value="pickups" className="space-y-3">
           {pickups.length === 0 ? (
