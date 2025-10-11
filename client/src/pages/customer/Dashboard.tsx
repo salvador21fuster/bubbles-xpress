@@ -55,7 +55,9 @@ export default function CustomerDashboard() {
         title: "Logged out",
         description: "You have been successfully logged out",
       });
-      navigate("/");
+      
+      // Force a full page reload to the landing page to ensure clean state
+      window.location.href = "/";
     },
     onError: () => {
       toast({
