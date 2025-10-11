@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Play, CheckCircle2, Clock } from "lucide-react";
+import { GraduationCap, Play, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 export default function DriverTraining() {
   const trainingModules = [
@@ -105,6 +106,12 @@ export default function DriverTraining() {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <div className="mb-6">
+        <Link href="/driver">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" data-testid="text-page-title">Driver Training</h1>
         <p className="text-muted-foreground text-sm md:text-base">
           Master the skills you need to be a successful Mr Bubbles Express driver

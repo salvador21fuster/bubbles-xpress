@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Play, CheckCircle2, Clock } from "lucide-react";
+import { GraduationCap, Play, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 export default function ShopTraining() {
   const trainingModules = [
@@ -91,6 +92,12 @@ export default function ShopTraining() {
   return (
     <div className="p-6 max-w-6xl">
       <div className="mb-6">
+        <Link href="/shop">
+          <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
         <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Shop Training</h1>
         <p className="text-muted-foreground">
           Learn everything you need to know to run your Mr Bubbles Express franchise
