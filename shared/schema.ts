@@ -17,7 +17,7 @@ import { z } from "zod";
 
 // ============= ENUMS =============
 
-export const userRoleEnum = pgEnum('user_role', ['customer', 'driver', 'shop', 'admin']);
+export const userRoleEnum = pgEnum('user_role', ['customer', 'driver', 'shop', 'franchise', 'admin']);
 
 export const orderStateEnum = pgEnum('order_state', [
   'created',

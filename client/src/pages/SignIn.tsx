@@ -16,7 +16,7 @@ import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_176006665846
 const signInSchema = z.object({
   identifier: z.string().min(1, "Email, username, or phone is required"),
   password: z.string().min(1, "Password is required"),
-  role: z.enum(["customer", "driver", "shop", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
+  role: z.enum(["customer", "driver", "shop", "franchise", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
 });
 
 type SignInForm = z.infer<typeof signInSchema>;
@@ -50,6 +50,7 @@ export default function SignIn() {
         customer: '/customer',
         driver: '/driver',
         shop: '/shop',
+        franchise: '/franchise',
         admin: '/admin'
       };
       window.location.href = redirectPaths[data.role as keyof typeof redirectPaths] || '/';
@@ -140,7 +141,8 @@ export default function SignIn() {
                         <SelectContent>
                           <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
                           <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
-                          <SelectItem value="shop" data-testid="option-shop">Shop / Franchise Owner</SelectItem>
+                          <SelectItem value="shop" data-testid="option-shop">Shop (Mr Bubbles Original)</SelectItem>
+                          <SelectItem value="franchise" data-testid="option-franchise">Franchise Partner</SelectItem>
                           <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
                         </SelectContent>
                       </Select>

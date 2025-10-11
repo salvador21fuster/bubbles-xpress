@@ -8,16 +8,19 @@ export function useAuth() {
   });
 
   const isSuperAdmin = user?.isSuperAdmin || false;
+  // For super admins, use their active role; for regular users, use their actual role
+  const activeRole = user?.role || '';
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     isSuperAdmin,
-    // For super admins, allow access to all roles
-    isCustomer: isSuperAdmin || user?.role === 'customer',
-    isDriver: isSuperAdmin || user?.role === 'driver',
-    isShop: isSuperAdmin || user?.role === 'shop',
-    isAdmin: isSuperAdmin || user?.role === 'admin',
+    // Use activeRole for role checks (works for both super admins and regular users)
+    isCustomer: activeRole === 'customer',
+    isDriver: activeRole === 'driver',
+    isShop: activeRole === 'shop', // Original Mr Bubbles shop only
+    isFranchise: activeRole === 'franchise', // Franchise partners
+    isAdmin: activeRole === 'admin',
   };
 }

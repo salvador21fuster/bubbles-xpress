@@ -19,7 +19,7 @@ const signUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["customer", "driver", "shop", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
+  role: z.enum(["customer", "driver", "shop", "franchise", "admin"], { errorMap: () => ({ message: "Please select your role" }) }),
 });
 
 type SignUpForm = z.infer<typeof signUpSchema>;
@@ -57,6 +57,7 @@ export default function SignUp() {
         customer: '/customer',
         driver: '/driver',
         shop: '/shop',
+        franchise: '/franchise',
         admin: '/admin'
       };
       window.location.href = redirectPaths[data.role as keyof typeof redirectPaths] || '/';
@@ -223,7 +224,8 @@ export default function SignUp() {
                         <SelectContent>
                           <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
                           <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
-                          <SelectItem value="shop" data-testid="option-shop">Shop / Franchise Owner</SelectItem>
+                          <SelectItem value="shop" data-testid="option-shop">Shop (Mr Bubbles Original)</SelectItem>
+                          <SelectItem value="franchise" data-testid="option-franchise">Franchise Partner</SelectItem>
                           <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
                         </SelectContent>
                       </Select>

@@ -21,6 +21,7 @@ export function RoleSwitcher() {
     if (location.startsWith('/customer')) return 'customer';
     if (location.startsWith('/driver')) return 'driver';
     if (location.startsWith('/shop')) return 'shop';
+    if (location.startsWith('/franchise')) return 'franchise';
     if (location.startsWith('/admin')) return 'admin';
     return user?.role || 'customer';
   };
@@ -32,6 +33,7 @@ export function RoleSwitcher() {
       customer: '/customer',
       driver: '/driver',
       shop: '/shop',
+      franchise: '/franchise',
       admin: '/admin',
     };
     navigate(dashboardPaths[role as keyof typeof dashboardPaths] || '/');
@@ -41,6 +43,7 @@ export function RoleSwitcher() {
     customer: User,
     driver: Truck,
     shop: Building,
+    franchise: Building,
     admin: Shield,
   };
 
@@ -48,6 +51,7 @@ export function RoleSwitcher() {
     customer: 'Customer',
     driver: 'Driver',
     shop: 'Shop',
+    franchise: 'Franchise',
     admin: 'Admin',
   };
 
@@ -61,7 +65,7 @@ export function RoleSwitcher() {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {(['customer', 'driver', 'shop', 'admin'] as const).map((role) => {
+          {(['customer', 'driver', 'shop', 'franchise', 'admin'] as const).map((role) => {
             const Icon = roleIcons[role];
             return (
               <SelectItem key={role} value={role} data-testid={`role-option-${role}`}>

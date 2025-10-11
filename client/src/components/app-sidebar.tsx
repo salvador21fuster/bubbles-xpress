@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 export function AppSidebar() {
-  const { user, isShop, isAdmin } = useAuth();
+  const { user, isShop, isFranchise, isAdmin } = useAuth();
   const [location] = useLocation();
 
   const shopItems = [
@@ -30,6 +30,15 @@ export function AppSidebar() {
     { title: "Training", url: "/shop/training", icon: GraduationCap },
   ];
 
+  const franchiseItems = [
+    { title: "Dashboard", url: "/franchise", icon: Home },
+    { title: "Orders", url: "/franchise/orders", icon: ShoppingBag },
+    { title: "Intake", url: "/franchise/intake", icon: Scan },
+    { title: "Processing", url: "/franchise/processing", icon: Package },
+    { title: "Profile", url: "/franchise/profile", icon: Building2 },
+    { title: "Training", url: "/franchise/training", icon: GraduationCap },
+  ];
+
   const adminItems = [
     { title: "Dashboard", url: "/admin", icon: Home },
     { title: "Transactions", url: "/admin/transactions", icon: BarChart3 },
@@ -39,7 +48,7 @@ export function AppSidebar() {
     { title: "Settings", url: "/admin/settings", icon: Settings },
   ];
 
-  const items = isAdmin ? adminItems : isShop ? shopItems : [];
+  const items = isAdmin ? adminItems : isFranchise ? franchiseItems : isShop ? shopItems : [];
 
   return (
     <Sidebar>
@@ -51,7 +60,7 @@ export function AppSidebar() {
             className="h-12 w-auto object-contain"
           />
           <p className="text-xs text-muted-foreground text-center">
-            {isAdmin ? 'Admin Portal' : isShop ? 'Shop Portal' : `${user?.role} Portal`}
+            {isAdmin ? 'Admin Portal' : isFranchise ? 'Franchise Portal' : isShop ? 'Shop Portal' : `${user?.role} Portal`}
           </p>
         </div>
       </SidebarHeader>

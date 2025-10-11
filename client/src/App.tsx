@@ -33,7 +33,7 @@ import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 
 function Router() {
-  const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isAdmin, isSuperAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isFranchise, isAdmin, isSuperAdmin } = useAuth();
   const [location] = useLocation();
 
   if (isLoading) {
@@ -111,7 +111,7 @@ function Router() {
           </header>
           <main className="flex-1 overflow-auto p-6">
             <Switch>
-              {/* Shop Routes */}
+              {/* Shop Routes (Original Mr Bubbles Shop Only) */}
               {isShop && (
                 <>
                   <Route path="/shop" component={ShopDashboard} />
@@ -120,6 +120,19 @@ function Router() {
                   <Route path="/shop/processing" component={ShopProcessing} />
                   <Route path="/shop/profile" component={ShopProfile} />
                   <Route path="/shop/training" component={ShopTraining} />
+                  <Route path="/" component={ShopDashboard} />
+                </>
+              )}
+
+              {/* Franchise Routes (Franchise Partners) */}
+              {isFranchise && (
+                <>
+                  <Route path="/franchise" component={ShopDashboard} />
+                  <Route path="/franchise/orders" component={ShopOrders} />
+                  <Route path="/franchise/intake" component={ShopIntake} />
+                  <Route path="/franchise/processing" component={ShopProcessing} />
+                  <Route path="/franchise/profile" component={ShopProfile} />
+                  <Route path="/franchise/training" component={ShopTraining} />
                   <Route path="/" component={ShopDashboard} />
                 </>
               )}
