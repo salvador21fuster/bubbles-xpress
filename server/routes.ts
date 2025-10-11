@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { signUpSchema, signInSchema, hashPassword, verifyPassword } from "./auth";
 import { z } from "zod";
+import { generateQRPayload, generateQRCode, parseQRPayload } from "./utils/qrcode";
 
 // ============= VALIDATION SCHEMAS =============
 
@@ -335,12 +336,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const createdBags = [];
       for (const bagData of data.bags) {
-        const bag = await storage.createBag({
+        // Create bag with temporary QR code, then update with proper one
+        const tempBag = await storage.createBag({
           orderId,
           sequence: bagData.seq,
-          qrCode: `mrbl://b/${orderId}/${bagData.seq}`,
+          qrCode: `temp-${orderId}-${bagData.seq}`, // Temporary placeholder
           labelPrinted: false,
         });
+        
+        // Generate proper QR code using bag ID
+        const qrPayload = generateQRPayload({ type: 'bag', id: tempBag.id });
+        
+        // Update bag with proper QR code
+        const bag = await storage.updateBag(tempBag.id, { qrCode: qrPayload });
         createdBags.push(bag);
       }
 
@@ -574,6 +582,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // TODO: Store paymentIntentId for audit trail when Stripe integration is complete
 
       res.json(updatedInvoice);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ============= QR CODE ROUTES =============
+  
+  // Generate QR code for order
+  app.get("/api/qr/order/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const orderId = req.params.id;
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      const payload = generateQRPayload({ type: 'order', id: orderId });
+      const qrCodeDataUrl = await generateQRCode(payload);
+      
+      res.json({ 
+        payload,
+        qrCode: qrCodeDataUrl,
+        orderId 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Generate QR code for bag
+  app.get("/api/qr/bag/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const bagId = req.params.id;
+      
+      // Verify bag exists before generating QR code
+      const bag = await storage.getBag(bagId);
+      if (!bag) {
+        return res.status(404).json({ message: "Bag not found" });
+      }
+      
+      // Return existing QR code if already stored, otherwise generate new one
+      const payload = bag.qrCode || generateQRPayload({ type: 'bag', id: bagId });
+      const qrCodeDataUrl = await generateQRCode(payload);
+      
+      res.json({ 
+        payload,
+        qrCode: qrCodeDataUrl,
+        bagId 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Generate QR code for item
+  app.get("/api/qr/item/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const itemId = req.params.id;
+      
+      // Verify item exists before generating QR code
+      const item = await storage.getItem(itemId);
+      if (!item) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      // Return existing QR code if already stored, otherwise generate new one
+      const payload = item.qrCode || generateQRPayload({ type: 'item', id: itemId });
+      const qrCodeDataUrl = await generateQRCode(payload);
+      
+      res.json({ 
+        payload,
+        qrCode: qrCodeDataUrl,
+        itemId 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Parse QR code payload
+  app.post("/api/qr/parse", isAuthenticated, async (req: any, res) => {
+    try {
+      const { payload } = req.body;
+      
+      if (!payload) {
+        return res.status(400).json({ message: "Payload required" });
+      }
+      
+      const parsed = parseQRPayload(payload);
+      
+      if (!parsed) {
+        return res.status(400).json({ message: "Invalid QR code payload" });
+      }
+      
+      res.json(parsed);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

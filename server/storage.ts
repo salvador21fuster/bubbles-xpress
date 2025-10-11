@@ -63,7 +63,12 @@ export interface IStorage {
 
   // Bag operations
   createBag(bag: InsertBag): Promise<Bag>;
+  getBag(bagId: string): Promise<Bag | undefined>;
   getBagsByOrder(orderId: string): Promise<Bag[]>;
+  updateBag(bagId: string, updates: Partial<InsertBag>): Promise<Bag>;
+
+  // Item operations
+  getItem(itemId: string): Promise<typeof items.$inferSelect | undefined>;
 
   // Scan operations
   createScan(scan: InsertScan): Promise<Scan>;
@@ -315,8 +320,28 @@ export class DatabaseStorage implements IStorage {
     return bag;
   }
 
+  async getBag(bagId: string): Promise<Bag | undefined> {
+    const [bag] = await db.select().from(bags).where(eq(bags.id, bagId));
+    return bag;
+  }
+
   async getBagsByOrder(orderId: string): Promise<Bag[]> {
     return await db.select().from(bags).where(eq(bags.orderId, orderId));
+  }
+
+  async updateBag(bagId: string, updates: Partial<InsertBag>): Promise<Bag> {
+    const [bag] = await db
+      .update(bags)
+      .set(updates)
+      .where(eq(bags.id, bagId))
+      .returning();
+    return bag;
+  }
+
+  // Item operations
+  async getItem(itemId: string): Promise<typeof items.$inferSelect | undefined> {
+    const [item] = await db.select().from(items).where(eq(items.id, itemId));
+    return item;
   }
 
   // Scan operations
