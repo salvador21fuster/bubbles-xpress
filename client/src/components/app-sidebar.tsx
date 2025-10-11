@@ -1,4 +1,4 @@
-import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText, Receipt } from "lucide-react";
+import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText, Receipt, Building2, GraduationCap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,9 +23,11 @@ export function AppSidebar() {
 
   const shopItems = [
     { title: "Dashboard", url: "/shop", icon: Home },
+    { title: "Orders", url: "/shop/orders", icon: ShoppingBag },
     { title: "Intake", url: "/shop/intake", icon: Scan },
     { title: "Processing", url: "/shop/processing", icon: Package },
-    { title: "Orders", url: "/shop/orders", icon: ShoppingBag },
+    { title: "Profile", url: "/shop/profile", icon: Building2 },
+    { title: "Training", url: "/shop/training", icon: GraduationCap },
   ];
 
   const adminItems = [

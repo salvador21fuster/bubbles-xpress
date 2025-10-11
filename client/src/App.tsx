@@ -15,6 +15,8 @@ import ShopDashboard from "@/pages/shop/Dashboard";
 import ShopIntake from "@/pages/shop/Intake";
 import ShopProcessing from "@/pages/shop/Processing";
 import ShopOrders from "@/pages/shop/Orders";
+import ShopProfile from "@/pages/shop/Profile";
+import ShopTraining from "@/pages/shop/Training";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
@@ -26,6 +28,7 @@ import CustomerPayment from "@/pages/customer/Payment";
 import CustomerOrderDetails from "@/pages/customer/OrderDetails";
 import DriverDashboard from "@/pages/driver/Dashboard";
 import DriverOrderDetails from "@/pages/driver/OrderDetails";
+import DriverTraining from "@/pages/driver/Training";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 
@@ -77,6 +80,7 @@ function Router() {
             <Route path="/driver" component={DriverDashboard} />
             <Route path="/driver/orders" component={DriverDashboard} />
             <Route path="/driver/orders/:id" component={DriverOrderDetails} />
+            <Route path="/driver/training" component={DriverTraining} />
           </>
         )}
 
@@ -111,9 +115,11 @@ function Router() {
               {isShop && (
                 <>
                   <Route path="/shop" component={ShopDashboard} />
+                  <Route path="/shop/orders" component={ShopOrders} />
                   <Route path="/shop/intake" component={ShopIntake} />
                   <Route path="/shop/processing" component={ShopProcessing} />
-                  <Route path="/shop/orders" component={ShopOrders} />
+                  <Route path="/shop/profile" component={ShopProfile} />
+                  <Route path="/shop/training" component={ShopTraining} />
                   <Route path="/" component={ShopDashboard} />
                 </>
               )}

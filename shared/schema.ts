@@ -115,6 +115,14 @@ export const shops = pgTable("shops", {
   contactEmail: varchar("contact_email"),
   contactPhone: varchar("contact_phone"),
   isProcessingCenter: boolean("is_processing_center").default(false),
+  
+  // Franchise/Subscription details
+  ownerId: varchar("owner_id"), // User ID of the shop owner
+  franchiseName: varchar("franchise_name"), // Business/franchise name
+  subscriptionType: varchar("subscription_type"), // 'monthly' or 'yearly'
+  subscriptionFee: integer("subscription_fee"), // Fee in cents (EUR)
+  subscriptionStatus: varchar("subscription_status").default('active'), // 'active', 'suspended', 'cancelled'
+  
   createdAt: timestamp("created_at").defaultNow(),
 });
 
