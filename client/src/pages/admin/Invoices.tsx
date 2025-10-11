@@ -13,7 +13,7 @@ export default function AdminInvoices() {
   const [search, setSearch] = useState("");
   
   const { data: invoices = [] } = useQuery<Invoice[]>({
-    queryKey: ["/api/admin/invoices"],
+    queryKey: ["/api/invoices"],
   });
 
   const filteredInvoices = invoices.filter(invoice => 
@@ -21,6 +21,9 @@ export default function AdminInvoices() {
     invoice.orderId.toLowerCase().includes(search.toLowerCase()) ||
     invoice.invoiceNumber.toLowerCase().includes(search.toLowerCase())
   );
+
+  const pendingInvoices = filteredInvoices.filter(inv => inv.status === 'pending');
+  const paidInvoices = filteredInvoices.filter(inv => inv.status === 'paid');
 
   const handleExport = () => {
     const csvContent = [
@@ -61,21 +64,39 @@ export default function AdminInvoices() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <p className="text-sm text-muted-foreground">Total Pending</p>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-yellow-600" data-testid="text-total-pending">
+              {pendingInvoices.length}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(pendingInvoices.reduce((sum, inv) => sum + (inv.totalCents || 0), 0))}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <p className="text-sm text-muted-foreground">Total Paid</p>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-green-600" data-testid="text-total-paid">
+              {paidInvoices.length}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(paidInvoices.reduce((sum, inv) => sum + (inv.totalCents || 0), 0))}
+            </p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="pb-2">
             <p className="text-sm text-muted-foreground">Total Amount</p>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold" data-testid="text-total-invoiced">{formatCurrency(totalAmount)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <p className="text-sm text-muted-foreground">Subtotal</p>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold" data-testid="text-total-subtotal">{formatCurrency(subtotalAmount)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -110,6 +131,7 @@ export default function AdminInvoices() {
                 <TableRow>
                   <TableHead>Invoice Number</TableHead>
                   <TableHead>Order ID</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Subtotal</TableHead>
                   <TableHead>VAT</TableHead>
                   <TableHead>Total</TableHead>
@@ -122,6 +144,15 @@ export default function AdminInvoices() {
                   <TableRow key={invoice.id}>
                     <TableCell className="font-mono text-sm">{invoice.invoiceNumber}</TableCell>
                     <TableCell className="font-mono text-sm">#{invoice.orderId.slice(0, 8)}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={invoice.status === 'paid' ? 'default' : 'secondary'}
+                        className={invoice.status === 'paid' ? 'bg-green-600' : 'bg-yellow-600'}
+                        data-testid={`badge-status-${invoice.id}`}
+                      >
+                        {invoice.status === 'paid' ? 'Paid' : 'Pending'}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{formatCurrency(invoice.subtotalCents || 0)}</TableCell>
                     <TableCell>{formatCurrency(invoice.vatCents || 0)}</TableCell>
                     <TableCell className="font-medium">{formatCurrency(invoice.totalCents || 0)}</TableCell>
