@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Package } from "lucide-react";
-import type { Service, Order } from "@shared/schema";
+import { ArrowLeft, Package, Users } from "lucide-react";
+import type { Service, Order, User } from "@shared/schema";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 import { useLoadingAction } from "@/hooks/use-loading-action";
 
@@ -37,6 +37,10 @@ export default function NewOrder() {
 
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
+  });
+
+  const { data: activeDrivers = [] } = useQuery<User[]>({
+    queryKey: ["/api/drivers/active"],
   });
 
   const form = useForm<OrderFormData>({
@@ -69,7 +73,7 @@ export default function NewOrder() {
         payment_method: 'card',
         notes: data.notes,
       });
-      return response as Order;
+      return await response.json() as Order;
     },
     onSuccess: (order: Order) => {
       toast({
@@ -122,6 +126,42 @@ export default function NewOrder() {
           <h1 className="text-2xl font-bold mb-2">New Laundry Order</h1>
           <p className="text-muted-foreground">Book a pickup for your laundry</p>
         </div>
+
+        {/* Active Drivers */}
+        {activeDrivers.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Available Drivers ({activeDrivers.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-3">
+                These drivers are currently online and available to collect your laundry
+              </p>
+              <div className="space-y-2">
+                {activeDrivers.map((driver) => (
+                  <div 
+                    key={driver.id} 
+                    className="flex items-center gap-3 p-2 rounded-md bg-muted"
+                    data-testid={`driver-${driver.id}`}
+                  >
+                    <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">
+                        {driver.firstName} {driver.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Online • Ready for pickup
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
