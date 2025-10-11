@@ -1243,6 +1243,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         // Store the active role for super admins
         activeRole: sessionRole,
+        // Also store as 'role' for middleware compatibility
+        role: sessionRole,
+        // Store isSuperAdmin flag so middleware can check it
+        isSuperAdmin: user.isSuperAdmin || false,
       };
 
       req.login(sessionUser, (err: any) => {
