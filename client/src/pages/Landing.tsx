@@ -226,7 +226,7 @@ export default function Landing() {
           </div>
 
           {/* Video Demonstrations */}
-          <div className="max-w-4xl mx-auto space-y-8">
+          <div className="space-y-8">
             <VideoPlayer src={video1} testId="video-how-it-works-1" />
             <VideoPlayer src={video2} testId="video-how-it-works-2" />
             <VideoPlayer src={video3} testId="video-how-it-works-3" />
