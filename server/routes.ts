@@ -19,7 +19,8 @@ const createOrderSchema = z.object({
   customer: z.object({
     id: z.string().optional(),
     email: z.string().email(),
-    phone: z.string().optional(),
+    phone: z.string(),
+    fullName: z.string(),
   }),
   address: z.object({
     line1: z.string(),
@@ -27,6 +28,8 @@ const createOrderSchema = z.object({
     city: z.string(),
     eircode: z.string().optional(),
   }),
+  pickupDate: z.string(),
+  timeWindow: z.string(),
   services: z.array(z.object({
     service_id: z.string(),
     quantity: z.number().positive(),
@@ -180,12 +183,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const customer = await storage.upsertUser({
           email: data.customer.email,
           role: 'customer',
+          phone: data.customer.phone,
         });
         customerId = customer.id;
       }
 
       const order = await storage.createOrder({
         customerId,
+        customerFullName: data.customer.fullName,
+        customerPhone: data.customer.phone,
+        pickupDate: data.pickupDate,
+        timeWindow: data.timeWindow,
         addressLine1: data.address.line1,
         addressLine2: data.address.line2 || null,
         city: data.address.city,

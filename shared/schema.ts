@@ -131,6 +131,14 @@ export const orders = pgTable("orders", {
   processingShopId: varchar("processing_shop_id"),
   state: orderStateEnum("state").notNull().default('created'),
   
+  // Customer Contact
+  customerFullName: varchar("customer_full_name"),
+  customerPhone: varchar("customer_phone"),
+  
+  // Pickup Schedule
+  pickupDate: varchar("pickup_date"),
+  timeWindow: varchar("time_window"),
+  
   // Address
   addressLine1: varchar("address_line1").notNull(),
   addressLine2: varchar("address_line2"),
