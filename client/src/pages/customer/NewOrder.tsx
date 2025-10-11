@@ -101,9 +101,9 @@ export default function NewOrder() {
     onSuccess: (order: Order) => {
       toast({
         title: "Order Created!",
-        description: `Order #${order.id.slice(0, 8)} has been created successfully.`,
+        description: "Redirecting to payment...",
       });
-      navigate(`/customer/orders/${order.id}`);
+      navigate(`/customer/payment?orderId=${order.id}`);
     },
     onError: (error) => {
       toast({

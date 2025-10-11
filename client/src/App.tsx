@@ -21,6 +21,7 @@ import AdminPolicies from "@/pages/admin/Policies";
 import AdminInvoices from "@/pages/admin/Invoices";
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import CustomerNewOrder from "@/pages/customer/NewOrder";
+import CustomerPayment from "@/pages/customer/Payment";
 import CustomerOrderDetails from "@/pages/customer/OrderDetails";
 import DriverDashboard from "@/pages/driver/Dashboard";
 import DriverOrderDetails from "@/pages/driver/OrderDetails";
@@ -58,6 +59,7 @@ function Router() {
           <>
             <Route path="/customer" component={CustomerDashboard} />
             <Route path="/customer/new-order" component={CustomerNewOrder} />
+            <Route path="/customer/payment" component={CustomerPayment} />
             <Route path="/customer/orders/:id" component={CustomerOrderDetails} />
             <Route path="/" component={CustomerDashboard} />
           </>

@@ -579,6 +579,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============= PAYMENT ROUTES (Mock) =============
+  
+  // Process mock payment
+  app.post("/api/payment/process", async (req, res) => {
+    try {
+      const { orderId, invoiceId, paymentDetails } = req.body;
+
+      if (!orderId || !invoiceId) {
+        return res.status(400).json({ message: "Order ID and Invoice ID required" });
+      }
+
+      // Validate mock payment details (basic validation)
+      if (!paymentDetails.cardNumber || !paymentDetails.cardName) {
+        return res.status(400).json({ message: "Invalid payment details" });
+      }
+
+      // Mock payment processing - in real world this would call Stripe
+      // For now, we'll just mark the invoice as paid
+      const updatedInvoice = await storage.updateInvoiceStatus(invoiceId, 'paid', new Date());
+      
+      if (!updatedInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // Update order state to confirmed
+      const order = await storage.getOrder(orderId);
+      if (order && order.state === 'created') {
+        await storage.updateOrderState(orderId, 'confirmed');
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Payment processed successfully",
+        invoice: updatedInvoice 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ============= POLICY ROUTES (Admin) =============
   
   // Upload split policy
