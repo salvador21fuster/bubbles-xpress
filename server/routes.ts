@@ -1255,6 +1255,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Franchise signup with subscription tier
+  app.post("/api/auth/franchise-signup", async (req, res) => {
+    try {
+      const franchiseSignUpSchema = z.object({
+        email: z.string().email("Invalid email address").optional().or(z.literal("")),
+        username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
+        phone: z.string().min(10, "Phone number is required").optional().or(z.literal("")),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        firstName: z.string().min(1, "First name is required"),
+        lastName: z.string().min(1, "Last name is required"),
+        franchiseName: z.string().min(3, "Franchise name is required"),
+        subscriptionTier: z.enum(["free", "silver", "gold"]),
+        billingCycle: z.enum(["monthly", "yearly"]).optional(),
+      });
+
+      const validation = franchiseSignUpSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: validation.error.errors 
+        });
+      }
+
+      const { email, username, phone, password, firstName, lastName, franchiseName, subscriptionTier, billingCycle } = validation.data;
+
+      // Check if user already exists
+      if (email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser) {
+          return res.status(409).json({ message: "Email already registered" });
+        }
+      }
+      if (username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(409).json({ message: "Username already taken" });
+        }
+      }
+      if (phone) {
+        const existingUser = await storage.getUserByPhone(phone);
+        if (existingUser) {
+          return res.status(409).json({ message: "Phone number already registered" });
+        }
+      }
+
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+
+      // Create user with franchise role
+      const newUser = await storage.createUser({
+        email: email || undefined,
+        username: username || undefined,
+        phone: phone || undefined,
+        firstName,
+        lastName,
+        hashedPassword,
+        role: 'franchise',
+      });
+
+      // Calculate tier pricing and fees
+      const tierPricing: Record<string, { monthly: number, yearly: number, fee: number }> = {
+        free: { monthly: 0, yearly: 0, fee: 25 },
+        silver: { monthly: 9900, yearly: 75000, fee: 15 }, // in cents
+        gold: { monthly: 29900, yearly: 250000, fee: 5 },
+      };
+
+      const pricing = tierPricing[subscriptionTier];
+      const subscriptionFee = subscriptionTier === 'free' ? 0 : (
+        billingCycle === 'yearly' ? pricing.yearly : pricing.monthly
+      );
+
+      // Create shop/franchise entry
+      await storage.createShop({
+        name: franchiseName,
+        address: '',
+        ownerId: newUser.id,
+        franchiseName,
+        subscriptionTier,
+        subscriptionType: subscriptionTier === 'free' ? 'free' : billingCycle,
+        subscriptionFee,
+        mrBubblesFeePercentage: pricing.fee,
+        subscriptionStatus: 'active',
+        paymentProcessed: true, // Fake payment processed
+      } as InsertShop);
+
+      // Create session using Passport's login method
+      const sessionUser = {
+        claims: {
+          sub: newUser.id,
+          email: newUser.email || newUser.username,
+          first_name: newUser.firstName,
+          last_name: newUser.lastName,
+        },
+        activeRole: 'franchise',
+      };
+
+      req.login(sessionUser, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to create session" });
+        }
+        
+        res.status(201).json({
+          id: newUser.id,
+          email: newUser.email,
+          username: newUser.username,
+          phone: newUser.phone,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: 'franchise',
+          subscriptionTier,
+        });
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Sign in with email/username/phone
   app.post("/api/auth/signin", async (req, res) => {
     try {

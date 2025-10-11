@@ -31,6 +31,7 @@ import DriverOrderDetails from "@/pages/driver/OrderDetails";
 import DriverTraining from "@/pages/driver/Training";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
+import FranchiseSignUp from "@/pages/FranchiseSignUp";
 
 function Router() {
   const { isAuthenticated, isLoading, isCustomer, isDriver, isShop, isFranchise, isAdmin, isSuperAdmin } = useAuth();
@@ -50,6 +51,7 @@ function Router() {
         <Route path="/" component={Landing} />
         <Route path="/signin" component={SignIn} />
         <Route path="/signup" component={SignUp} />
+        <Route path="/franchise-signup" component={FranchiseSignUp} />
         <Route component={NotFound} />
       </Switch>
     );
