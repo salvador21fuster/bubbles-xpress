@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, MapPin, Clock } from "lucide-react";
-import { Link } from "wouter";
+import { Package, Plus, MapPin, Clock, LogOut } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import type { Order } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const statusColors: Record<string, string> = {
   'created': 'bg-gray-500',
@@ -33,9 +35,35 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function CustomerDashboard() {
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/customer/orders"],
     refetchInterval: 10000, // Auto-refresh every 10 seconds for real-time updates
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      // Clear all cached data to prevent next user from seeing previous user's data
+      queryClient.clear();
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+      navigate("/customer/signin");
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
   });
 
   const activeOrders = orders.filter(o => o.state !== 'delivered' && o.state !== 'closed');
@@ -45,8 +73,23 @@ export default function CustomerDashboard() {
     <div className="min-h-screen bg-background p-4 pb-20">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">My Orders</h1>
-        <p className="text-muted-foreground">Track your laundry orders</p>
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold mb-2">My Orders</h1>
+            <p className="text-muted-foreground">Track your laundry orders</p>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-logout"
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* New Order Button */}

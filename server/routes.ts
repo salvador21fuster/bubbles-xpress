@@ -1266,6 +1266,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      req.session.destroy((err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to destroy session" });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true, message: "Logged out successfully" });
+      });
+    });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
