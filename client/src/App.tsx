@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import MisterBubbleChatbot from "@/components/MisterBubbleChatbot";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import ShopDashboard from "@/pages/shop/Dashboard";
@@ -167,6 +168,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <MisterBubbleChatbot />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
