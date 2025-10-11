@@ -1,11 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, MapPin, Navigation, TrendingUp } from "lucide-react";
+import { Package, MapPin, Navigation, TrendingUp, Power } from "lucide-react";
 import { Link } from "wouter";
-import type { Order } from "@shared/schema";
+import type { Order, User } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // Simple route optimization: sort by city then address
 function optimizeRoute(orders: Order[]): Order[] {
@@ -19,8 +22,36 @@ function optimizeRoute(orders: Order[]): Order[] {
 }
 
 export default function DriverDashboard() {
+  const { toast } = useToast();
+  
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/driver/orders"],
+  });
+
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
+  });
+
+  const availabilityMutation = useMutation({
+    mutationFn: async (isActive: boolean) => {
+      return await apiRequest("PATCH", "/api/driver/availability", { isActive });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: user?.isActive ? "You're now offline" : "You're now online",
+        description: user?.isActive 
+          ? "You won't receive new pickup requests" 
+          : "You'll be visible to customers looking for drivers",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update availability status",
+      });
+    },
   });
 
   const pickups = optimizeRoute(orders.filter(o => o.state === 'confirmed'));
@@ -38,6 +69,33 @@ export default function DriverDashboard() {
         <h1 className="text-2xl font-bold mb-2">Driver Dashboard</h1>
         <p className="text-muted-foreground">Today's pickups and deliveries</p>
       </div>
+
+      {/* Availability Toggle */}
+      <Card className="mb-6">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Power className={`h-5 w-5 ${user?.isActive ? 'text-green-600' : 'text-muted-foreground'}`} />
+              <div>
+                <p className="font-medium">
+                  {user?.isActive ? 'You\'re Online' : 'You\'re Offline'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.isActive 
+                    ? 'Customers can see you for pickups' 
+                    : 'Turn on to accept pickups'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={user?.isActive || false}
+              onCheckedChange={(checked) => availabilityMutation.mutate(checked)}
+              disabled={availabilityMutation.isPending}
+              data-testid="switch-driver-availability"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Loading State */}
       {isLoading && (
