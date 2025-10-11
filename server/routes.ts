@@ -758,24 +758,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role as any,
       });
 
-      // Create session
-      (req as any).session.user = {
+      // Create session using Passport's login method
+      const sessionUser = {
         claims: {
           sub: newUser.id,
           email: newUser.email || newUser.username,
           first_name: newUser.firstName,
           last_name: newUser.lastName,
-        }
+        },
+        activeRole: newUser.role,
       };
 
-      res.status(201).json({
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
-        phone: newUser.phone,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
+      req.login(sessionUser, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to create session" });
+        }
+        
+        res.status(201).json({
+          id: newUser.id,
+          email: newUser.email,
+          username: newUser.username,
+          phone: newUser.phone,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role,
+        });
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -820,7 +827,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create session (use requested role for super admins)
       const sessionRole = user.isSuperAdmin ? role : user.role;
-      (req as any).session.user = {
+      
+      // Use Passport's login method to create a proper session
+      const sessionUser = {
         claims: {
           sub: user.id,
           email: user.email || user.username,
@@ -831,15 +840,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         activeRole: sessionRole,
       };
 
-      res.json({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        phone: user.phone,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: sessionRole, // Return the role they're signing in as
-        isSuperAdmin: user.isSuperAdmin,
+      req.login(sessionUser, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to create session" });
+        }
+        
+        res.json({
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          phone: user.phone,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: sessionRole, // Return the role they're signing in as
+          isSuperAdmin: user.isSuperAdmin,
+        });
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
