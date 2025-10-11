@@ -72,7 +72,7 @@ export function RealDroghedaMap({
             left: 50%;
             transform: translateX(-50%);
           ">
-            🫧 Mr Bubbles HQ
+            Mr Bubbles HQ
           </div>
           <div style="
             width: 32px;
@@ -84,9 +84,11 @@ export function RealDroghedaMap({
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
           ">
-            🏢
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
           </div>
         </div>
       `,
@@ -111,9 +113,11 @@ export function RealDroghedaMap({
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
           ">
-            🏠
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
           </div>
         `,
         iconSize: [36, 36],
@@ -172,10 +176,14 @@ export function RealDroghedaMap({
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
                 animation: pulse 2s infinite;
               ">
-                🚐
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+                  <path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+                  <path d="M5 17H3v-7m-1 0h11v12m0 0h2"/>
+                  <path d="M14 5h4l3 5v7h-2"/>
+                </svg>
               </div>
             </div>
           `,
