@@ -55,7 +55,7 @@ export default function CustomerDashboard() {
         title: "Logged out",
         description: "You have been successfully logged out",
       });
-      navigate("/customer/signin");
+      navigate("/");
     },
     onError: () => {
       toast({
