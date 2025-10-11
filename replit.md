@@ -8,6 +8,7 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-11**: Super admin feature implemented - benbubbles and ronanbubbles can sign into ALL portal types (customer, driver, shop, admin) by selecting the role at login
 - **2025-10-10**: Authentication system overhauled - Custom email/password auth with bcrypt, username/phone login support, all 4 roles (customer, driver, shop, admin)
 - **2025-10-10**: Admin users created - benbubbles and ronanbubbles admin accounts seeded for Admin Portal access
 - **2025-10-10**: Admin Portal enhanced - Complete oversight with Dashboard, Transactions, Invoices, Users, and Policies pages
