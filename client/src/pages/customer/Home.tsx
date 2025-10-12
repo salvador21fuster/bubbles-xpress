@@ -9,6 +9,7 @@ import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt,
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
+import logoImage from "@assets/image_1760233335456.png";
 
 interface ServiceWithImage extends Service {
   imageUrl?: string;
@@ -504,6 +505,17 @@ export default function CustomerHome() {
             <MapPin className="h-5 w-5" />
             <span className="text-xs">Browse</span>
           </Button>
+          
+          {/* Mr Bubbles Logo - Center */}
+          <div className="flex items-center justify-center px-2">
+            <img 
+              src={logoImage} 
+              alt="Mr Bubbles" 
+              className="h-10 w-auto object-contain"
+              data-testid="logo-bottom-nav"
+            />
+          </div>
+
           <Button
             variant="ghost"
             size="sm"
