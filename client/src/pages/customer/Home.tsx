@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar } from "lucide-react";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -28,6 +28,10 @@ export default function CustomerHome() {
   const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState<Array<{service: ServiceWithImage, quantity: number}>>([]);
   const [showCheckout, setShowCheckout] = useState(false);
+  
+  // Order detail states
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
 
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
@@ -358,16 +362,119 @@ export default function CustomerHome() {
     );
   };
 
-  // Orders View
-  const OrdersView = () => (
-    <div className="flex-1 overflow-y-auto pb-20 p-4">
-      <h2 className="text-2xl font-bold mb-4">My Orders</h2>
-      <p className="text-muted-foreground">Your order history will appear here</p>
-      <Link href="/customer/orders">
-        <Button className="mt-4" data-testid="button-view-orders">View All Orders</Button>
-      </Link>
-    </div>
-  );
+  // Orders View - Uber Eats Style
+  const OrdersView = () => {
+    const getStatusColor = (state: string) => {
+      switch (state) {
+        case 'delivered': return 'text-green-600';
+        case 'picked_up': case 'out_for_delivery': return 'text-blue-600';
+        case 'washing': case 'drying': case 'pressing': case 'qc': return 'text-orange-600';
+        case 'created': case 'confirmed': return 'text-yellow-600';
+        default: return 'text-muted-foreground';
+      }
+    };
+
+    const getStatusText = (state: string) => {
+      switch (state) {
+        case 'delivered': return 'Delivered';
+        case 'out_for_delivery': return 'Out for Delivery';
+        case 'picked_up': return 'Picked Up';
+        case 'washing': case 'drying': case 'pressing': return 'Processing';
+        case 'qc': return 'Quality Check';
+        case 'packed': return 'Packed';
+        case 'created': return 'Order Placed';
+        case 'confirmed': return 'Confirmed';
+        case 'at_origin_shop': case 'at_processing_shop': return 'At Shop';
+        default: return state;
+      }
+    };
+
+    return (
+      <div className="flex-1 overflow-y-auto pb-20">
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-4">My Orders</h2>
+          
+          {orders.length === 0 ? (
+            <Card className="p-8 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                  <Receipt className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">No orders yet</h3>
+                  <p className="text-sm text-muted-foreground">When you place an order, it will appear here</p>
+                </div>
+                <Button 
+                  onClick={() => setActiveTab('browse')}
+                  className="mt-2"
+                  data-testid="button-browse-services"
+                >
+                  Browse Services
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((order) => {
+                const deliveryAddress = `${order.addressLine1}${order.addressLine2 ? ', ' + order.addressLine2 : ''}, ${order.city}`;
+                const totalWithVat = order.totalCents ? (order.totalCents / 100).toFixed(2) : '0.00';
+                
+                return (
+                  <Card 
+                    key={order.id} 
+                    className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setShowOrderDetail(true);
+                    }}
+                    data-testid={`card-order-${order.id}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-sm font-semibold ${getStatusColor(order.state)}`}>
+                            {getStatusText(order.state)}
+                          </span>
+                          {(order.state === 'picked_up' || order.state === 'out_for_delivery') && (
+                            <Badge variant="secondary" className="text-xs">
+                              In Transit
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {order.createdAt && new Date(order.createdAt).toLocaleDateString('en-IE', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold">€{totalWithVat}</p>
+                        <p className="text-xs text-muted-foreground">incl. VAT</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{deliveryAddress}</span>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">View Details</span>
+                      <ChevronDown className="h-4 w-4 -rotate-90" />
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   // Account View
   const AccountView = () => {
@@ -736,6 +843,196 @@ export default function CustomerHome() {
     </div>
   );
 
+  // Order Detail View with Invoice and Live Tracking
+  const OrderDetailView = () => {
+    if (!selectedOrder) return null;
+
+    const deliveryAddress = `${selectedOrder.addressLine1}${selectedOrder.addressLine2 ? ', ' + selectedOrder.addressLine2 : ''}, ${selectedOrder.city}`;
+    const subtotal = selectedOrder.subtotalCents ? (selectedOrder.subtotalCents / 100).toFixed(2) : '0.00';
+    const vat = selectedOrder.vatCents ? (selectedOrder.vatCents / 100).toFixed(2) : '0.00';
+    const total = selectedOrder.totalCents ? (selectedOrder.totalCents / 100).toFixed(2) : '0.00';
+    
+    const hasDriver = selectedOrder.driverId !== null;
+    const showTracking = selectedOrder.state === 'picked_up' || selectedOrder.state === 'out_for_delivery';
+
+    return (
+      <div className="fixed inset-0 z-50 bg-background">
+        {/* Header */}
+        <div className="flex-shrink-0 border-b bg-background">
+          <div className="flex items-center gap-3 p-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowOrderDetail(false)}
+              data-testid="button-close-order-detail"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-bold">Order Details</h1>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto pb-6">
+          {/* Live Tracking - Only show if driver accepted */}
+          {showTracking && hasDriver && (
+            <div className="bg-primary/5 p-4 mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Truck className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Driver on the way</h3>
+                  <p className="text-sm text-muted-foreground">Estimated arrival in 15 minutes</p>
+                </div>
+              </div>
+              <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                <DroghedaMap 
+                  height="100%" 
+                  showMarker={true} 
+                  showDriverVan={true}
+                  driverLocation={{ latitude: 53.7197, longitude: -6.3488 }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Invoice Section */}
+          <div className="m-4">
+            <Card className="p-6">
+              {/* Invoice Header with Logo */}
+              <div className="flex items-start justify-between mb-6 pb-4 border-b">
+                <div>
+                  <img 
+                    src={logoImage} 
+                    alt="Mr Bubbles Express" 
+                    className="h-12 w-auto object-contain mb-2"
+                  />
+                  <p className="text-xs text-muted-foreground">Professional Laundry Service</p>
+                  <p className="text-xs text-muted-foreground">Drogheda, Ireland</p>
+                </div>
+                <div className="text-right">
+                  <h3 className="font-bold text-lg">Invoice</h3>
+                  <p className="text-xs text-muted-foreground">Order #{selectedOrder.id.slice(0, 8)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleDateString('en-IE')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Customer Details */}
+              <div className="mb-4">
+                <h4 className="font-semibold text-sm mb-2">Bill To:</h4>
+                <p className="text-sm">{selectedOrder.customerFullName || 'Customer'}</p>
+                <p className="text-sm text-muted-foreground">{deliveryAddress}</p>
+                {selectedOrder.eircode && (
+                  <p className="text-sm text-muted-foreground">{selectedOrder.eircode}</p>
+                )}
+              </div>
+
+              {/* Order Items */}
+              <div className="mb-4">
+                <h4 className="font-semibold text-sm mb-3">Services:</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Laundry Service</span>
+                    <span>€{subtotal}</span>
+                  </div>
+                  {selectedOrder.deliveryInstructions && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Note: {selectedOrder.deliveryInstructions}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Totals */}
+              <div className="space-y-2 pt-4 border-t">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>€{subtotal}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="text-primary font-medium">FREE</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">VAT (23%)</span>
+                  <span>€{vat}</span>
+                </div>
+                <div className="h-px bg-border my-2"></div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>€{total}</span>
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Paid with {selectedOrder.paymentMethod || 'card'} • {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleDateString('en-IE')}
+                  </span>
+                </div>
+              </div>
+
+              {/* AI Generated Notice */}
+              <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-center text-muted-foreground">
+                  This invoice was automatically generated by Mr Bubbles AI
+                </p>
+              </div>
+            </Card>
+
+            {/* Order Status Timeline */}
+            <Card className="p-4 mt-4">
+              <h4 className="font-semibold mb-3">Order Status</h4>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${selectedOrder.state !== 'created' ? 'bg-primary text-white' : 'bg-muted'}`}>
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Order Placed</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleString('en-IE')}
+                    </p>
+                  </div>
+                </div>
+                {selectedOrder.pickedUpAt && (
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                      <Truck className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Picked Up</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(selectedOrder.pickedUpAt).toLocaleString('en-IE')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {selectedOrder.deliveredAt && (
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center">
+                      <Check className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Delivered</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(selectedOrder.deliveredAt).toLocaleString('en-IE')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar - Uber Eats Style */}
@@ -877,6 +1174,9 @@ export default function CustomerHome() {
 
       {/* Checkout View */}
       {showCheckout && <CheckoutView />}
+
+      {/* Order Detail View */}
+      {showOrderDetail && <OrderDetailView />}
     </div>
   );
 }
