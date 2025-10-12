@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useLocation } from "wouter";
+import { Separator } from "@/components/ui/separator";
+import { Mail, ArrowLeft } from "lucide-react";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 const signInSchema = z.object({
@@ -69,109 +70,150 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <img 
-            src={logoImage} 
-            alt="Mr Bubbles Express" 
-            className="h-16 w-auto mx-auto mb-4"
-          />
-          <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-muted-foreground mt-2">Sign in to your account</p>
+        {/* Logo and Back */}
+        <div className="mb-8">
+          <button 
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm">Back</span>
+          </button>
+          
+          <div className="text-center">
+            <img 
+              src={logoImage} 
+              alt="Mr Bubbles Express" 
+              className="h-16 w-auto mx-auto mb-6"
+            />
+            <h1 className="text-2xl font-bold">Sign in to your account</h1>
+            <p className="text-muted-foreground mt-2">Enter your details to continue</p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>Enter your credentials to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="identifier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email, Username, or Phone</FormLabel>
+        {/* Form Card - Uber Clean Style */}
+        <div className="bg-card border rounded-2xl p-6 shadow-sm">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="identifier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Email, Phone or Username</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter your email, phone, or username" 
+                        className="h-12 rounded-lg"
+                        {...field} 
+                        data-testid="input-identifier"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter your password" 
+                        className="h-12 rounded-lg"
+                        {...field} 
+                        data-testid="input-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">I am a</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter your email, username, or phone" 
-                          {...field} 
-                          data-testid="input-identifier"
-                        />
+                        <SelectTrigger className="h-12 rounded-lg" data-testid="select-role">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <SelectContent>
+                        <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
+                        <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
+                        <SelectItem value="shop" data-testid="option-shop">Shop (Mr Bubbles)</SelectItem>
+                        <SelectItem value="franchise" data-testid="option-franchise">Franchise Partner</SelectItem>
+                        <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Enter your password" 
-                          {...field} 
-                          data-testid="input-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-semibold rounded-lg" 
+                disabled={signInMutation.isPending}
+                data-testid="button-signin"
+              >
+                {signInMutation.isPending ? "Signing in..." : "Continue"}
+              </Button>
+            </form>
+          </Form>
 
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>I am a</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-role">
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="customer" data-testid="option-customer">Customer</SelectItem>
-                          <SelectItem value="driver" data-testid="option-driver">Driver</SelectItem>
-                          <SelectItem value="shop" data-testid="option-shop">Shop (Mr Bubbles Original)</SelectItem>
-                          <SelectItem value="franchise" data-testid="option-franchise">Franchise Partner</SelectItem>
-                          <SelectItem value="admin" data-testid="option-admin">Administrator</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={signInMutation.isPending}
-                  data-testid="button-signin"
-                >
-                  {signInMutation.isPending ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-            </Form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <a href="/signup" className="text-primary hover:underline" data-testid="link-signup">
-                  Sign up
-                </a>
-              </p>
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="mt-4 space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full h-12 rounded-lg"
+                type="button"
+                disabled
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Continue with Email Link
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <a href="/signup" className="text-primary font-medium hover:underline" data-testid="link-signup">
+                Sign up
+              </a>
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground">
+            By signing in, you agree to our{" "}
+            <a href="#" className="underline hover:text-foreground">Terms of Service</a>
+            {" "}and{" "}
+            <a href="#" className="underline hover:text-foreground">Privacy Policy</a>
+          </p>
+        </div>
       </div>
     </div>
   );

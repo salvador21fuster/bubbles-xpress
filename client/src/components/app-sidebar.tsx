@@ -1,10 +1,9 @@
-import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText, Receipt, Building2, GraduationCap } from "lucide-react";
+import { Home, Package, Users, Settings, BarChart3, ShoppingBag, Scan, FileText, Receipt, Building2, GraduationCap, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -14,12 +13,37 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 export function AppSidebar() {
   const { user, isShop, isFranchise, isAdmin } = useAuth();
   const [location] = useLocation();
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      window.location.href = "/";
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
   const shopItems = [
     { title: "Dashboard", url: "/shop", icon: Home },
@@ -51,60 +75,78 @@ export function AppSidebar() {
   const items = isAdmin ? adminItems : isFranchise ? franchiseItems : isShop ? shopItems : [];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b">
-        <div className="flex flex-col gap-2">
+    <Sidebar className="border-r bg-background">
+      {/* Uber Eats Manager Style Header */}
+      <SidebarHeader className="p-6 border-b">
+        <div className="flex items-center gap-3">
           <img 
             src={logoImage} 
             alt="Mr Bubbles" 
-            className="h-12 w-auto object-contain"
+            className="h-8 w-8 rounded-lg object-cover"
           />
-          <p className="text-xs text-muted-foreground text-center">
-            {isAdmin ? 'Admin Portal' : isFranchise ? 'Franchise Portal' : isShop ? 'Shop Portal' : `${user?.role} Portal`}
-          </p>
+          <div>
+            <h2 className="font-bold text-lg">Mr Bubbles</h2>
+            <p className="text-xs text-muted-foreground">
+              {isAdmin ? 'Manager Portal' : isFranchise ? 'Franchise' : 'Shop'}
+            </p>
+          </div>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+
+      <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location === item.url}>
-                    <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="space-y-1">
+              {items.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      className={`${isActive ? 'bg-muted font-medium' : 'hover-elevate'} rounded-lg`}
+                      isActive={isActive}
+                    >
+                      <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
+                        <item.icon className="h-5 w-5" />
+                        <span className="text-sm">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Uber Style User Footer */}
       <SidebarFooter className="p-4 border-t">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.profileImageUrl || undefined} />
-            <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || 'U'}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">
-              {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 px-2">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                {user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {user?.username || user?.email?.split('@')[0] || 'User'}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full justify-start gap-2"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-logout"
+          >
+            <LogOut className="h-4 w-4" />
+            {logoutMutation.isPending ? "Logging out..." : "Log out"}
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full mt-2"
-          onClick={() => window.location.href = '/api/logout'}
-          data-testid="button-logout"
-        >
-          Log Out
-        </Button>
       </SidebarFooter>
     </Sidebar>
   );
