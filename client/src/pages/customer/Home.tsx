@@ -1359,20 +1359,20 @@ export default function CustomerHome() {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
         {/* Header - Minimal Uber Eats style */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-background/90 backdrop-blur">
+        <div className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between p-4">
           <Button 
             variant="outline" 
             size="icon" 
             onClick={() => setShowOrderDetail(false)}
             data-testid="button-back-order-detail"
-            className="rounded-full bg-background shadow-md"
+            className="rounded-full bg-background shadow-lg border-2 h-11 w-11"
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <Button 
             variant="ghost" 
             size="sm"
-            className="rounded-full bg-background"
+            className="rounded-full bg-background/90 backdrop-blur shadow-md"
             data-testid="button-help"
           >
             Help
