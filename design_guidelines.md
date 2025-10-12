@@ -6,7 +6,7 @@
 ## Color Palette
 
 ### Primary Colors
-- **Uber Green (Primary Action)**: `#06C167` - Main CTA buttons, active states
+- **Mr Bubbles Blue (Primary Action)**: `#0079E7` - Main CTA buttons, active states, brand color
 - **Black (Secondary Action)**: `#000000` - Secondary buttons, navigation
 - **White (Background)**: `#FFFFFF` - Main background, cards
 
@@ -14,14 +14,14 @@
 - **Primary Text**: `#000000` - Headings, main content
 - **Secondary Text**: `#6B7280` - Descriptions, metadata
 - **Tertiary Text**: `#9CA3AF` - Hints, placeholders
-- **Link/Action Text**: `#06C167` - Interactive text elements
+- **Link/Action Text**: `#0079E7` - Interactive text elements (Mr Bubbles blue)
 
 ### System Colors
 - **Background**: `#F9FAFB` - Page background (very subtle gray)
 - **Card Background**: `#FFFFFF` - White cards with subtle shadow
 - **Border**: `#E5E7EB` - Dividers, card borders
 - **Error**: `#EF4444` - Error states
-- **Success**: `#06C167` - Success states
+- **Success**: `#0079E7` - Success states (Mr Bubbles blue)
 
 ## Typography
 
@@ -71,9 +71,9 @@
 
 ### Buttons
 
-#### Primary Button (Uber Green)
+#### Primary Button (Mr Bubbles Blue)
 ```
-- Background: #06C167
+- Background: #0079E7 (Mr Bubbles Blue)
 - Text: White (#FFFFFF)
 - Border Radius: 8px
 - Padding: 16px 24px
@@ -127,7 +127,7 @@
 - Background: White
 - Padding: 16px
 - Border Top: 1px solid #E5E7EB
-- Button: Full width primary green button
+- Button: Full width primary blue button (Mr Bubbles blue)
 - Safe area padding for iOS notch
 ```
 
@@ -167,7 +167,7 @@
 ## Interactions
 
 ### Hover States (Desktop)
-- **Buttons**: Darken by 5% (`#05A858` for green)
+- **Buttons**: Darken by 5% (`#0066C0` for Mr Bubbles blue)
 - **Cards**: Slight shadow increase
 - **Links**: Underline
 

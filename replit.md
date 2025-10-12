@@ -8,6 +8,10 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-12**: Order history cache invalidation fixed - Orders now appear immediately in customer history after payment processing
+- **2025-10-12**: Design system updated to Mr Bubbles blue (#0079E7) - Replaced Uber green with brand blue as primary color across all apps while maintaining Uber Eats design patterns
+- **2025-10-12**: Logout functionality added to all apps - Customer (Account tab), Driver (menu), Shop/Admin (sidebar) with proper toasts and redirects
+- **2025-10-12**: Driver-customer messaging system - Drivers can send messages to customers with quick templates for arrival notifications
 - **2025-10-12**: Customer App Uber Eats redesign complete - Single-page app with Delivery/Pickup toggle, hero banner, category pills with Lucide icons, service cards (Hidden gems style), map view with bottom navigation
 - **2025-10-12**: Interactive Drogheda map implemented - Real Leaflet/OpenStreetMap map showing Drogheda, Ireland with SVG-based markers for user location, driver van, and laundry shops (no emojis)
 - **2025-10-12**: Shop Portal Uber Eats styling applied - Mobile-first dashboard and orders pages with semantic color tokens for dark mode support
