@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Calendar, Filter, MoreVertical } from "lucide-react";
-import { Link } from "wouter";
+import { Search, Calendar, ChevronDown, FileText, Truck, User, DollarSign, Clock } from "lucide-react";
+import { format } from "date-fns";
 import type { Order } from "@shared/schema";
 import { formatCurrency } from "@/lib/authUtils";
 
@@ -16,19 +16,35 @@ export default function ShopOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
-  const [dateRange, setDateRange] = useState("today");
+  const [sortBy, setSortBy] = useState<"date" | "amount" | "status" | "customer">("date");
   
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/shop/orders"],
   });
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(search.toLowerCase()) ||
-                         order.addressLine1.toLowerCase().includes(search.toLowerCase()) ||
-                         order.city.toLowerCase().includes(search.toLowerCase());
+  // Filter and sort orders
+  let filteredOrders = orders.filter(order => {
+    const matchesSearch = search === "" || 
+      order.customerFullName?.toLowerCase().includes(search.toLowerCase()) ||
+      order.id.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.state === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  // Sort orders
+  if (sortBy === "date") {
+    filteredOrders = [...filteredOrders].sort((a, b) => 
+      new Date(b.pickupDate || b.createdAt || 0).getTime() - new Date(a.pickupDate || a.createdAt || 0).getTime()
+    );
+  } else if (sortBy === "amount") {
+    filteredOrders = [...filteredOrders].sort((a, b) => (b.totalCents || 0) - (a.totalCents || 0));
+  } else if (sortBy === "status") {
+    filteredOrders = [...filteredOrders].sort((a, b) => a.state.localeCompare(b.state));
+  } else if (sortBy === "customer") {
+    filteredOrders = [...filteredOrders].sort((a, b) => 
+      (a.customerFullName || '').localeCompare(b.customerFullName || '')
+    );
+  }
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -50,18 +66,18 @@ export default function ShopOrders() {
 
   const getStatusBadge = (state: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      'at_origin_shop': { label: 'At Shop', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      'at_processing_shop': { label: 'Processing', className: 'bg-blue-100 text-blue-800 border-blue-200' },
-      'washing': { label: 'Washing', className: 'bg-cyan-100 text-cyan-800 border-cyan-200' },
-      'drying': { label: 'Drying', className: 'bg-purple-100 text-purple-800 border-purple-200' },
-      'pressing': { label: 'Pressing', className: 'bg-pink-100 text-pink-800 border-pink-200' },
-      'qc': { label: 'Quality Check', className: 'bg-orange-100 text-orange-800 border-orange-200' },
-      'packed': { label: 'Packed', className: 'bg-green-100 text-green-800 border-green-200' },
-      'delivered': { label: 'Delivered', className: 'bg-gray-100 text-gray-800 border-gray-200' },
+      'created': { label: 'New Order', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+      'confirmed': { label: 'Confirmed', className: 'bg-green-50 text-green-700 border-green-200' },
+      'picked_up': { label: 'Picked Up', className: 'bg-purple-50 text-purple-700 border-purple-200' },
+      'at_origin_shop': { label: 'At Shop', className: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+      'processing': { label: 'Processing', className: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+      'ready': { label: 'Ready', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      'out_for_delivery': { label: 'Out for Delivery', className: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+      'delivered': { label: 'Delivered', className: 'bg-gray-50 text-gray-700 border-gray-200' },
     };
 
-    const config = statusConfig[state] || { label: state, className: 'bg-gray-100 text-gray-800' };
-    return <Badge variant="outline" className={`${config.className} font-medium`}>{config.label}</Badge>;
+    const config = statusConfig[state] || { label: state, className: 'bg-gray-50 text-gray-700 border-gray-200' };
+    return { ...config };
   };
 
   if (isLoading) {
@@ -73,159 +89,257 @@ export default function ShopOrders() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
+    <div className="p-6 space-y-6 bg-background">
+      {/* Header - Uber Eats Manager Style */}
       <div>
-        <h1 className="text-3xl font-bold">Orders</h1>
+        <h1 className="text-3xl font-bold text-foreground">Orders</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Showing {filteredOrders.length} results • <button className="text-primary hover:underline" onClick={() => { setSearch(""); setStatusFilter("all"); setDateRange("today"); }}>Reset</button>
+          Manage incoming orders and track processing
         </p>
       </div>
 
-      {/* Filters Bar - Uber Eats Style */}
-      <div className="flex flex-wrap gap-3">
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[180px]" data-testid="select-date-range">
-            <Calendar className="h-4 w-4 mr-2" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="yesterday">Yesterday</SelectItem>
-            <SelectItem value="week">Last 7 days</SelectItem>
-            <SelectItem value="month">Last 30 days</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Filters Bar - Exact Uber Eats Layout */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Button variant="outline" className="gap-2" data-testid="button-date-range">
+          <Calendar className="h-4 w-4" />
+          <span>Oct 1 - Oct 12, 2025</span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </Button>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]" data-testid="select-status-filter">
-            <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="created">New Orders</SelectItem>
+            <SelectItem value="confirmed">Confirmed</SelectItem>
+            <SelectItem value="picked_up">Picked Up</SelectItem>
             <SelectItem value="at_origin_shop">At Shop</SelectItem>
-            <SelectItem value="at_processing_shop">Processing</SelectItem>
-            <SelectItem value="washing">Washing</SelectItem>
-            <SelectItem value="drying">Drying</SelectItem>
-            <SelectItem value="pressing">Pressing</SelectItem>
-            <SelectItem value="qc">Quality Check</SelectItem>
-            <SelectItem value="packed">Packed</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="ready">Ready</SelectItem>
+            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+            <SelectItem value="delivered">Delivered</SelectItem>
           </SelectContent>
         </Select>
 
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search orders..."
-            className="pl-9"
-            data-testid="input-search-orders"
-          />
-        </div>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+          <SelectTrigger className="w-[160px]" data-testid="select-sort">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Sort by Date</SelectItem>
+            <SelectItem value="amount">Sort by Amount</SelectItem>
+            <SelectItem value="status">Sort by Status</SelectItem>
+            <SelectItem value="customer">Sort by Customer</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <Button variant="ghost" size="icon" data-testid="button-more-filters">
-          <MoreVertical className="h-5 w-5" />
+        <Button 
+          variant="default" 
+          disabled={selectedOrders.size === 0}
+          className="gap-2"
+          data-testid="button-process-selected"
+        >
+          Process selected ({selectedOrders.size})
         </Button>
+
+        <div className="ml-auto flex items-center gap-2">
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search orders..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+              data-testid="input-search"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Bulk Actions */}
-      {selectedOrders.size > 0 && (
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-center justify-between">
-          <p className="text-sm font-medium text-primary">
-            {selectedOrders.size} order{selectedOrders.size !== 1 ? 's' : ''} selected
-          </p>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline">Export</Button>
-            <Button size="sm" variant="outline">Mark as Processed</Button>
-            <Button size="sm" variant="outline">Assign Driver</Button>
-          </div>
-        </div>
-      )}
+      {/* Results Count */}
+      <div className="flex items-center justify-between text-sm">
+        <p className="text-muted-foreground">
+          {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+        </p>
+      </div>
 
       {/* Orders Table - Uber Eats Manager Style */}
-      <Card className="border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b bg-muted/50">
+      <div className="border rounded-lg overflow-hidden bg-card">
+        <table className="w-full">
+          <thead className="border-b bg-muted/30">
+            <tr>
+              <th className="p-4 text-left w-12">
+                <Checkbox 
+                  checked={selectedOrders.size === filteredOrders.length && filteredOrders.length > 0}
+                  onCheckedChange={handleSelectAll}
+                  data-testid="checkbox-select-all"
+                />
+              </th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Customer</th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Order Details</th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Driver</th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Status</th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Total</th>
+              <th className="p-4 text-left font-medium text-sm text-muted-foreground">Invoice</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {filteredOrders.length === 0 ? (
               <tr>
-                <th className="text-left p-4 font-medium text-sm">
-                  <Checkbox
-                    checked={selectedOrders.size === filteredOrders.length && filteredOrders.length > 0}
-                    onCheckedChange={handleSelectAll}
-                    data-testid="checkbox-select-all"
-                  />
-                </th>
-                <th className="text-left p-4 font-medium text-sm">Customer</th>
-                <th className="text-left p-4 font-medium text-sm">Order ID</th>
-                <th className="text-left p-4 font-medium text-sm">Delivery Type</th>
-                <th className="text-left p-4 font-medium text-sm">Location / Time</th>
-                <th className="text-left p-4 font-medium text-sm">Status</th>
-                <th className="text-right p-4 font-medium text-sm">Amount</th>
+                <td colSpan={7} className="p-12 text-center text-muted-foreground">
+                  No orders found
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => (
-                <tr 
-                  key={order.id} 
-                  className="border-b hover:bg-muted/30 transition-colors"
-                  data-testid={`row-order-${order.id}`}
-                >
-                  <td className="p-4">
-                    <Checkbox
-                      checked={selectedOrders.has(order.id)}
-                      onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
-                      data-testid={`checkbox-order-${order.id}`}
-                    />
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {order.addressLine1[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-sm">Customer</span>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <Link href={`/shop/orders/${order.id}`}>
-                      <button className="font-mono text-sm text-primary hover:underline">
-                        #{order.id.slice(0, 8)}
-                      </button>
-                    </Link>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm">Delivery • Laundry</span>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-sm">
-                      <p className="font-medium">{order.city}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {order.pickupDate ? new Date(order.pickupDate).toLocaleDateString() : 'Not scheduled'}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    {getStatusBadge(order.state)}
-                  </td>
-                  <td className="p-4 text-right">
-                    <span className="font-semibold text-sm">{formatCurrency(order.totalCents || 0)}</span>
-                    <p className="text-xs text-muted-foreground">+{formatCurrency((order.totalCents || 0) * 0.05)}</p>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ) : (
+              filteredOrders.map((order) => {
+                const status = getStatusBadge(order.state);
+                const initials = order.customerFullName
+                  ?.split(' ')
+                  .map((n: string) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2) || '?';
 
-        {filteredOrders.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground">No orders found</p>
+                return (
+                  <tr 
+                    key={order.id} 
+                    className="hover-elevate cursor-pointer"
+                    data-testid={`row-order-${order.id}`}
+                  >
+                    <td className="p-4">
+                      <Checkbox 
+                        checked={selectedOrders.has(order.id)}
+                        onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                        data-testid={`checkbox-order-${order.id}`}
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium" data-testid={`text-customer-name-${order.id}`}>
+                            {order.customerFullName || 'Unknown'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            #{order.id.slice(0, 8)}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div>
+                        <div className="text-sm font-medium flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                          {order.pickupDate && format(new Date(order.pickupDate), 'MMM dd, yyyy')}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {order.timeWindow || 'TBD'} • {order.addressLine1}, {order.city}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          {order.driverId ? 'Assigned' : 'Unassigned'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <Badge 
+                        variant="outline" 
+                        className={`${status.className} border`}
+                        data-testid={`badge-status-${order.id}`}
+                      >
+                        {status.label}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1.5">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-semibold" data-testid={`text-total-${order.id}`}>
+                          {formatCurrency(order.totalCents || 0)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="gap-1.5"
+                        data-testid={`button-view-invoice-${order.id}`}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Summary Cards - Uber Eats Style */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{orders.length}</p>
+              <p className="text-xs text-muted-foreground">Total Orders</p>
+            </div>
           </div>
-        )}
-      </Card>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Clock className="h-5 w-5 text-yellow-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {orders.filter(o => o.state === 'processing').length}
+              </p>
+              <p className="text-xs text-muted-foreground">Processing</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Truck className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {orders.filter(o => o.state === 'delivered').length}
+              </p>
+              <p className="text-xs text-muted-foreground">Delivered</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <DollarSign className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {formatCurrency(orders.reduce((sum, o) => sum + (o.totalCents || 0), 0))}
+              </p>
+              <p className="text-xs text-muted-foreground">Total Revenue</p>
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

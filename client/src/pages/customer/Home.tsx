@@ -480,9 +480,14 @@ export default function CustomerHome() {
         />
       )}
 
-      {/* Hero Banner - Uber Eats Style */}
-      <div className="relative h-48 bg-gradient-to-br from-primary/90 to-primary overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyMCIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-20"></div>
+      {/* Hero Banner - Uber Eats Style with Laundry Stack Image */}
+      <div className="relative h-48 overflow-hidden">
+        <img 
+          src="/attached_assets/Screen-Shot-2022-05-06-at-9.26.29-AM_1760252446209.png"
+          alt="Fresh Laundry Service"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
         <div className="relative h-full flex flex-col justify-end p-6">
           <h2 className="text-3xl font-bold text-white mb-2">€0 delivery fee</h2>
           <p className="text-white/90 text-lg">from Mr Bubbles Express</p>
