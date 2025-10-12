@@ -6,9 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft, MapPin, Calendar, CreditCard, Percent } from "lucide-react";
 import { Link } from "wouter";
 import { useCart } from "@/contexts/CartContext";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 
 export default function CustomerCheckout() {
   const { getCartItems, getCartTotal } = useCart();
+  const [collectionAddress, setCollectionAddress] = useState("5 Greenhills villa'S, Yellowbatter, Drogheda, Co. Louth");
+  const [collectionInstructions, setCollectionInstructions] = useState("");
+  const [showInstructions, setShowInstructions] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<'standard' | 'scheduled'>('standard');
   const [tipPercentage, setTipPercentage] = useState<number>(0);
 
@@ -34,24 +38,40 @@ export default function CustomerCheckout() {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Delivery Address */}
-        <Card className="p-4 border border-gray-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-gray-600 mt-1" />
-            <div className="flex-1">
-              <h3 className="font-semibold mb-1">Delivery address</h3>
-              <p className="text-sm text-gray-600">5 Greenhills villa'S</p>
-              <p className="text-sm text-gray-600">Yellowbatter, Drogheda, Co. Louth</p>
-              <Button variant="ghost" className="p-0 h-auto text-primary" data-testid="button-edit-address">
-                Add delivery instructions
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Delivery Options */}
+        {/* Collection Address */}
         <div>
-          <h2 className="font-bold text-lg mb-3">Delivery options</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="h-5 w-5 text-gray-600" />
+            <h3 className="font-semibold">Collection address</h3>
+          </div>
+          <AddressAutocomplete
+            value={collectionAddress}
+            onChange={(address) => setCollectionAddress(address)}
+            placeholder="Enter collection address"
+          />
+          <Button 
+            variant="ghost" 
+            className="p-0 h-auto text-primary mt-2" 
+            onClick={() => setShowInstructions(!showInstructions)}
+            data-testid="button-add-instructions"
+          >
+            {showInstructions ? 'Hide' : 'Add'} collection instructions
+          </Button>
+          {showInstructions && (
+            <Textarea
+              value={collectionInstructions}
+              onChange={(e) => setCollectionInstructions(e.target.value)}
+              placeholder="e.g., Ring doorbell, leave at front door"
+              className="mt-2 rounded-lg"
+              data-testid="input-collection-instructions"
+            />
+          )}
+        </div>
+
+        {/* Collection Options */}
+        <div>
+          <h2 className="font-bold text-lg mb-3">Collection options</h2>
+          <p className="text-sm text-gray-600 mb-3">Choose when we collect your items. Delivery back to you is included!</p>
           <div className="space-y-2">
             <button
               onClick={() => setDeliveryOption('standard')}
@@ -133,7 +153,7 @@ export default function CustomerCheckout() {
         <div>
           <h2 className="font-bold text-lg mb-1">Add a tip</h2>
           <p className="text-sm text-gray-600 mb-3">
-            Tipping is an optional way to thank the person who delivers your order
+            Tipping is an optional way to thank your driver for collection and delivery
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[0, 10, 15, 20, 25].map((percentage) => (
@@ -160,7 +180,7 @@ export default function CustomerCheckout() {
             <span>€{(subtotalCents / 100).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Delivery fee</span>
+            <span className="text-gray-600">Collection & Delivery</span>
             <span>€{(deliveryFeeCents / 100).toFixed(2)}</span>
           </div>
           {tipPercentage > 0 && (
