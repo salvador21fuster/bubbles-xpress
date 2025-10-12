@@ -1204,12 +1204,16 @@ export default function CustomerHome() {
         <div className="m-4 space-y-3">
           <h3 className="font-bold">Your Order</h3>
           {cart.map((item) => {
-            const ItemIcon = getServiceIcon(item.service.name);
+            const itemImage = item.service.imageUrl || getServiceImage(item.service.name);
             return (
               <Card key={item.service.id} className="p-4">
                 <div className="flex gap-3">
-                  <div className="w-16 h-16 flex-shrink-0 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <ItemIcon className="h-8 w-8 text-primary" />
+                  <div className="w-16 h-16 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
+                    <img 
+                      src={itemImage} 
+                      alt={item.service.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold">{item.service.name}</h4>
