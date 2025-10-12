@@ -390,7 +390,17 @@ export default function CustomerHome() {
 
   // Uber Eats style Browse View
   const BrowseView = () => (
-    <div className="flex-1 overflow-y-auto pb-20">
+    <div className="pb-20">
+      {/* Mini Map Preview - Show when address is selected */}
+      {selectedAddressLocation && (
+        <div 
+          ref={miniMapRef} 
+          className="mx-4 mt-4 rounded-lg overflow-hidden border bg-muted" 
+          style={{ height: '180px' }}
+          data-testid="mini-map-preview"
+        />
+      )}
+
       {/* Hero Banner - Uber Eats Style */}
       <div className="relative h-48 bg-gradient-to-br from-primary/90 to-primary overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyMCIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-20"></div>
@@ -1345,16 +1355,6 @@ export default function CustomerHome() {
               ))}
             </div>
           )}
-
-          {/* Mini Map Preview - Show when address is selected */}
-          {selectedAddressLocation && (
-            <div 
-              ref={miniMapRef} 
-              className="mx-4 mb-3 rounded-lg overflow-hidden border bg-muted" 
-              style={{ height: '180px' }}
-              data-testid="mini-map-preview"
-            />
-          )}
         </div>
 
         {/* Search Bar - Only show in browse view */}
@@ -1374,11 +1374,13 @@ export default function CustomerHome() {
         )}
       </div>
 
-      {/* Content Area */}
-      {activeTab === 'browse' && <BrowseView />}
-      {activeTab === 'map' && <MapView />}
-      {activeTab === 'orders' && <OrdersView />}
-      {activeTab === 'account' && <AccountView />}
+      {/* Content Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        {activeTab === 'browse' && <BrowseView />}
+        {activeTab === 'map' && <MapView />}
+        {activeTab === 'orders' && <OrdersView />}
+        {activeTab === 'account' && <AccountView />}
+      </div>
 
       {/* Bottom Navigation - Uber Eats Style */}
       <div className="flex-shrink-0 border-t bg-background">
