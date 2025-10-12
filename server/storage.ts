@@ -13,6 +13,7 @@ import {
   splits,
   invoices,
   orderServices,
+  messages,
   type User,
   type UpsertUser,
   type Order,
@@ -30,6 +31,8 @@ import {
   type SplitPolicy,
   type Split,
   type Invoice,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, isNull } from "drizzle-orm";
@@ -106,6 +109,11 @@ export interface IStorage {
   createInvoice(invoice: Omit<Invoice, 'id' | 'createdAt'>): Promise<Invoice>;
   getInvoiceByOrder(orderId: string): Promise<Invoice | undefined>;
   getAllInvoices(): Promise<Invoice[]>;
+
+  // Message operations
+  createMessage(message: InsertMessage): Promise<Message>;
+  getMessagesByOrder(orderId: string): Promise<Message[]>;
+  markMessageAsRead(messageId: string): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -499,6 +507,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(invoices.id, invoiceId))
       .returning();
     return invoice;
+  }
+
+  // Message operations
+  async createMessage(messageData: InsertMessage): Promise<Message> {
+    const [message] = await db.insert(messages).values(messageData).returning();
+    return message;
+  }
+
+  async getMessagesByOrder(orderId: string): Promise<Message[]> {
+    return await db.select().from(messages)
+      .where(eq(messages.orderId, orderId))
+      .orderBy(messages.createdAt);
+  }
+
+  async markMessageAsRead(messageId: string): Promise<Message> {
+    const [message] = await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(eq(messages.id, messageId))
+      .returning();
+    return message;
   }
 }
 

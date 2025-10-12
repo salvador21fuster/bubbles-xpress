@@ -347,6 +347,21 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 
+// Messages table (driver-customer communication)
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull(),
+  senderId: varchar("sender_id").notNull(), // User ID of sender
+  senderRole: userRoleEnum("sender_role").notNull(), // driver or customer
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true });
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
+
 // ============= CART & CHECKOUT (UBER EATS STYLE) =============
 
 // Carts table (shopping cart before checkout)
@@ -425,6 +440,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   subcontracts: many(subcontracts),
   splits: many(splits),
   invoices: many(invoices),
+  messages: many(messages),
 }));
 
 export const bagsRelations = relations(bags, ({ one, many }) => ({
@@ -520,5 +536,16 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   service: one(services, {
     fields: [cartItems.serviceId],
     references: [services.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  order: one(orders, {
+    fields: [messages.orderId],
+    references: [orders.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
   }),
 }));
