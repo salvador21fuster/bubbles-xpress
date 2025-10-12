@@ -936,7 +936,7 @@ export default function CustomerHome() {
 
   // Checkout View - Uber Eats Style
   const CheckoutView = () => (
-    <div className="fixed inset-0 z-50 bg-background">
+    <div className="fixed inset-0 z-[60] bg-background">
       {/* Header */}
       <div className="flex-shrink-0 border-b bg-background">
         <div className="flex items-center gap-3 p-4">
@@ -1060,7 +1060,11 @@ export default function CustomerHome() {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Delivery Fee</span>
-            <span className="text-primary font-medium">FREE</span>
+            <div className="text-right">
+              <span className="line-through text-muted-foreground">€3.99</span>
+              <span className="ml-2 text-green-600 font-medium">FREE</span>
+              <p className="text-xs text-muted-foreground">(FREE FIRST DELIVERY)</p>
+            </div>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">VAT (23%)</span>
