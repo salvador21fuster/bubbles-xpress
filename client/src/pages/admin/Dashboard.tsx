@@ -2,12 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { BarChart3, Users, Package, DollarSign, TrendingUp, TrendingDown, AlertCircle, Star, Clock, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BarChart3, Users, Package, DollarSign, TrendingUp, TrendingDown, AlertCircle, Star, Clock, CheckCircle, Eye, FileText, MapPin, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { formatCurrency } from "@/lib/authUtils";
 import type { Order } from "@shared/schema";
+import { useState } from "react";
 
 export default function AdminDashboard() {
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
+  
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
   });
@@ -226,7 +232,14 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {orders.slice(0, 10).map((order: Order) => (
-                  <tr key={order.id} className="border-b hover:bg-muted/30 transition-colors">
+                  <tr 
+                    key={order.id} 
+                    className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setShowOrderDetail(true);
+                    }}
+                  >
                     <td className="p-3">
                       <button className="font-mono text-sm text-primary hover:underline">
                         #{order.id.slice(0, 8)}
@@ -239,7 +252,7 @@ export default function AdminDashboard() {
                             {order.addressLine1[0]?.toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm">Customer</span>
+                        <span className="text-sm">{order.customerFullName || 'Customer'}</span>
                       </div>
                     </td>
                     <td className="p-3">
@@ -251,7 +264,21 @@ export default function AdminDashboard() {
                       </Badge>
                     </td>
                     <td className="p-3 text-right">
-                      <span className="font-semibold text-sm">{formatCurrency(order.totalCents || 0)}</span>
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="font-semibold text-sm">{formatCurrency(order.totalCents || 0)}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(order);
+                            setShowOrderDetail(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -267,6 +294,220 @@ export default function AdminDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Order Detail Dialog */}
+      <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Order Details: #{selectedOrder?.id.slice(0, 8)}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-6">
+              {/* Order Status & Summary */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-sm text-muted-foreground mb-1">Status</div>
+                    <Badge variant="outline" className="capitalize">
+                      {selectedOrder.state.replace(/_/g, ' ')}
+                    </Badge>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
+                    <div className="text-2xl font-bold">{formatCurrency(selectedOrder.totalCents || 0)}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-sm text-muted-foreground mb-1">Order Date</div>
+                    <div className="font-medium">
+                      {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleDateString('en-IE', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Customer & Delivery Information */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Customer Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Name</div>
+                      <div className="font-medium">{selectedOrder.customerFullName || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Customer ID</div>
+                      <div className="font-mono text-sm">{selectedOrder.customerId.slice(0, 12)}...</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Order State</div>
+                      <div className="font-medium capitalize">{selectedOrder.state.replace(/_/g, ' ')}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Delivery Address
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="font-medium">{selectedOrder.addressLine1}</div>
+                    {selectedOrder.addressLine2 && <div>{selectedOrder.addressLine2}</div>}
+                    <div>{selectedOrder.city}</div>
+                    <div>{selectedOrder.eircode}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Financial Breakdown - Invoice Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Invoice & Financial Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium">
+                        {formatCurrency(Math.round((selectedOrder.totalCents || 0) / 1.23))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">VAT (23%)</span>
+                      <span className="font-medium">
+                        {formatCurrency(Math.round((selectedOrder.totalCents || 0) - (selectedOrder.totalCents || 0) / 1.23))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-3 border-t-2 border-border">
+                      <span className="font-semibold text-lg">Total</span>
+                      <span className="font-bold text-lg">{formatCurrency(selectedOrder.totalCents || 0)}</span>
+                    </div>
+
+                    {/* Revenue Split Info */}
+                    <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-2">
+                      <div className="font-semibold mb-3">Revenue Distribution</div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Shop Revenue (estimated)</span>
+                        <span className="font-medium">
+                          {formatCurrency(Math.round((selectedOrder.totalCents || 0) * 0.75))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Driver Fee (estimated)</span>
+                        <span className="font-medium">
+                          {formatCurrency(Math.round((selectedOrder.totalCents || 0) * 0.15))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Platform Fee (estimated)</span>
+                        <span className="font-medium">
+                          {formatCurrency(Math.round((selectedOrder.totalCents || 0) * 0.10))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Order Timeline & Processing Shop */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Processing Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Origin Shop ID</div>
+                      <div className="font-mono text-sm">{selectedOrder.originShopId || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Processing Shop ID</div>
+                      <div className="font-mono text-sm">{selectedOrder.processingShopId || 'Same as origin'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Driver ID</div>
+                      <div className="font-mono text-sm">{selectedOrder.driverId || 'Not assigned'}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Order Timeline</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
+                      <div className="flex-1">
+                        <div className="font-medium">Order Created</div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleString('en-IE')}
+                        </div>
+                      </div>
+                    </div>
+                    {selectedOrder.confirmedAt && (
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Confirmed</div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(selectedOrder.confirmedAt).toLocaleString('en-IE')}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {selectedOrder.deliveredAt && (
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Delivered</div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(selectedOrder.deliveredAt).toLocaleString('en-IE')}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link href={`/admin/orders?orderId=${selectedOrder.id}`}>
+                    View Full Order Details
+                  </Link>
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Download Invoice
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
