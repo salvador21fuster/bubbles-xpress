@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check } from "lucide-react";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -1036,7 +1036,7 @@ export default function CustomerHome() {
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar - Uber Eats Style */}
       <div className="flex-shrink-0 border-b bg-background">
-        {/* Pickup and Delivery Button with Cart */}
+        {/* Pickup and Delivery Button with Cart and Live Agent */}
         <div className="flex items-center justify-between gap-2 p-3 border-b">
           <Button 
             variant="default" 
@@ -1047,20 +1047,33 @@ export default function CustomerHome() {
             Pickup and Delivery
           </Button>
           
-          {/* Cart Button - Top Right */}
-          {cart.length > 0 && !showCheckout && (
+          <div className="flex items-center gap-2">
+            {/* Cart Button */}
+            {cart.length > 0 && !showCheckout && (
+              <Button
+                variant="default"
+                size="sm"
+                className="rounded-full gap-2 relative"
+                onClick={() => setShowCheckout(true)}
+                data-testid="button-view-cart"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span className="font-bold">{cart.length}</span>
+                <span>€{(cartTotal * 1.23).toFixed(2)}</span>
+              </Button>
+            )}
+            
+            {/* Live Agent Button - Top Right */}
             <Button
-              variant="default"
+              variant="ghost"
               size="sm"
-              className="rounded-full gap-2 relative"
-              onClick={() => setShowCheckout(true)}
-              data-testid="button-view-cart"
+              className="gap-2"
+              data-testid="button-live-agent"
             >
-              <ShoppingCart className="h-4 w-4" />
-              <span className="font-bold">{cart.length}</span>
-              <span>€{(cartTotal * 1.23).toFixed(2)}</span>
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Live Agent</span>
             </Button>
-          )}
+          </div>
         </div>
 
         {/* Address Bar */}
