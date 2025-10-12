@@ -1237,14 +1237,24 @@ export default function CustomerHome() {
       <div className="flex-shrink-0 border-b bg-background">
         {/* Pickup and Delivery Button with Cart and Live Agent */}
         <div className="flex items-center justify-between gap-2 p-3 border-b">
-          <Button 
-            variant="default" 
-            size="sm" 
-            className="rounded-full" 
-            data-testid="button-pickup-delivery"
-          >
-            Pickup and Delivery
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/')}
+              data-testid="button-back-home"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="rounded-full" 
+              data-testid="button-pickup-delivery"
+            >
+              Pickup and Delivery
+            </Button>
+          </div>
           
           <div className="flex items-center gap-2">
             {/* Cart Button */}
