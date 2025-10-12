@@ -12,6 +12,8 @@ import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
 import serviceImage from "@assets/download (4)_1760237350814.jpg";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface ServiceWithImage extends Service {
   imageUrl?: string;
@@ -56,9 +58,14 @@ export default function CustomerHome() {
     city: string;
     county: string;
     postcode: string;
+    lat: number;
+    lon: number;
   }>>([]);
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
+  const [selectedAddressLocation, setSelectedAddressLocation] = useState<{lat: number; lon: number} | null>(null);
+  const miniMapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
@@ -235,6 +242,64 @@ export default function CustomerHome() {
       scrollToBottom();
     }
   }, [chatMessages, showLiveAgent]);
+
+  // Initialize mini map when address location is selected
+  useEffect(() => {
+    if (selectedAddressLocation && miniMapRef.current) {
+      // Clean up existing map
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+      }
+
+      // Create new map
+      const map = L.map(miniMapRef.current, {
+        center: [selectedAddressLocation.lat, selectedAddressLocation.lon],
+        zoom: 16,
+        zoomControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        attributionControl: false,
+      });
+
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+      // Create custom house icon
+      const houseIcon = L.divIcon({
+        className: 'custom-house-marker',
+        html: `
+          <div style="position: relative; width: 40px; height: 50px;">
+            <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+              <rect x="8" y="20" width="24" height="20" fill="#0079E7" stroke="#fff" stroke-width="2"/>
+              <path d="M 5 20 L 20 5 L 35 20 Z" fill="#005BB5" stroke="#fff" stroke-width="2"/>
+              <rect x="16" y="28" width="8" height="12" fill="#fff" rx="1"/>
+              <circle cx="14" cy="26" r="2" fill="#fff"/>
+              <circle cx="26" cy="26" r="2" fill="#fff"/>
+              <circle cx="20" cy="45" r="3" fill="#0079E7" stroke="#fff" stroke-width="2"/>
+              <line x1="20" y1="40" x2="20" y2="45" stroke="#0079E7" stroke-width="2"/>
+            </svg>
+          </div>
+        `,
+        iconSize: [40, 50],
+        iconAnchor: [20, 45],
+      });
+
+      // Add marker
+      L.marker([selectedAddressLocation.lat, selectedAddressLocation.lon], {
+        icon: houseIcon,
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [selectedAddressLocation]);
 
   // Address autocomplete search
   useEffect(() => {
@@ -1299,6 +1364,7 @@ export default function CustomerHome() {
                   key={index}
                   onClick={() => {
                     setAddressInput(suggestion.displayName);
+                    setSelectedAddressLocation({ lat: suggestion.lat, lon: suggestion.lon });
                     setShowAddressDropdown(false);
                   }}
                   className="w-full text-left px-4 py-3 hover:bg-muted transition-colors border-b last:border-0"
@@ -1318,6 +1384,16 @@ export default function CustomerHome() {
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Mini Map Preview - Show when address is selected */}
+          {selectedAddressLocation && (
+            <div 
+              ref={miniMapRef} 
+              className="mx-4 mb-3 rounded-lg overflow-hidden border bg-muted" 
+              style={{ height: '180px' }}
+              data-testid="mini-map-preview"
+            />
           )}
         </div>
 
