@@ -512,7 +512,7 @@ export default function CustomerHome() {
         </div>
         
         <div className="relative h-full flex flex-col justify-end p-6">
-          <h2 className="text-3xl font-bold text-white mb-2">€0 delivery fee</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">€0 Delivery fee</h2>
           <p className="text-white/90 text-lg">from Mr Bubbles Express</p>
           <Button variant="secondary" size="sm" className="mt-3 w-fit bg-white text-primary hover:bg-white/90" data-testid="button-order-now">
             Order Now
