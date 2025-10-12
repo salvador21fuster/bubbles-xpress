@@ -500,18 +500,21 @@ export default function CustomerHome() {
         />
       )}
 
-      {/* Hero Banner - Uber Eats Style with Laundry Stack Image */}
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src="/attached_assets/Screen-Shot-2022-05-06-at-9.26.29-AM_1760252446209.png"
-          alt="Fresh Laundry Service"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+      {/* Hero Banner - Blue Gradient with Bubbles */}
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary via-blue-500 to-yellow-400">
+        {/* Animated Floating Bubbles */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-10 left-10 w-16 h-16 rounded-full bg-white/20 animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-12 h-12 rounded-full bg-white/15 animate-bounce" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute bottom-16 left-1/4 w-20 h-20 rounded-full bg-white/10 animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/3 right-10 w-8 h-8 rounded-full bg-white/25 animate-bounce" style={{ animationDuration: '2s', animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-8 right-1/3 w-14 h-14 rounded-full bg-white/15 animate-pulse" style={{ animationDelay: '0.7s' }}></div>
+        </div>
+        
         <div className="relative h-full flex flex-col justify-end p-6">
           <h2 className="text-3xl font-bold text-white mb-2">€0 delivery fee</h2>
           <p className="text-white/90 text-lg">from Mr Bubbles Express</p>
-          <Button variant="secondary" size="sm" className="mt-3 w-fit" data-testid="button-order-now">
+          <Button variant="secondary" size="sm" className="mt-3 w-fit bg-white text-primary hover:bg-white/90" data-testid="button-order-now">
             Order Now
           </Button>
         </div>
