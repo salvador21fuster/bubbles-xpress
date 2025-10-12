@@ -1,0 +1,30 @@
+Apps like Uber Eats – Customer App Features
+User Registration/Login
+Here, users register on the platform by signing up or logging in. The section offers authentication methods like email, phone number, social media account, etc. 
+
+Restaurant & Menu Browsing
+After registering, apps like Uber Eats let users browse the menus of restaurants available on their platform. Food delivery apps like Uber Eats partner with various local restaurant vendors that enjoy a wide user base.   
+
+Search and Filters (Cuisine, Location, Offers)
+Uber Eats-like apps have multiple search filters that make it easy for users to search for their favorite meals. The apps further enhance the user experience by allowing them to filter food options by various criteria, such as location, cuisine, and offers. 
+
+Real-Time Order Tracking
+Once users have placed orders, they can track the status of their orders i.e., whether the order has been processed, if it is out for delivery, etc. Most food delivery apps like Uber Eats also leverage GPS-enabled tracking, using which users know the exact location of their orders. 
+
+Multiple Payment Options (Card, Wallets, Crypto)
+To make an app like Uber Eats, it is important to include multiple payment options through which customers can make payments once their orders are fulfilled. An app like Uber Eats allows users to pay through debit or credit cards, cryptocurrency, or digital wallets such as Apple Pay, Google Pay, and PayPal. 
+
+Ratings and Reviews
+This section allows customers to provide feedback on their food delivery experience. Here customers can give feedback on the services given by he restaurant, the delivery person, and specific items. They can provide feedback in the form of stars, followed by a detailed review mentioning the whole experience. 
+
+Live Chat Support
+To address customer-related queries and issues surrounding the food delivery experience, apps like Uber Eats integrate live chat support, allowing customers to reach out to a customer support executive at any time of day. They can either get on a call with an executive or chat using text. 
+
+AI-Based Food Recommendations
+AI-based food recommendations in apps like Uber Eats personalize the user experience by suggesting relevant meals and restaurants based on a user’s past orders, preferences, or factors such as time of day and location. The feature helps enhance user engagement and satisfaction, making it easier for customers to find food they will enjoy.
+
+Reorder from History
+Customers can access their past orders and select and reorder their favorite items. The feature helps save time and makes ordering way more convenient for customers as they don’t have to create fresh orders. 
+
+Loyalty Points and Rewards
+The aim of providing rewards and loyalty points is to encourage repeat business and establish customer loyalty. Customers can earn loyalty points or rewards with each purchase, which they can redeem for discounts, free items, or other perks. 
