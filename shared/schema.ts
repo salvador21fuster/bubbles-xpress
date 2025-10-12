@@ -49,6 +49,8 @@ export const scanTypeEnum = pgEnum('scan_type', [
 
 export const paymentMethodEnum = pgEnum('payment_method', ['card', 'cash', 'account']);
 
+export const deliveryOptionEnum = pgEnum('delivery_option', ['standard', 'scheduled']);
+
 // ============= SESSION & AUTH TABLES (Replit Auth) =============
 
 // Session storage table (mandatory for Replit Auth)
@@ -158,9 +160,18 @@ export const orders = pgTable("orders", {
   
   // Pricing
   subtotalCents: integer("subtotal_cents").default(0),
+  deliveryFeeCents: integer("delivery_fee_cents").default(0),
+  tipCents: integer("tip_cents").default(0),
   vatCents: integer("vat_cents").default(0),
   totalCents: integer("total_cents").default(0),
   currency: varchar("currency").default('EUR'),
+  
+  // Uber Eats Style Checkout Fields
+  deliveryOption: deliveryOptionEnum("delivery_option").default('standard'),
+  scheduledDeliveryDate: varchar("scheduled_delivery_date"), // For scheduled deliveries
+  scheduledDeliveryTime: varchar("scheduled_delivery_time"), // Time window for scheduled deliveries
+  deliveryInstructions: text("delivery_instructions"), // "Meet at my door", etc.
+  tipPercentage: integer("tip_percentage"), // 0, 10, 15, 20, 25, or custom
   
   paymentMethod: paymentMethodEnum("payment_method"),
   paymentIntentId: varchar("payment_intent_id"),
@@ -336,12 +347,54 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 
+// ============= CART & CHECKOUT (UBER EATS STYLE) =============
+
+// Carts table (shopping cart before checkout)
+export const carts = pgTable("carts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull(),
+  
+  // Cart status
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCartSchema = createInsertSchema(carts).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCart = z.infer<typeof insertCartSchema>;
+export type Cart = typeof carts.$inferSelect;
+
+// Cart Items table (items in shopping cart)
+export const cartItems = pgTable("cart_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cartId: varchar("cart_id").notNull(),
+  serviceId: varchar("service_id").notNull(), // Reference to services table
+  
+  // Product details
+  productCode: varchar("product_code").notNull(), // e.g., "DRESS", "SUIT2", "WDF"
+  productName: varchar("product_name").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  
+  // Pricing
+  unitPriceCents: integer("unit_price_cents").notNull(),
+  totalPriceCents: integer("total_price_cents").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCartItemSchema = createInsertSchema(cartItems).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type CartItem = typeof cartItems.$inferSelect;
+
 // ============= RELATIONS =============
 
 export const usersRelations = relations(users, ({ many }) => ({
   ordersAsCustomer: many(orders, { relationName: 'customerOrders' }),
   ordersAsDriver: many(orders, { relationName: 'driverOrders' }),
   scans: many(scans),
+  carts: many(carts),
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -448,5 +501,24 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
   order: one(orders, {
     fields: [invoices.orderId],
     references: [orders.id],
+  }),
+}));
+
+export const cartsRelations = relations(carts, ({ one, many }) => ({
+  customer: one(users, {
+    fields: [carts.customerId],
+    references: [users.id],
+  }),
+  items: many(cartItems),
+}));
+
+export const cartItemsRelations = relations(cartItems, ({ one }) => ({
+  cart: one(carts, {
+    fields: [cartItems.cartId],
+    references: [carts.id],
+  }),
+  service: one(services, {
+    fields: [cartItems.serviceId],
+    references: [services.id],
   }),
 }));
