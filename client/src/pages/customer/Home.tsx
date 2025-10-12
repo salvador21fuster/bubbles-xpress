@@ -10,7 +10,7 @@ import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
-import serviceImage from "@assets/image_1760236519841.png";
+import serviceImage from "@assets/download (4)_1760237350814.jpg";
 
 interface ServiceWithImage extends Service {
   imageUrl?: string;
