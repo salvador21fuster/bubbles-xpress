@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award } from "lucide-react";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -29,12 +29,32 @@ export default function CustomerHome() {
     queryKey: ["/api/customer/orders"],
   });
 
+  // Helper function to get laundry-specific icon for each service
+  const getServiceIcon = (serviceName: string) => {
+    const name = serviceName.toLowerCase();
+    
+    if (name.includes('shirt') || name.includes('iron') || name.includes('press')) return Shirt;
+    if (name.includes('suit') || name.includes('jacket')) return Wind;
+    if (name.includes('dress') || name.includes('wedding')) return Heart;
+    if (name.includes('bed') || name.includes('linen')) return Bed;
+    if (name.includes('curtain') || name.includes('drape')) return Home;
+    if (name.includes('shoe') || name.includes('boot')) return Footprints;
+    if (name.includes('bag') || name.includes('handbag')) return ShoppingBag;
+    if (name.includes('ski') || name.includes('winter')) return Snowflake;
+    if (name.includes('alter') || name.includes('repair')) return Scissors;
+    if (name.includes('dry') || name.includes('clean')) return Sparkles;
+    if (name.includes('wash') || name.includes('laundry')) return Droplets;
+    if (name.includes('delivery') || name.includes('collection')) return Truck;
+    
+    return Droplets; // Default: general laundry service icon
+  };
+
   const categories = [
-    { id: 'all', name: 'All', IconComponent: Package },
+    { id: 'all', name: 'All', IconComponent: Sparkles },
     { id: 'washing', name: 'Washing', IconComponent: Droplets },
     { id: 'ironing', name: 'Ironing', IconComponent: Shirt },
     { id: 'dry-cleaning', name: 'Dry Clean', IconComponent: Sparkles },
-    { id: 'specialty', name: 'Specialty', IconComponent: Wind },
+    { id: 'specialty', name: 'Specialty', IconComponent: Scissors },
   ];
 
   // Enhanced filtering with search
@@ -140,24 +160,27 @@ export default function CustomerHome() {
             <h3 className="text-lg font-bold">Recommended for you</h3>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-            {recommendedServices.map((service) => (
-              <Link key={service.id} href={`/customer/services?service=${service.id}`}>
-                <Card className="flex-shrink-0 w-40 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-recommended-${service.id}`}>
-                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <Package className="h-12 w-12 text-primary" />
+            {recommendedServices.map((service) => {
+              const ServiceIcon = getServiceIcon(service.name);
+              return (
+                <Link key={service.id} href={`/customer/services?service=${service.id}`}>
+                  <Card className="flex-shrink-0 w-40 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-recommended-${service.id}`}>
+                    <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                        <ServiceIcon className="h-12 w-12 text-primary" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-3">
-                    <h4 className="font-semibold text-sm truncate">{service.name}</h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="h-3 w-3 fill-primary text-primary" />
-                      <span className="text-xs font-medium">4.8</span>
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm truncate">{service.name}</h4>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="h-3 w-3 fill-primary text-primary" />
+                        <span className="text-xs font-medium">4.8</span>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
@@ -165,13 +188,13 @@ export default function CustomerHome() {
       {/* Offers & Deals */}
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2 mb-3">
-          <Gift className="h-5 w-5 text-primary" />
+          <Ticket className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-bold">Offers near you</h3>
         </div>
         <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30" data-testid="card-offer">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <Zap className="h-6 w-6 text-white" />
+              <Gift className="h-6 w-6 text-white" />
             </div>
             <div className="flex-1">
               <p className="font-bold">First order €5 off</p>
@@ -190,50 +213,53 @@ export default function CustomerHome() {
         </div>
 
         <div className="grid gap-4">
-          {filteredServices.slice(0, 6).map((service) => (
-            <Link key={service.id} href={`/customer/services?service=${service.id}`}>
-              <Card className="flex gap-3 p-3 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-service-${service.id}`}>
-                {/* Service Image */}
-                <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
-                  {service.imageUrl ? (
-                    <img 
-                      src={service.imageUrl} 
-                      alt={service.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <Package className="h-8 w-8 text-primary" />
+          {filteredServices.slice(0, 6).map((service) => {
+            const ServiceIcon = getServiceIcon(service.name);
+            return (
+              <Link key={service.id} href={`/customer/services?service=${service.id}`}>
+                <Card className="flex gap-3 p-3 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-service-${service.id}`}>
+                  {/* Service Image */}
+                  <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
+                    {service.imageUrl ? (
+                      <img 
+                        src={service.imageUrl} 
+                        alt={service.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                        <ServiceIcon className="h-8 w-8 text-primary" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Service Info */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold truncate">{service.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="h-3 w-3 fill-primary text-primary" />
+                      <span className="text-sm font-medium">4.8</span>
+                      <span className="text-sm text-muted-foreground">• </span>
+                      <span className="text-sm text-muted-foreground">
+                        €{parseFloat(service.pricePerUnit).toFixed(2)} / {service.unit}
+                      </span>
                     </div>
-                  )}
-                </div>
-
-                {/* Service Info */}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold truncate">{service.name}</h4>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star className="h-3 w-3 fill-primary text-primary" />
-                    <span className="text-sm font-medium">4.8</span>
-                    <span className="text-sm text-muted-foreground">• </span>
-                    <span className="text-sm text-muted-foreground">
-                      €{parseFloat(service.pricePerUnit).toFixed(2)} / {service.unit}
-                    </span>
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">24-48 hrs</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">24-48 hrs</span>
-                  </div>
-                </div>
 
-                {/* Service Badge */}
-                <div className="flex items-start">
-                  <Badge variant="secondary" className="text-xs">
-                    {service.unit === 'kg' ? 'By Weight' : 'Per Item'}
-                  </Badge>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                  {/* Service Badge */}
+                  <div className="flex items-start">
+                    <Badge variant="secondary" className="text-xs">
+                      {service.unit === 'kg' ? 'By Weight' : 'Per Item'}
+                    </Badge>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -262,7 +288,7 @@ export default function CustomerHome() {
               <Card className="flex-shrink-0 w-64 p-3">
                 <div className="flex items-start gap-2">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Package className="h-6 w-6 text-primary" />
+                    <Truck className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-sm">Mr Bubbles HQ</h4>
@@ -343,7 +369,7 @@ export default function CustomerHome() {
           <div className="space-y-2">
             <Card className="p-3 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Gift className="h-5 w-5 text-primary" />
+                <Ticket className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-sm">€5 off every 5th order</p>
@@ -352,7 +378,7 @@ export default function CustomerHome() {
             </Card>
             <Card className="p-3 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <Truck className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-sm">Priority pickup</p>

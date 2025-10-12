@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Package, Users, User as UserIcon, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Package, Users, User as UserIcon, Calendar, Clock, Sparkles } from "lucide-react";
 import type { Service, Order, User } from "@shared/schema";
 import { WashingMachineLoader } from "@/components/WashingMachineLoader";
 import { useLoadingAction } from "@/hooks/use-loading-action";
@@ -309,7 +309,7 @@ export default function NewOrder() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5" />
                   Service Details
                 </CardTitle>
               </CardHeader>

@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, MapPin, Clock, LogOut } from "lucide-react";
+import { Package, Plus, MapPin, Clock, LogOut, Truck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { Order } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -195,7 +195,7 @@ export default function CustomerDashboard() {
       {orders.length === 0 && !isLoading && (
         <Card>
           <CardContent className="p-12 text-center">
-            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <Truck className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
             <p className="text-muted-foreground mb-4">Book your first laundry pickup to get started</p>
             <Link href="/customer/new-order">

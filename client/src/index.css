@@ -48,11 +48,11 @@
 
   --popover-border: 210 15% 86%;
 
-  /* Uber Eats Green */
-  --uber-green: 145 95% 39%;
-  --uber-green-dark: 145 95% 32%;
+  /* Mr Bubbles Blue - #0079E7 (R0 G121 B231) */
+  --mr-bubbles-blue: 209 100% 45%;
+  --mr-bubbles-blue-dark: 209 100% 38%;
   
-  --primary: 145 95% 39%;
+  --primary: 209 100% 45%;
 
   --primary-foreground: 0 0% 100%;
 
@@ -170,8 +170,8 @@
 
   --popover-border: 210 12% 24%;
 
-  /* Uber Eats Green for Dark Mode */
-  --primary: 145 95% 45%;
+  /* Mr Bubbles Blue for Dark Mode */
+  --primary: 209 100% 55%;
 
   --primary-foreground: 0 0% 100%;
 
