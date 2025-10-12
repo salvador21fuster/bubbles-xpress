@@ -1596,11 +1596,11 @@ export default function CustomerHome() {
 
       {/* Intro Video Overlay */}
       {showIntroVideo && (
-        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center">
           <video
             ref={videoRef}
             src={introVideo}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover md:w-[600px] md:h-[800px] md:rounded-2xl md:shadow-2xl"
             playsInline
             data-testid="video-intro"
           />
