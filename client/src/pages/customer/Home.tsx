@@ -6,12 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, ChevronDown, ChevronLeft, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2 } from "lucide-react";
+import { MapPin, ChevronDown, ChevronLeft, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2, Play, Pause, Volume2, VolumeX, SkipForward } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
 import serviceImage from "@assets/download (4)_1760237350814.jpg";
+import introVideo from "@assets/Lightning-Fast Delivery Zero Hassle, Total Flexibility – We Sync with Your Life Savor the ultimate convenience in laundry and dry cleaning with our lightning-quick 24-hour turnaround. Pick a picku (6)_1760193095528.mp4";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -24,6 +25,12 @@ export default function CustomerHome() {
   const [activeTab, setActiveTab] = useState<'browse' | 'map' | 'orders' | 'account'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Intro video states
+  const [showIntroVideo, setShowIntroVideo] = useState(true);
+  const [isVideoMuted, setIsVideoMuted] = useState(false);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   // Booking flow states
   const [selectedService, setSelectedService] = useState<ServiceWithImage | null>(null);
@@ -172,6 +179,53 @@ export default function CustomerHome() {
     setSelectedService(service);
     setQuantity(1);
   };
+
+  // Video control functions
+  const handleSkipIntro = () => {
+    setShowIntroVideo(false);
+  };
+
+  const handleTogglePause = () => {
+    if (videoRef.current) {
+      if (isVideoPaused) {
+        videoRef.current.play();
+        setIsVideoPaused(false);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPaused(true);
+      }
+    }
+  };
+
+  const handleToggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isVideoMuted;
+      setIsVideoMuted(!isVideoMuted);
+    }
+  };
+
+  // Autoplay video with sound on mount
+  useEffect(() => {
+    if (showIntroVideo && videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.play().catch(err => {
+        console.log("Autoplay with sound failed:", err);
+      });
+    }
+  }, [showIntroVideo]);
+
+  // Auto-hide intro when video ends
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleEnded = () => {
+      setShowIntroVideo(false);
+    };
+
+    video.addEventListener('ended', handleEnded);
+    return () => video.removeEventListener('ended', handleEnded);
+  }, []);
 
   // Live Agent Chat - Knowledge Base
   const knowledgeBase = {
@@ -1536,6 +1590,73 @@ export default function CustomerHome() {
                 </Button>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Intro Video Overlay */}
+      {showIntroVideo && (
+        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+          <video
+            ref={videoRef}
+            src={introVideo}
+            className="w-full h-full object-cover"
+            playsInline
+            data-testid="video-intro"
+          />
+          
+          {/* Video Controls Overlay */}
+          <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-3 px-6">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleTogglePause}
+              className="gap-2 bg-white/90 hover:bg-white text-black backdrop-blur-sm"
+              data-testid="button-toggle-pause"
+            >
+              {isVideoPaused ? (
+                <>
+                  <Play className="h-4 w-4" />
+                  <span>Play</span>
+                </>
+              ) : (
+                <>
+                  <Pause className="h-4 w-4" />
+                  <span>Pause</span>
+                </>
+              )}
+            </Button>
+            
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleToggleMute}
+              className="gap-2 bg-white/90 hover:bg-white text-black backdrop-blur-sm"
+              data-testid="button-toggle-mute"
+            >
+              {isVideoMuted ? (
+                <>
+                  <VolumeX className="h-4 w-4" />
+                  <span>Unmute</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="h-4 w-4" />
+                  <span>Mute</span>
+                </>
+              )}
+            </Button>
+            
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSkipIntro}
+              className="gap-2"
+              data-testid="button-skip-intro"
+            >
+              <SkipForward className="h-4 w-4" />
+              <span>Skip Intro</span>
+            </Button>
           </div>
         </div>
       )}
