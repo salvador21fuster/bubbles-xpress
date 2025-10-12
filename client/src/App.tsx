@@ -50,10 +50,14 @@ function Router() {
     );
   }
 
+  // Always show clean landing page at root, regardless of auth status
+  if (location === '/') {
+    return <Landing />;
+  }
+
   if (!isAuthenticated) {
     return (
       <Switch>
-        <Route path="/" component={Landing} />
         <Route path="/signin" component={SignIn} />
         <Route path="/signup" component={SignUp} />
         <Route path="/franchise-signup" component={FranchiseSignUp} />
@@ -93,8 +97,6 @@ function Router() {
           </>
         )}
 
-        {/* Landing page is the home page for everyone */}
-        <Route path="/" component={Landing} />
         <Route component={NotFound} />
       </Switch>
     );
@@ -159,8 +161,6 @@ function Router() {
                 </>
               )}
 
-              {/* Landing page is the home page for everyone */}
-              <Route path="/" component={Landing} />
               <Route component={NotFound} />
             </Switch>
           </main>
