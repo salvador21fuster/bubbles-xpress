@@ -11,6 +11,21 @@ interface AddressAutocompleteProps {
   className?: string;
 }
 
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  address?: {
+    road?: string;
+    suburb?: string;
+    city?: string;
+    county?: string;
+    state?: string;
+    postcode?: string;
+  };
+}
+
 export function AddressAutocomplete({ 
   value, 
   onChange, 
@@ -18,44 +33,49 @@ export function AddressAutocomplete({
   className = ""
 }: AddressAutocompleteProps) {
   const [inputValue, setInputValue] = useState(value);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const autocompleteService = useRef<any>(null);
-  const placesService = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const debounceTimer = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
 
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  useEffect(() => {
-    // Initialize Google Places API services
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    
-    if (!apiKey) {
-      console.warn('Google Maps API key not found');
+  const searchAddress = async (query: string) => {
+    if (!query || query.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
-    // Load Google Maps script if not already loaded
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeServices;
-      document.head.appendChild(script);
-    } else {
-      initializeServices();
-    }
-  }, []);
-
-  const initializeServices = () => {
-    if (window.google) {
-      autocompleteService.current = new window.google.maps.places.AutocompleteService();
-      placesService.current = new window.google.maps.places.PlacesService(
-        document.createElement('div')
+    setIsLoading(true);
+    try {
+      // Using OpenStreetMap Nominatim API (free, no API key required)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?` +
+        `format=json&` +
+        `q=${encodeURIComponent(query)}&` +
+        `countrycodes=ie&` + // Restrict to Ireland
+        `addressdetails=1&` +
+        `limit=5`,
+        {
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
       );
+
+      if (response.ok) {
+        const data: NominatimResult[] = await response.json();
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      }
+    } catch (error) {
+      console.error('Address search error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,33 +84,19 @@ export function AddressAutocomplete({
     setInputValue(newValue);
     onChange(newValue);
 
-    if (!newValue || !autocompleteService.current) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
+    // Debounce the API call
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
 
-    // Get predictions from Google Places
-    autocompleteService.current.getPlacePredictions(
-      {
-        input: newValue,
-        componentRestrictions: { country: 'ie' }, // Restrict to Ireland
-      },
-      (predictions: any[], status: any) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-          setSuggestions(predictions);
-          setShowSuggestions(true);
-        } else {
-          setSuggestions([]);
-          setShowSuggestions(false);
-        }
-      }
-    );
+    debounceTimer.current = setTimeout(() => {
+      searchAddress(newValue);
+    }, 300);
   };
 
-  const handleSuggestionClick = (suggestion: any) => {
-    setInputValue(suggestion.description);
-    onChange(suggestion.description, suggestion);
+  const handleSuggestionClick = (suggestion: NominatimResult) => {
+    setInputValue(suggestion.display_name);
+    onChange(suggestion.display_name, suggestion);
     setShowSuggestions(false);
     setSuggestions([]);
   };
@@ -106,26 +112,40 @@ export function AddressAutocomplete({
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
         
-        // Reverse geocoding to get address from coordinates
-        if (window.google) {
-          const geocoder = new window.google.maps.Geocoder();
-          geocoder.geocode(
-            { location: { lat: latitude, lng: longitude } },
-            (results: any[], status: any) => {
-              if (status === 'OK' && results[0]) {
-                const address = results[0].formatted_address;
-                setInputValue(address);
-                onChange(address, results[0]);
-                toast({
-                  title: "Location found",
-                  description: "Using your current location",
-                });
+        try {
+          // Reverse geocoding using Nominatim
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?` +
+            `format=json&` +
+            `lat=${latitude}&` +
+            `lon=${longitude}&` +
+            `addressdetails=1`,
+            {
+              headers: {
+                'Accept': 'application/json',
               }
             }
           );
+
+          if (response.ok) {
+            const data: NominatimResult = await response.json();
+            const address = data.display_name;
+            setInputValue(address);
+            onChange(address, data);
+            toast({
+              title: "Location found",
+              description: "Using your current location",
+            });
+          }
+        } catch (error) {
+          toast({
+            title: "Location error",
+            description: "Unable to get address from location",
+            variant: "destructive",
+          });
         }
       },
       (error) => {
@@ -167,27 +187,37 @@ export function AddressAutocomplete({
       {/* Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={suggestion.place_id}
-              type="button"
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-gray-100 last:border-b-0"
-              data-testid={`suggestion-${index}`}
-            >
-              <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {suggestion.structured_formatting?.main_text || suggestion.description}
-                </p>
-                {suggestion.structured_formatting?.secondary_text && (
-                  <p className="text-xs text-gray-500 truncate">
-                    {suggestion.structured_formatting.secondary_text}
+          {suggestions.map((suggestion, index) => {
+            const mainText = suggestion.address?.road || suggestion.address?.suburb || 
+                           suggestion.display_name.split(',')[0];
+            const secondaryText = suggestion.display_name
+              .split(',')
+              .slice(1)
+              .join(',')
+              .trim();
+            
+            return (
+              <button
+                key={suggestion.place_id}
+                type="button"
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-gray-100 last:border-b-0"
+                data-testid={`suggestion-${index}`}
+              >
+                <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {mainText}
                   </p>
-                )}
-              </div>
-            </button>
-          ))}
+                  {secondaryText && (
+                    <p className="text-xs text-gray-500 truncate">
+                      {secondaryText}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
