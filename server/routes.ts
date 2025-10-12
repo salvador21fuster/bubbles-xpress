@@ -1465,6 +1465,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Live Agent Chat with Gemini AI
+  app.post("/api/chat/agent", async (req, res) => {
+    try {
+      const { message, conversationHistory } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Import Gemini chat function
+      const { chatWithAgent } = await import("./gemini");
+      
+      const response = await chatWithAgent(
+        message,
+        conversationHistory || []
+      );
+
+      res.json({ response });
+    } catch (error: any) {
+      console.error("Chat error:", error);
+      res.status(500).json({ 
+        message: "Sorry, I'm having trouble responding right now. Please try again.",
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

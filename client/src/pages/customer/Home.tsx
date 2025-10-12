@@ -234,20 +234,48 @@ export default function CustomerHome() {
     };
 
     setChatMessages(prev => [...prev, userMessage]);
+    const messageText = chatInput;
     setChatInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      // Call Gemini AI backend
+      const response = await fetch('/api/chat/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageText,
+          conversationHistory: chatMessages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            text: msg.text
+          }))
+        }),
+      });
+
+      const data = await response.json();
+
       const botResponse = {
         id: (Date.now() + 1).toString(),
-        text: findBestResponse(chatInput),
+        text: data.response || "I'm here to help! Could you please rephrase your question?",
         sender: 'bot' as const,
         timestamp: new Date(),
       };
 
       setChatMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorResponse = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble connecting right now. Please try again in a moment!",
+        sender: 'bot' as const,
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 800 + Math.random() * 1200);
+    }
   };
 
   // Uber Eats style Browse View
