@@ -10,6 +10,7 @@ import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
+import serviceImage from "@assets/image_1760236519841.png";
 
 interface ServiceWithImage extends Service {
   imageUrl?: string;
@@ -497,10 +498,12 @@ export default function CustomerHome() {
           </div>
 
           {/* Service Image */}
-          <div className="aspect-video bg-muted">
-            <div className="w-full h-full flex items-center justify-center bg-primary/10">
-              <ServiceIcon className="h-24 w-24 text-primary" />
-            </div>
+          <div className="aspect-video bg-muted overflow-hidden">
+            <img 
+              src={serviceImage} 
+              alt={selectedService.name}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Service Details */}
