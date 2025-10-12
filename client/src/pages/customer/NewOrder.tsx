@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Package, Users, User as UserIcon, Calendar, Clock, Sparkles } from "lucide-react";
 import type { Service, Order, User } from "@shared/schema";
@@ -111,6 +111,9 @@ export default function NewOrder() {
       return await response.json() as Order;
     },
     onSuccess: (order: Order) => {
+      // Invalidate customer orders cache so new order appears in history
+      queryClient.invalidateQueries({ queryKey: ["/api/customer/orders"] });
+      
       toast({
         title: "Order Created!",
         description: "Redirecting to payment...",

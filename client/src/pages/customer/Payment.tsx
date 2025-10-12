@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Lock, ArrowLeft } from "lucide-react";
 import type { Order, Invoice } from "@shared/schema";
@@ -62,6 +62,9 @@ export default function Payment() {
 
   const processPaymentMutation = useMutation({
     mutationFn: async (data: PaymentFormData) => {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const response = await apiRequest("POST", "/api/payment/process", {
         orderId,
         invoiceId: invoice?.id,
@@ -70,6 +73,9 @@ export default function Payment() {
       return await response.json();
     },
     onSuccess: () => {
+      // Invalidate customer orders cache to show the new order
+      queryClient.invalidateQueries({ queryKey: ["/api/customer/orders"] });
+      
       toast({
         title: "Payment Successful!",
         description: "Your order has been confirmed and is being processed.",
@@ -77,6 +83,7 @@ export default function Payment() {
       navigate(`/customer/orders/${orderId}`);
     },
     onError: (error) => {
+      setIsProcessing(false);
       toast({
         title: "Payment Failed",
         description: error.message,
@@ -87,12 +94,7 @@ export default function Payment() {
 
   const onSubmit = async (data: PaymentFormData) => {
     setIsProcessing(true);
-    
-    // Simulate payment processing delay
-    setTimeout(() => {
-      processPaymentMutation.mutate(data);
-      setIsProcessing(false);
-    }, 2000);
+    processPaymentMutation.mutate(data);
   };
 
   if (!orderId) {
