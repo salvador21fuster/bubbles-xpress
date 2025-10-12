@@ -405,7 +405,7 @@ export default function CustomerHome() {
 
       {/* Category Pills */}
       <div className="sticky top-0 bg-background border-b z-10 px-4 py-3">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-1.5">
           {categories.map((cat) => {
             const Icon = cat.IconComponent;
             return (
@@ -414,11 +414,12 @@ export default function CustomerHome() {
                 variant={selectedCategory === cat.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(cat.id)}
-                className="flex-shrink-0 gap-1.5 rounded-full"
+                className="gap-1 rounded-full text-xs px-2.5 h-8 flex-1"
                 data-testid={`button-category-${cat.id}`}
               >
-                <Icon className="h-4 w-4" />
-                <span>{cat.name}</span>
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{cat.name}</span>
+                <span className="sm:hidden">{cat.name.split(' ')[0]}</span>
               </Button>
             );
           })}
