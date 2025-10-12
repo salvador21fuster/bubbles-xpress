@@ -107,24 +107,37 @@ export default function CustomerHome() {
     },
   });
 
-  // Helper function to get laundry-specific icon for each service
-  const getServiceIcon = (serviceName: string) => {
+  // Helper function to get professional image for each service
+  const getServiceImage = (serviceName: string) => {
     const name = serviceName.toLowerCase();
     
-    if (name.includes('shirt') || name.includes('iron') || name.includes('press')) return Shirt;
-    if (name.includes('suit') || name.includes('jacket')) return Wind;
-    if (name.includes('dress') || name.includes('wedding')) return Heart;
-    if (name.includes('bed') || name.includes('linen')) return Bed;
-    if (name.includes('curtain') || name.includes('drape')) return Home;
-    if (name.includes('shoe') || name.includes('boot')) return Footprints;
-    if (name.includes('bag') || name.includes('handbag')) return ShoppingBag;
-    if (name.includes('ski') || name.includes('winter')) return Snowflake;
-    if (name.includes('alter') || name.includes('repair')) return Scissors;
-    if (name.includes('dry') || name.includes('clean')) return Sparkles;
-    if (name.includes('wash') || name.includes('laundry')) return Droplets;
-    if (name.includes('delivery') || name.includes('collection')) return Truck;
+    if (name.includes('shirt') || name.includes('iron') || name.includes('press')) {
+      return '/attached_assets/stock_images/ironing_pressing_clo_eaf49771.jpg';
+    }
+    if (name.includes('dress') || name.includes('wedding') || name.includes('gown')) {
+      return '/attached_assets/stock_images/wedding_dress_gown_c_06b73a61.jpg';
+    }
+    if (name.includes('bed') || name.includes('linen') || name.includes('sheet')) {
+      return '/attached_assets/stock_images/folded_bed_linens_sh_58c5f69f.jpg';
+    }
+    if (name.includes('curtain') || name.includes('drape')) {
+      return '/attached_assets/stock_images/curtains_drapes_prof_164e7bb2.jpg';
+    }
+    if (name.includes('shoe') || name.includes('boot') || name.includes('leather')) {
+      return '/attached_assets/stock_images/shoes_boots_cleaning_00f70eef.jpg';
+    }
+    if (name.includes('alter') || name.includes('repair') || name.includes('tailor')) {
+      return '/attached_assets/stock_images/tailoring_alteration_f459285b.jpg';
+    }
+    if (name.includes('dry') || name.includes('clean') || name.includes('suit')) {
+      return '/attached_assets/stock_images/dry_cleaning_pressed_595f876c.jpg';
+    }
+    if (name.includes('wash') || name.includes('laundry') || name.includes('load')) {
+      return '/attached_assets/stock_images/professional_laundry_9a7ec295.jpg';
+    }
     
-    return Droplets; // Default: general laundry service icon
+    // Default: general laundry service
+    return '/attached_assets/stock_images/professional_laundry_9a7ec295.jpg';
   };
 
   const categories = [
@@ -558,7 +571,7 @@ export default function CustomerHome() {
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
             {recommendedServices.map((service) => {
-              const ServiceIcon = getServiceIcon(service.name);
+              const serviceImage = service.imageUrl || getServiceImage(service.name);
               return (
                 <Card 
                   key={service.id}
@@ -567,9 +580,11 @@ export default function CustomerHome() {
                   data-testid={`card-recommended-${service.id}`}
                 >
                   <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <ServiceIcon className="h-12 w-12 text-primary" />
-                    </div>
+                    <img 
+                      src={serviceImage} 
+                      alt={service.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-3">
                     <h4 className="font-semibold text-sm truncate">{service.name}</h4>
@@ -614,7 +629,7 @@ export default function CustomerHome() {
 
         <div className="grid gap-4">
           {filteredServices.slice(0, 6).map((service) => {
-            const ServiceIcon = getServiceIcon(service.name);
+            const serviceImage = service.imageUrl || getServiceImage(service.name);
             return (
               <Card 
                 key={service.id}
@@ -624,17 +639,11 @@ export default function CustomerHome() {
               >
                 {/* Service Image */}
                 <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
-                  {service.imageUrl ? (
-                    <img 
-                      src={service.imageUrl} 
-                      alt={service.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <ServiceIcon className="h-8 w-8 text-primary" />
-                    </div>
-                  )}
+                  <img 
+                    src={serviceImage} 
+                    alt={service.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 {/* Service Info */}
@@ -942,7 +951,7 @@ export default function CustomerHome() {
   // Service Detail Modal - Uber Eats Style
   const ServiceDetailModal = () => {
     if (!selectedService) return null;
-    const ServiceIcon = getServiceIcon(selectedService.name);
+    const serviceImage = selectedService.imageUrl || getServiceImage(selectedService.name);
     
     return (
       <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
