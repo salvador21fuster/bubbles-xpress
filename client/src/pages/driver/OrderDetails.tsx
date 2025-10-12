@@ -1,328 +1,221 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute, useLocation } from "wouter";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Phone, Package, CheckCircle, Camera, Navigation, CheckCircle2, Circle } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, MapPin, MessageCircle, Send, User } from "lucide-react";
+import { useRoute, useLocation } from "wouter";
+import type { Order, Message, User as UserType } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { QRScanner } from "@/components/QRScanner";
-import { QRLabelPrinter } from "@/components/QRLabelPrinter";
-import { RealDroghedaMap } from "@/components/RealDroghedaMap";
-import type { Order } from "@shared/schema";
 
-export default function DriverOrderDetails() {
+export default function DriverOrderDetail() {
   const [, navigate] = useLocation();
+  const [, params] = useRoute("/driver/orders/:id");
+  const orderId = params?.id;
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [match, params] = useRoute("/driver/orders/:id");
-  const [showScanner, setShowScanner] = useState(false);
-  const [labelPrinted, setLabelPrinted] = useState(false);
-  const [onWay, setOnWay] = useState(false);
+  const [messageText, setMessageText] = useState("");
 
-  const { data: order, isLoading } = useQuery<Order>({
-    queryKey: ["/api/orders", params?.id],
-    enabled: !!params?.id,
+  const { data: order } = useQuery<Order>({
+    queryKey: ["/api/orders", orderId],
+    enabled: !!orderId,
   });
 
-  const markPickedUpMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/scan", {
-        type: 'pickup',
-        order_id: params?.id,
-        geo: { lat: 0, lng: 0 },
+  const { data: messages = [], refetch: refetchMessages } = useQuery<Message[]>({
+    queryKey: ["/api/orders", orderId, "messages"],
+    enabled: !!orderId,
+    refetchInterval: 5000,
+  });
+
+  const { data: user } = useQuery<UserType>({
+    queryKey: ["/api/auth/user"],
+  });
+
+  const { data: customer } = useQuery<UserType>({
+    queryKey: ["/api/users", order?.customerId],
+    enabled: !!order?.customerId,
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async (message: string) => {
+      if (!orderId || !order?.customerId) throw new Error("Missing order or customer ID");
+      return await apiRequest("POST", `/api/orders/${orderId}/messages`, {
+        message,
+        recipientId: order.customerId,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+      setMessageText("");
+      refetchMessages();
       toast({
-        title: "Pickup Confirmed",
-        description: "Order marked as picked up",
+        title: "Message sent",
+        description: "Customer has been notified",
       });
-      navigate('/driver');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Failed to confirm pickup",
-        description: error.message,
         variant: "destructive",
+        title: "Failed to send message",
+        description: error.message || "Something went wrong",
       });
     },
   });
 
-  const markDeliveredMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/scan", {
-        type: 'delivery',
-        order_id: params?.id,
-        geo: { lat: 0, lng: 0 },
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
-      toast({
-        title: "Delivery Confirmed",
-        description: "Order marked as delivered",
-      });
-      navigate('/driver');
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to confirm delivery",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const quickMessages = [
+    "I'm on my way to pick up your laundry",
+    "I'll arrive in 5 minutes",
+    "I'm outside your location",
+    "Laundry has been picked up successfully",
+  ];
 
-  if (isLoading) {
+  if (!order) {
     return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">Loading order...</p>
       </div>
     );
   }
 
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <p className="text-muted-foreground">Order not found</p>
-      </div>
-    );
-  }
-
-  const isPickup = order.state === 'confirmed';
-  const isDelivery = order.state === 'packed' || order.state === 'out_for_delivery';
-  const earnings = ((order.totalCents || 0) * 0.1) / 100;
-
   return (
-    <div className="min-h-screen bg-background p-4 pb-20">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            className="mb-4"
-            onClick={() => navigate('/driver')}
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header */}
+      <div className="border-b bg-background p-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/driver/dashboard")}
             data-testid="button-back"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold mb-1">Order #{order.id.slice(0, 8)}</h1>
-              <p className="text-sm text-green-600 font-medium">+€{earnings.toFixed(2)} earning</p>
-            </div>
-            <Badge className={`${isPickup ? 'bg-blue-500' : 'bg-green-500'} text-white border-0`}>
-              {isPickup ? 'Pickup' : 'Delivery'}
-            </Badge>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold">Order Details</h1>
+            <p className="text-sm text-muted-foreground">
+              {order.state === 'confirmed' ? 'Pickup' : 'Delivery'}
+            </p>
           </div>
+          <Badge variant={order.state === 'confirmed' ? 'default' : 'secondary'}>
+            {order.state}
+          </Badge>
         </div>
+      </div>
 
-        {/* Customer Address */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              {isPickup ? 'Pickup' : 'Delivery'} Address
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="font-medium">{order.addressLine1}</p>
-              {order.addressLine2 && <p className="text-sm text-muted-foreground">{order.addressLine2}</p>}
-              <p className="text-sm text-muted-foreground">
-                {order.city}{order.eircode ? `, ${order.eircode}` : ''}
-              </p>
-            </div>
-            <Button className="w-full gap-2" data-testid="button-navigate">
-              <MapPin className="h-4 w-4" />
-              Open in Maps
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Order Details */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Order Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Amount</span>
-                <span className="font-semibold">€{((order.totalCents || 0) / 100).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Your Earnings (10%)</span>
-                <span className="font-semibold text-green-600">€{earnings.toFixed(2)}</span>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Customer Info */}
+        <Card>
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="w-12 h-12">
+                <AvatarFallback className="bg-muted">
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{customer?.username || 'Customer'}</p>
+                <p className="text-sm text-muted-foreground">{customer?.phone || customer?.email}</p>
               </div>
             </div>
-            {order.notes && (
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-sm font-medium mb-1">Customer Notes:</p>
-                <p className="text-sm text-muted-foreground">{order.notes}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Progress Tracker (Pickup Only) */}
-        {isPickup && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Pickup Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {/* Step 1: Print Label */}
-                <div className="flex items-center gap-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                    labelPrinted ? 'bg-primary' : 'bg-muted'
-                  }`}>
-                    {labelPrinted ? (
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-semibold ${!labelPrinted && 'text-muted-foreground'}`}>
-                      Print QR Label
-                    </p>
-                    <p className="text-sm text-muted-foreground">Attach to laundry bag</p>
-                  </div>
-                </div>
-
-                {/* Step 2: On My Way */}
-                <div className="flex items-center gap-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                    onWay ? 'bg-primary' : 'bg-muted'
-                  }`}>
-                    {onWay ? (
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-semibold ${!onWay && 'text-muted-foreground'}`}>
-                      En Route to Customer
-                    </p>
-                    <p className="text-sm text-muted-foreground">Heading to {order.timeWindow} pickup</p>
-                  </div>
-                </div>
-
-                {/* Step 3: Pickup Confirmed */}
-                <div className="flex items-center gap-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                    order.state === 'picked_up' ? 'bg-primary' : 'bg-muted'
-                  }`}>
-                    {order.state === 'picked_up' ? (
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-semibold ${order.state !== 'picked_up' && 'text-muted-foreground'}`}>
-                      Pickup Confirmed
-                    </p>
-                    <p className="text-sm text-muted-foreground">QR scanned at customer location</p>
-                  </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="font-medium">{order.addressLine1}</p>
+                  {order.addressLine2 && <p className="text-sm">{order.addressLine2}</p>}
+                  <p className="text-sm text-muted-foreground">{order.city}, {order.eircode}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Workflow Steps */}
-        {showScanner ? (
-          <QRScanner
-            scanType={isPickup ? 'pickup' : 'delivery'}
-            orderId={order.id}
-            onScanComplete={() => {
-              setShowScanner(false);
-              queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-              queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
-              toast({
-                title: isPickup ? "Pickup Confirmed" : "Delivery Confirmed",
-                description: isPickup ? "Laundry collected successfully" : "Order delivered successfully",
-              });
-              navigate('/driver');
-            }}
-            onCancel={() => setShowScanner(false)}
-          />
-        ) : (
-          <div className="space-y-6">
-            {/* Step 1: Print Label (Pickup Only) */}
-            {isPickup && !labelPrinted && (
-              <QRLabelPrinter 
-                order={order} 
-                onPrintComplete={() => {
-                  setLabelPrinted(true);
-                  toast({
-                    title: "Label Printed",
-                    description: "You can now start the pickup",
-                  });
-                }}
-              />
-            )}
-
-            {/* Step 2: Customer Location Map & On Way Button (Pickup) */}
-            {isPickup && labelPrinted && !onWay && (
-              <div className="space-y-4">
-                <RealDroghedaMap height="350px" />
-                
-                <Button 
-                  size="lg" 
-                  className="w-full gap-2"
-                  onClick={() => {
-                    setOnWay(true);
-                    toast({
-                      title: "En Route",
-                      description: `Heading to pickup in ${order.timeWindow} window`,
-                    });
-                  }}
-                  data-testid="button-on-way"
-                >
-                  <Navigation className="h-5 w-5" />
-                  I'm On My Way
-                </Button>
-              </div>
-            )}
-
-            {/* Step 3: Scan QR at Customer Location (Pickup) */}
-            {isPickup && onWay && (
-              <Button 
-                size="lg" 
-                className="w-full gap-2"
-                onClick={() => setShowScanner(true)}
-                data-testid="button-scan-pickup"
-              >
-                <Camera className="h-5 w-5" />
-                Scan QR & Confirm Pickup
-              </Button>
-            )}
-
-            {/* Delivery Flow */}
-            {isDelivery && (
-              <Button 
-                size="lg" 
-                className="w-full gap-2"
-                onClick={() => setShowScanner(true)}
-                data-testid="button-scan-delivery"
-              >
-                <Camera className="h-5 w-5" />
-                Scan QR & Confirm Delivery
-              </Button>
-            )}
+            </div>
           </div>
-        )}
+        </Card>
+
+        {/* Messages Section */}
+        <Card>
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <h2 className="font-bold">Messages</h2>
+            </div>
+
+            {/* Messages List */}
+            <div className="space-y-3 mb-4 max-h-[300px] overflow-y-auto">
+              {messages.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No messages yet. Send a message to notify the customer.
+                </p>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        msg.senderId === user?.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.message}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Quick Messages */}
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground mb-2">Quick messages:</p>
+              <div className="flex flex-wrap gap-2">
+                {quickMessages.map((msg, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => sendMessageMutation.mutate(msg)}
+                    disabled={sendMessageMutation.isPending}
+                    data-testid={`button-quick-message-${index}`}
+                  >
+                    {msg}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message Input */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type a message..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && messageText.trim()) {
+                    sendMessageMutation.mutate(messageText);
+                  }
+                }}
+                data-testid="input-message"
+              />
+              <Button
+                size="icon"
+                onClick={() => {
+                  if (messageText.trim()) {
+                    sendMessageMutation.mutate(messageText);
+                  }
+                }}
+                disabled={!messageText.trim() || sendMessageMutation.isPending}
+                data-testid="button-send-message"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
