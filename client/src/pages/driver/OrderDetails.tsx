@@ -86,7 +86,7 @@ export default function DriverOrderDetail() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/admin")}
+            onClick={() => navigate("/driver")}
             data-testid="button-back"
           >
             <ArrowLeft className="h-5 w-5" />

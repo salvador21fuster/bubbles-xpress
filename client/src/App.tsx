@@ -93,7 +93,7 @@ function Router() {
           </>
         )}
 
-        {/* Landing page accessible even when authenticated */}
+        {/* Landing page is the home page for everyone */}
         <Route path="/" component={Landing} />
         <Route component={NotFound} />
       </Switch>
@@ -129,7 +129,6 @@ function Router() {
                   <Route path="/shop/processing" component={ShopProcessing} />
                   <Route path="/shop/profile" component={ShopProfile} />
                   <Route path="/shop/training" component={ShopTraining} />
-                  <Route path="/" component={ShopDashboard} />
                 </>
               )}
 
@@ -142,7 +141,6 @@ function Router() {
                   <Route path="/franchise/processing" component={ShopProcessing} />
                   <Route path="/franchise/profile" component={ShopProfile} />
                   <Route path="/franchise/training" component={ShopTraining} />
-                  <Route path="/" component={ShopDashboard} />
                 </>
               )}
               
@@ -158,10 +156,11 @@ function Router() {
                   <Route path="/admin/invoices" component={AdminInvoices} />
                   <Route path="/admin/users" component={AdminUsers} />
                   <Route path="/admin/policies" component={AdminPolicies} />
-                  <Route path="/" component={AdminDashboard} />
                 </>
               )}
 
+              {/* Landing page is the home page for everyone */}
+              <Route path="/" component={Landing} />
               <Route component={NotFound} />
             </Switch>
           </main>

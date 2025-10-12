@@ -84,11 +84,11 @@ export default function OrderDetails() {
           <Button 
             variant="ghost" 
             className="mb-4"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/customer')}
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Admin Portal
+            Back to Orders
           </Button>
           <div className="flex items-start justify-between">
             <div>
