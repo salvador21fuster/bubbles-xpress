@@ -47,6 +47,19 @@ export default function CustomerHome() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Address autocomplete states
+  const [addressInput, setAddressInput] = useState("123 Main St");
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{
+    displayName: string;
+    street: string;
+    city: string;
+    county: string;
+    postcode: string;
+  }>>([]);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  const addressInputRef = useRef<HTMLInputElement>(null);
+
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
   });
@@ -222,6 +235,31 @@ export default function CustomerHome() {
       scrollToBottom();
     }
   }, [chatMessages, showLiveAgent]);
+
+  // Address autocomplete search
+  useEffect(() => {
+    const searchAddress = async () => {
+      if (addressInput.length < 3) {
+        setAddressSuggestions([]);
+        return;
+      }
+
+      setIsLoadingAddress(true);
+      try {
+        const response = await fetch(`/api/address/search?q=${encodeURIComponent(addressInput)}`);
+        const data = await response.json();
+        setAddressSuggestions(data.results || []);
+      } catch (error) {
+        console.error("Address search error:", error);
+        setAddressSuggestions([]);
+      } finally {
+        setIsLoadingAddress(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchAddress, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [addressInput]);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
@@ -1217,17 +1255,64 @@ export default function CustomerHome() {
           </div>
         </div>
 
-        {/* Address Bar */}
-        <div className="flex items-center gap-2 px-4 py-3">
-          <MapPin className="h-5 w-5 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <Button variant="ghost" className="w-full justify-start p-0 h-auto font-normal" data-testid="button-address">
-              <div className="flex items-center gap-2">
-                <span className="font-medium truncate">123 Main St</span>
-                <ChevronDown className="h-4 w-4 flex-shrink-0" />
-              </div>
-            </Button>
+        {/* Address Bar with Autocomplete */}
+        <div className="relative px-4 py-3">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 flex-shrink-0" />
+            <div className="flex-1 min-w-0 relative">
+              <Input
+                ref={addressInputRef}
+                value={addressInput}
+                onChange={(e) => {
+                  setAddressInput(e.target.value);
+                  setShowAddressDropdown(true);
+                }}
+                onFocus={() => {
+                  if (addressSuggestions.length > 0) {
+                    setShowAddressDropdown(true);
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowAddressDropdown(false), 200);
+                }}
+                placeholder="Enter your address..."
+                className="font-medium h-auto py-1 px-2 border-0 focus-visible:ring-0"
+                data-testid="input-address"
+              />
+              {isLoadingAddress && (
+                <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
           </div>
+
+          {/* Address Suggestions Dropdown */}
+          {showAddressDropdown && addressSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto mx-4">
+              {addressSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setAddressInput(suggestion.displayName);
+                    setShowAddressDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-muted transition-colors border-b last:border-0"
+                  data-testid={`address-suggestion-${index}`}
+                >
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{suggestion.displayName}</p>
+                      {suggestion.city && (
+                        <p className="text-xs text-muted-foreground">
+                          {suggestion.city}{suggestion.county && `, ${suggestion.county}`}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Search Bar - Only show in browse view */}

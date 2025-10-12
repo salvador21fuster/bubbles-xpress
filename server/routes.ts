@@ -1492,6 +1492,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Address Autocomplete with AI
+  app.get("/api/address/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      if (q.length < 3) {
+        return res.json({ results: [] });
+      }
+
+      const { searchAddress } = await import("./addressSearch");
+      const results = await searchAddress(q);
+
+      res.json({ results });
+    } catch (error: any) {
+      console.error("Address search error:", error);
+      res.status(500).json({ 
+        message: "Failed to search addresses",
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
