@@ -1518,6 +1518,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Message operations - Driver-Customer communication
+  app.post("/api/orders/:orderId/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const { orderId } = req.params;
+      const { message, recipientId } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message text is required" });
+      }
+
+      if (!recipientId || typeof recipientId !== 'string') {
+        return res.status(400).json({ message: "Recipient ID is required" });
+      }
+
+      const newMessage = await storage.createMessage({
+        orderId,
+        senderId: req.user.id,
+        recipientId,
+        message,
+        isRead: false,
+      });
+
+      res.json(newMessage);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/orders/:orderId/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const { orderId } = req.params;
+      const messages = await storage.getMessagesByOrder(orderId);
+      res.json(messages);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/messages/:messageId/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const { messageId } = req.params;
+      const message = await storage.markMessageAsRead(messageId);
+      res.json(message);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
