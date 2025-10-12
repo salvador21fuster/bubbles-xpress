@@ -13,8 +13,15 @@ import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
-import serviceImage from "@assets/download (4)_1760237350814.jpg";
 import introVideo from "@assets/Diseño sin título (4)_1760249798796.mp4";
+import washingImage from "@assets/stock_images/professional_laundry_9a7ec295.jpg";
+import dryCleaningImage from "@assets/stock_images/dry_cleaning_pressed_595f876c.jpg";
+import ironingImage from "@assets/stock_images/ironing_pressing_clo_eaf49771.jpg";
+import linensImage from "@assets/stock_images/folded_bed_linens_sh_58c5f69f.jpg";
+import curtainsImage from "@assets/stock_images/curtains_drapes_prof_164e7bb2.jpg";
+import alterationsImage from "@assets/stock_images/tailoring_alteration_f459285b.jpg";
+import weddingDressImage from "@assets/stock_images/wedding_dress_gown_c_06b73a61.jpg";
+import shoesImage from "@assets/stock_images/shoes_boots_cleaning_00f70eef.jpg";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -112,32 +119,32 @@ export default function CustomerHome() {
     const name = serviceName.toLowerCase();
     
     if (name.includes('shirt') || name.includes('iron') || name.includes('press')) {
-      return '/attached_assets/stock_images/ironing_pressing_clo_eaf49771.jpg';
+      return ironingImage;
     }
     if (name.includes('dress') || name.includes('wedding') || name.includes('gown')) {
-      return '/attached_assets/stock_images/wedding_dress_gown_c_06b73a61.jpg';
+      return weddingDressImage;
     }
     if (name.includes('bed') || name.includes('linen') || name.includes('sheet')) {
-      return '/attached_assets/stock_images/folded_bed_linens_sh_58c5f69f.jpg';
+      return linensImage;
     }
     if (name.includes('curtain') || name.includes('drape')) {
-      return '/attached_assets/stock_images/curtains_drapes_prof_164e7bb2.jpg';
+      return curtainsImage;
     }
     if (name.includes('shoe') || name.includes('boot') || name.includes('leather')) {
-      return '/attached_assets/stock_images/shoes_boots_cleaning_00f70eef.jpg';
+      return shoesImage;
     }
     if (name.includes('alter') || name.includes('repair') || name.includes('tailor')) {
-      return '/attached_assets/stock_images/tailoring_alteration_f459285b.jpg';
+      return alterationsImage;
     }
     if (name.includes('dry') || name.includes('clean') || name.includes('suit')) {
-      return '/attached_assets/stock_images/dry_cleaning_pressed_595f876c.jpg';
+      return dryCleaningImage;
     }
     if (name.includes('wash') || name.includes('laundry') || name.includes('load')) {
-      return '/attached_assets/stock_images/professional_laundry_9a7ec295.jpg';
+      return washingImage;
     }
     
     // Default: general laundry service
-    return '/attached_assets/stock_images/professional_laundry_9a7ec295.jpg';
+    return washingImage;
   };
 
   const categories = [
