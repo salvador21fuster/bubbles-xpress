@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -31,6 +32,20 @@ export default function CustomerHome() {
   // Order detail states
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
+
+  // Live Agent Chat states
+  const [showLiveAgent, setShowLiveAgent] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{id: string, text: string, sender: 'user' | 'bot', timestamp: Date}>>([
+    {
+      id: "welcome",
+      text: "Hi! I'm your Mr Bubbles assistant. How can I help you today?",
+      sender: "bot",
+      timestamp: new Date(),
+    }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
@@ -136,6 +151,103 @@ export default function CustomerHome() {
   const handleServiceClick = (service: ServiceWithImage) => {
     setSelectedService(service);
     setQuantity(1);
+  };
+
+  // Live Agent Chat - Knowledge Base
+  const knowledgeBase = {
+    services: {
+      keywords: ["service", "wash", "dry", "clean", "iron", "press", "fold", "price", "cost", "fee"],
+      response: "Mr Bubbles Express offers professional laundry services including washing, drying, ironing, and folding. We charge by weight (per kg) or per item. Our services include: standard wash & fold (€3/kg), express service (€5/kg), dry cleaning, and ironing (€2/item). All prices include 23% VAT."
+    },
+    franchise: {
+      keywords: ["franchise", "partner", "join", "tier", "silver", "gold", "subscription", "fee", "percentage"],
+      response: "We offer 3 franchise tiers:\n\n• Free Tier: Limited access, 25% fee to Mr Bubbles\n\n• Silver (€99/month or €750/year): All training, equipment & clothing, 15% fee\n\n• Gold (€299/month or €2500/year): Ultimate access, premium training, all equipment, 5% fee\n\nReady to join? Sign up as a franchise partner to get started!"
+    },
+    ordering: {
+      keywords: ["order", "book", "pickup", "delivery", "schedule", "time", "when", "how long"],
+      response: "Booking is easy!\n\n1. Select your pickup time (we offer morning/afternoon/evening slots)\n2. We collect your laundry from your door\n3. Items are washed, dried & folded professionally\n4. We deliver back to you within 24-48 hours\n\nYou can track your order in real-time through the app!"
+    },
+    location: {
+      keywords: ["area", "location", "drogheda", "where", "coverage", "deliver", "pilot"],
+      response: "We're currently operating in Drogheda, Louth as our pilot area. Our headquarters is on Bubbles Road. We're expanding soon to other areas in Ireland. Want to bring Mr Bubbles to your area? Contact us about franchise opportunities!"
+    },
+    payment: {
+      keywords: ["pay", "payment", "card", "cash", "stripe", "cost", "charge"],
+      response: "We accept multiple payment methods:\n• Credit/Debit cards (via Stripe)\n• Cash on delivery\n• Account billing for businesses\n\nAll prices include 23% Irish VAT. Payment is processed after delivery for your peace of mind."
+    },
+    driver: {
+      keywords: ["driver", "job", "work", "earn", "requirements", "apply"],
+      response: "Join our driver team!\n\nDrivers earn competitive rates plus tips. Requirements:\n• Valid driver's license\n• Own vehicle\n• Smartphone for app\n• Clean driving record\n\nSign up as a driver to get started. We provide training, branded gear, and flexible hours!"
+    },
+    tracking: {
+      keywords: ["track", "status", "where", "gps", "location", "follow"],
+      response: "Track your order in real-time!\n\nYou can see:\n• Driver's live GPS location\n• Order status updates (collected → washing → drying → delivering)\n• Estimated delivery time\n• QR code scanning confirmations\n\nJust open your order in the customer app to see live tracking!"
+    },
+    scanning: {
+      keywords: ["qr", "scan", "code", "bag", "label", "tag"],
+      response: "We use QR codes for complete tracking! Each bag gets a unique QR code that tracks:\n• Pickup confirmation with photo\n• Shop intake scan\n• Quality control checks\n• Delivery handoff with signature\n\nThis ensures complete transparency and prevents mix-ups!"
+    },
+    support: {
+      keywords: ["help", "support", "contact", "issue", "problem", "question", "phone", "email"],
+      response: "I'm here to help!\n\nFor immediate support:\n• Chat with me anytime\n• Call: +353 XX XXX XXXX\n• Email: support@mrbubbles.ie\n\nFor Franchises: Gold tier gets 24/7 premium support, Silver gets priority support, Free tier gets standard email support."
+    },
+    greeting: {
+      keywords: ["hello", "hi", "hey", "good", "morning", "afternoon", "evening"],
+      response: "Hello! I'm your Mr Bubbles assistant. How can I help you today? I can tell you about our services, franchise opportunities, order tracking, or anything else about Mr Bubbles Express!"
+    },
+    thanks: {
+      keywords: ["thank", "thanks", "appreciate"],
+      response: "You're very welcome! Happy to help! Is there anything else you'd like to know about Mr Bubbles Express?"
+    }
+  };
+
+  const findBestResponse = (message: string): string => {
+    const lowerMessage = message.toLowerCase();
+    
+    for (const [key, data] of Object.entries(knowledgeBase)) {
+      if (data.keywords.some(keyword => lowerMessage.includes(keyword))) {
+        return data.response;
+      }
+    }
+    
+    return "I'd be happy to help you with that! I can answer questions about:\n\n• Our laundry services & pricing\n• Franchise opportunities (Free/Silver/Gold tiers)\n• How to place an order\n• Order tracking & delivery\n• Payment methods\n• Driver opportunities\n• QR code scanning\n\nWhat would you like to know?";
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (showLiveAgent) {
+      scrollToBottom();
+    }
+  }, [chatMessages, showLiveAgent]);
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      text: chatInput,
+      sender: 'user' as const,
+      timestamp: new Date(),
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput("");
+    setIsTyping(true);
+
+    setTimeout(() => {
+      const botResponse = {
+        id: (Date.now() + 1).toString(),
+        text: findBestResponse(chatInput),
+        sender: 'bot' as const,
+        timestamp: new Date(),
+      };
+
+      setChatMessages(prev => [...prev, botResponse]);
+      setIsTyping(false);
+    }, 800 + Math.random() * 1200);
   };
 
   // Uber Eats style Browse View
@@ -1068,6 +1180,7 @@ export default function CustomerHome() {
               variant="ghost"
               size="sm"
               className="gap-2"
+              onClick={() => setShowLiveAgent(true)}
               data-testid="button-live-agent"
             >
               <MessageCircle className="h-4 w-4" />
@@ -1177,6 +1290,98 @@ export default function CustomerHome() {
 
       {/* Order Detail View */}
       {showOrderDetail && <OrderDetailView />}
+
+      {/* Live Agent Chat */}
+      {showLiveAgent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center sm:justify-end p-0 sm:p-4">
+          <div className="bg-background w-full sm:w-96 h-[80vh] sm:h-[600px] sm:rounded-lg shadow-2xl flex flex-col">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Live Agent</h3>
+                  <p className="text-xs opacity-90">AI Assistant • Online</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowLiveAgent(false)}
+                className="text-primary-foreground hover:bg-primary-foreground/20"
+                data-testid="button-close-live-agent"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Chat Messages */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}
+                      data-testid={`message-${message.sender}`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                      <p className={`text-xs mt-1 ${message.sender === "user" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-lg p-3 flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">Assistant is typing...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Chat Input */}
+            <div className="border-t p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask me anything..."
+                  className="flex-1"
+                  disabled={isTyping}
+                  data-testid="input-live-agent-message"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!chatInput.trim() || isTyping}
+                  data-testid="button-send-live-agent-message"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
