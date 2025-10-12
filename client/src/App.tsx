@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import { CartProvider } from "@/contexts/CartContext";
 import MisterBubbleChatbot from "@/components/MisterBubbleChatbot";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
@@ -23,6 +24,8 @@ import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
 import AdminPolicies from "@/pages/admin/Policies";
 import AdminInvoices from "@/pages/admin/Invoices";
+import CustomerServices from "@/pages/customer/Services";
+import CustomerCheckout from "@/pages/customer/Checkout";
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import CustomerNewOrder from "@/pages/customer/NewOrder";
 import CustomerPayment from "@/pages/customer/Payment";
@@ -69,7 +72,9 @@ function Router() {
         {/* Customer Routes */}
         {(isCustomer || isSuperAdmin) && (
           <>
-            <Route path="/customer" component={CustomerDashboard} />
+            <Route path="/customer" component={CustomerServices} />
+            <Route path="/customer/services" component={CustomerServices} />
+            <Route path="/customer/checkout" component={CustomerCheckout} />
             <Route path="/customer/orders" component={CustomerDashboard} />
             <Route path="/customer/new-order" component={CustomerNewOrder} />
             <Route path="/customer/payment" component={CustomerPayment} />
@@ -164,13 +169,15 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-          <MisterBubbleChatbot />
-        </TooltipProvider>
-      </ThemeProvider>
+      <CartProvider>
+        <ThemeProvider defaultTheme="light">
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+            <MisterBubbleChatbot />
+          </TooltipProvider>
+        </ThemeProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
 }
