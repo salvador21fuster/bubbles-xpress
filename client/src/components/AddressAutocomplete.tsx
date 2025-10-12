@@ -23,6 +23,7 @@ interface NominatimResult {
     county?: string;
     state?: string;
     postcode?: string;
+    country_code?: string;
   };
 }
 
@@ -37,6 +38,8 @@ export function AddressAutocomplete({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout>();
+  const lastRequestTime = useRef<number>(0);
+  const abortController = useRef<AbortController | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,20 +53,40 @@ export function AddressAutocomplete({
       return;
     }
 
+    // Cancel previous request if still pending
+    if (abortController.current) {
+      abortController.current.abort();
+    }
+    abortController.current = new AbortController();
+
+    // Rate limiting: Ensure at least 1 second between requests (Nominatim requirement)
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTime.current;
+    const minDelay = 1000; // 1 second minimum
+
+    if (timeSinceLastRequest < minDelay) {
+      await new Promise(resolve => setTimeout(resolve, minDelay - timeSinceLastRequest));
+    }
+
+    lastRequestTime.current = Date.now();
     setIsLoading(true);
+
     try {
       // Using OpenStreetMap Nominatim API (free, no API key required)
+      // Required to include email for identification per Nominatim usage policy
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
         `format=json&` +
         `q=${encodeURIComponent(query)}&` +
         `countrycodes=ie&` + // Restrict to Ireland
         `addressdetails=1&` +
-        `limit=5`,
+        `limit=5&` +
+        `email=support@mrbubbles.ie`, // Required by Nominatim usage policy
         {
           headers: {
             'Accept': 'application/json',
-          }
+          },
+          signal: abortController.current.signal
         }
       );
 
@@ -72,8 +95,10 @@ export function AddressAutocomplete({
         setSuggestions(data);
         setShowSuggestions(data.length > 0);
       }
-    } catch (error) {
-      console.error('Address search error:', error);
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Address search error:', error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +116,7 @@ export function AddressAutocomplete({
 
     debounceTimer.current = setTimeout(() => {
       searchAddress(newValue);
-    }, 300);
+    }, 800); // Increased debounce to work with 1s rate limit
   };
 
   const handleSuggestionClick = (suggestion: NominatimResult) => {
@@ -115,6 +140,17 @@ export function AddressAutocomplete({
       async (position) => {
         const { latitude, longitude } = position.coords;
         
+        // Rate limiting: Ensure at least 1 second since last request
+        const now = Date.now();
+        const timeSinceLastRequest = now - lastRequestTime.current;
+        const minDelay = 1000;
+
+        if (timeSinceLastRequest < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - timeSinceLastRequest));
+        }
+
+        lastRequestTime.current = Date.now();
+        
         try {
           // Reverse geocoding using Nominatim
           const response = await fetch(
@@ -122,7 +158,8 @@ export function AddressAutocomplete({
             `format=json&` +
             `lat=${latitude}&` +
             `lon=${longitude}&` +
-            `addressdetails=1`,
+            `addressdetails=1&` +
+            `email=support@mrbubbles.ie`, // Required by Nominatim usage policy
             {
               headers: {
                 'Accept': 'application/json',
@@ -132,13 +169,23 @@ export function AddressAutocomplete({
 
           if (response.ok) {
             const data: NominatimResult = await response.json();
-            const address = data.display_name;
-            setInputValue(address);
-            onChange(address, data);
-            toast({
-              title: "Location found",
-              description: "Using your current location",
-            });
+            
+            // Check if location is in Ireland using country_code
+            if (data.address?.country_code === 'ie') {
+              const address = data.display_name;
+              setInputValue(address);
+              onChange(address, data);
+              toast({
+                title: "Location found",
+                description: "Using your current location",
+              });
+            } else {
+              toast({
+                title: "Location outside Ireland",
+                description: "We currently only serve locations in Ireland",
+                variant: "destructive",
+              });
+            }
           }
         } catch (error) {
           toast({
