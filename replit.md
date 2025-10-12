@@ -8,6 +8,8 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-12**: Shop Portal redesigned to match Uber Eats Manager - Orders page with detailed table, customer avatars, driver status, invoice buttons; Dashboard with KPI cards, recent orders table, and quick actions
+- **2025-10-12**: Customer App hero banner updated - Replaced abstract pattern with professional laundry stack photo with dark gradient overlay
 - **2025-10-12**: Admin Portal Orders page redesigned - Exact Uber Eats Manager layout with data table, checkboxes, filters, date range picker, search, and clean white design
 - **2025-10-12**: Admin sidebar navigation updated - New menu structure matching Uber Eats Manager (Home, Orders, Performance, Feedback, Users, Payments, Settings)
 - **2025-10-12**: Order history cache invalidation fixed - Orders now appear immediately in customer history after payment processing  

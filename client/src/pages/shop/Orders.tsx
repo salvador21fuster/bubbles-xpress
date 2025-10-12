@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Calendar, ChevronDown, FileText, Truck, User, DollarSign, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 import type { Order } from "@shared/schema";
 import { formatCurrency } from "@/lib/authUtils";
 
 export default function ShopOrders() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const initialStatus = urlParams.get('status') || 'all';
+  
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<"date" | "amount" | "status" | "customer">("date");
+
+  // Update filter when URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const status = params.get('status');
+    if (status) {
+      setStatusFilter(status);
+    }
+  }, [location]);
   
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/shop/orders"],
@@ -70,10 +84,16 @@ export default function ShopOrders() {
       'confirmed': { label: 'Confirmed', className: 'bg-green-50 text-green-700 border-green-200' },
       'picked_up': { label: 'Picked Up', className: 'bg-purple-50 text-purple-700 border-purple-200' },
       'at_origin_shop': { label: 'At Shop', className: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-      'processing': { label: 'Processing', className: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
-      'ready': { label: 'Ready', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      'subcontracted': { label: 'Subcontracted', className: 'bg-orange-50 text-orange-700 border-orange-200' },
+      'at_processing_shop': { label: 'At Processing', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+      'washing': { label: 'Washing', className: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+      'drying': { label: 'Drying', className: 'bg-purple-50 text-purple-700 border-purple-200' },
+      'pressing': { label: 'Pressing', className: 'bg-pink-50 text-pink-700 border-pink-200' },
+      'qc': { label: 'Quality Check', className: 'bg-violet-50 text-violet-700 border-violet-200' },
+      'packed': { label: 'Packed', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
       'out_for_delivery': { label: 'Out for Delivery', className: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
       'delivered': { label: 'Delivered', className: 'bg-gray-50 text-gray-700 border-gray-200' },
+      'closed': { label: 'Closed', className: 'bg-slate-50 text-slate-700 border-slate-200' },
     };
 
     const config = statusConfig[state] || { label: state, className: 'bg-gray-50 text-gray-700 border-gray-200' };
@@ -116,10 +136,16 @@ export default function ShopOrders() {
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="picked_up">Picked Up</SelectItem>
             <SelectItem value="at_origin_shop">At Shop</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="ready">Ready</SelectItem>
+            <SelectItem value="subcontracted">Subcontracted</SelectItem>
+            <SelectItem value="at_processing_shop">At Processing</SelectItem>
+            <SelectItem value="washing">Washing</SelectItem>
+            <SelectItem value="drying">Drying</SelectItem>
+            <SelectItem value="pressing">Pressing</SelectItem>
+            <SelectItem value="qc">Quality Check</SelectItem>
+            <SelectItem value="packed">Packed</SelectItem>
             <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
             <SelectItem value="delivered">Delivered</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
           </SelectContent>
         </Select>
 
@@ -307,7 +333,7 @@ export default function ShopOrders() {
             </div>
             <div>
               <p className="text-2xl font-bold">
-                {orders.filter(o => o.state === 'processing').length}
+                {orders.filter(o => ['washing', 'drying', 'pressing', 'qc', 'at_processing_shop'].includes(o.state)).length}
               </p>
               <p className="text-xs text-muted-foreground">Processing</p>
             </div>
