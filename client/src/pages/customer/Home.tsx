@@ -238,9 +238,13 @@ export default function CustomerHome() {
 
   // Address autocomplete search
   useEffect(() => {
+    // Clear suggestions immediately when input changes to prevent showing stale results
+    setAddressSuggestions([]);
+    
     const searchAddress = async () => {
       if (addressInput.length < 3) {
         setAddressSuggestions([]);
+        setShowAddressDropdown(false);
         return;
       }
 
@@ -249,6 +253,9 @@ export default function CustomerHome() {
         const response = await fetch(`/api/address/search?q=${encodeURIComponent(addressInput)}`);
         const data = await response.json();
         setAddressSuggestions(data.results || []);
+        if (data.results && data.results.length > 0) {
+          setShowAddressDropdown(true);
+        }
       } catch (error) {
         console.error("Address search error:", error);
         setAddressSuggestions([]);
@@ -1265,10 +1272,9 @@ export default function CustomerHome() {
                 value={addressInput}
                 onChange={(e) => {
                   setAddressInput(e.target.value);
-                  setShowAddressDropdown(true);
                 }}
                 onFocus={() => {
-                  if (addressSuggestions.length > 0) {
+                  if (addressSuggestions.length > 0 && addressInput.length >= 3) {
                     setShowAddressDropdown(true);
                   }
                 }}
