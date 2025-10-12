@@ -8,6 +8,9 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
+- **2025-10-12**: Customer App Uber Eats redesign complete - Single-page app with Delivery/Pickup toggle, hero banner, category pills with Lucide icons, service cards (Hidden gems style), map view with bottom navigation
+- **2025-10-12**: Interactive Drogheda map implemented - Real Leaflet/OpenStreetMap map showing Drogheda, Ireland with SVG-based markers for user location, driver van, and laundry shops (no emojis)
+- **2025-10-12**: Shop Portal Uber Eats styling applied - Mobile-first dashboard and orders pages with semantic color tokens for dark mode support
 - **2025-10-11**: Mister Bubble AI Chatbot - Floating chatbot on all pages/dashboards with comprehensive knowledge base covering services, franchise tiers, ordering, tracking, payments, and support
 - **2025-10-11**: Franchise subscription tiers implemented - Free (25% fee), Silver (€99/month or €750/year, 15% fee), Gold (€299/month or €2500/year, 5% fee) with full benefits display in profile
 - **2025-10-11**: Franchise signup flow complete - 3-step wizard with tier selection, billing cycle choice, and fake payment processing before Stripe integration
