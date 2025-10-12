@@ -19,6 +19,7 @@ import ShopOrders from "@/pages/shop/Orders";
 import ShopProfile from "@/pages/shop/Profile";
 import ShopTraining from "@/pages/shop/Training";
 import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminOrders from "@/pages/admin/Orders";
 import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
 import AdminPolicies from "@/pages/admin/Policies";
@@ -149,6 +150,10 @@ function Router() {
               {(isAdmin || isSuperAdmin) && (
                 <>
                   <Route path="/admin" component={AdminDashboard} />
+                  <Route path="/admin/orders" component={AdminOrders} />
+                  <Route path="/admin/performance" component={AdminDashboard} />
+                  <Route path="/admin/feedback" component={AdminDashboard} />
+                  <Route path="/admin/payments" component={AdminInvoices} />
                   <Route path="/admin/transactions" component={AdminTransactions} />
                   <Route path="/admin/invoices" component={AdminInvoices} />
                   <Route path="/admin/users" component={AdminUsers} />

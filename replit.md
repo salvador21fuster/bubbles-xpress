@@ -8,7 +8,9 @@ The system implements a hierarchical order tracking model (Order → Bag(s) → 
 
 ## Recent Updates
 
-- **2025-10-12**: Order history cache invalidation fixed - Orders now appear immediately in customer history after payment processing
+- **2025-10-12**: Admin Portal Orders page redesigned - Exact Uber Eats Manager layout with data table, checkboxes, filters, date range picker, search, and clean white design
+- **2025-10-12**: Admin sidebar navigation updated - New menu structure matching Uber Eats Manager (Home, Orders, Performance, Feedback, Users, Payments, Settings)
+- **2025-10-12**: Order history cache invalidation fixed - Orders now appear immediately in customer history after payment processing  
 - **2025-10-12**: Design system updated to Mr Bubbles blue (#0079E7) - Replaced Uber green with brand blue as primary color across all apps while maintaining Uber Eats design patterns
 - **2025-10-12**: Logout functionality added to all apps - Customer (Account tab), Driver (menu), Shop/Admin (sidebar) with proper toasts and redirects
 - **2025-10-12**: Driver-customer messaging system - Drivers can send messages to customers with quick templates for arrival notifications

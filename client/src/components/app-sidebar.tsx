@@ -64,11 +64,12 @@ export function AppSidebar() {
   ];
 
   const adminItems = [
-    { title: "Dashboard", url: "/admin", icon: Home },
-    { title: "Transactions", url: "/admin/transactions", icon: BarChart3 },
-    { title: "Invoices", url: "/admin/invoices", icon: Receipt },
+    { title: "Home", url: "/admin", icon: Home },
+    { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
+    { title: "Performance", url: "/admin/performance", icon: BarChart3 },
+    { title: "Feedback", url: "/admin/feedback", icon: FileText },
     { title: "Users", url: "/admin/users", icon: Users },
-    { title: "Policies", url: "/admin/policies", icon: FileText },
+    { title: "Payments", url: "/admin/payments", icon: Receipt },
     { title: "Settings", url: "/admin/settings", icon: Settings },
   ];
 
