@@ -1092,190 +1092,135 @@ export default function CustomerHome() {
     </div>
   );
 
-  // Order Detail View with Invoice and Live Tracking
+  // Order Detail View - Uber Eats Style with Full-Screen Map
   const OrderDetailView = () => {
     if (!selectedOrder) return null;
 
     const deliveryAddress = `${selectedOrder.addressLine1}${selectedOrder.addressLine2 ? ', ' + selectedOrder.addressLine2 : ''}, ${selectedOrder.city}`;
-    const subtotal = selectedOrder.subtotalCents ? (selectedOrder.subtotalCents / 100).toFixed(2) : '0.00';
-    const vat = selectedOrder.vatCents ? (selectedOrder.vatCents / 100).toFixed(2) : '0.00';
-    const total = selectedOrder.totalCents ? (selectedOrder.totalCents / 100).toFixed(2) : '0.00';
-    
     const hasDriver = selectedOrder.driverId !== null;
-    const showTracking = selectedOrder.state === 'picked_up' || selectedOrder.state === 'out_for_delivery';
+    const isPickedUp = selectedOrder.state === 'picked_up' || selectedOrder.state === 'out_for_delivery';
+    const isDelivered = selectedOrder.state === 'delivered' || selectedOrder.state === 'closed';
+    
+    // Order status messages - Uber Eats style
+    const getStatusMessage = () => {
+      if (isDelivered) return "Your order has arrived";
+      if (isPickedUp && hasDriver) return "Picking up your order...";
+      if (selectedOrder.state === 'at_processing_shop' || selectedOrder.state === 'washing' || selectedOrder.state === 'drying' || selectedOrder.state === 'pressing' || selectedOrder.state === 'qc' || selectedOrder.state === 'packed') return "Preparing your order...";
+      return "Order confirmed";
+    };
+
+    const getStatusSubtext = () => {
+      if (isDelivered) return `Arrived at ${selectedOrder.deliveredAt ? new Date(selectedOrder.deliveredAt).toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit' }) : 'destination'}`;
+      if (isPickedUp) return "Latest arrival by 12:50 PM";
+      return "We'll notify you when your driver is on the way";
+    };
 
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        {/* Header */}
-        <div className="flex-shrink-0 border-b bg-background">
-          <div className="flex items-center gap-3 p-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setShowOrderDetail(false)}
-              data-testid="button-close-order-detail"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold">Order Details</h1>
-          </div>
+      <div className="fixed inset-0 z-50 bg-background flex flex-col">
+        {/* Header - Minimal Uber Eats style */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-background/90 backdrop-blur">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowOrderDetail(false)}
+            data-testid="button-close-order-detail"
+            className="rounded-full bg-background"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="rounded-full bg-background"
+            data-testid="button-help"
+          >
+            Help
+          </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-6">
-          {/* Live Tracking - Only show if driver accepted */}
-          {showTracking && hasDriver && (
-            <div className="bg-primary/5 p-4 mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Truck className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Driver on the way</h3>
-                  <p className="text-sm text-muted-foreground">Estimated arrival in 15 minutes</p>
-                </div>
-              </div>
-              <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-                <DroghedaMap 
-                  height="100%" 
-                  showMarker={true} 
-                  showDriverVan={true}
-                  driverLocation={{ latitude: 53.7197, longitude: -6.3488 }}
-                />
+        {/* Full-Screen Map */}
+        <div className="flex-1 relative">
+          <DroghedaMap 
+            height="100%" 
+            showMarker={true} 
+            showDriverVan={isPickedUp && hasDriver}
+            driverLocation={{ latitude: 53.7197, longitude: -6.3488 }}
+          />
+
+          {/* Status Banner - Uber Eats Style */}
+          {isDelivered && (
+            <div className="absolute top-16 left-4 right-4 z-10">
+              <div className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg">
+                <Check className="h-5 w-5" />
+                <span className="font-medium">Vehicle unlocked</span>
               </div>
             </div>
           )}
 
-          {/* Invoice Section */}
-          <div className="m-4">
-            <Card className="p-6">
-              {/* Invoice Header with Logo */}
-              <div className="flex items-start justify-between mb-6 pb-4 border-b">
-                <div>
-                  <img 
-                    src={logoImage} 
-                    alt="Mr Bubbles Express" 
-                    className="h-12 w-auto object-contain mb-2"
-                  />
-                  <p className="text-xs text-muted-foreground">Professional Laundry Service</p>
-                  <p className="text-xs text-muted-foreground">Drogheda, Ireland</p>
-                </div>
-                <div className="text-right">
-                  <h3 className="font-bold text-lg">Invoice</h3>
-                  <p className="text-xs text-muted-foreground">Order #{selectedOrder.id.slice(0, 8)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleDateString('en-IE')}
-                  </p>
-                </div>
-              </div>
+          {/* Bottom Card - Uber Eats Style Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl" data-testid="order-detail-bottom-card">
+            {/* Status Message */}
+            <div className="p-6 pb-4">
+              <h2 className="text-2xl font-bold mb-1">{getStatusMessage()}</h2>
+              <p className="text-sm text-muted-foreground">{getStatusSubtext()}</p>
+            </div>
 
-              {/* Customer Details */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-2">Bill To:</h4>
-                <p className="text-sm">{selectedOrder.customerFullName || 'Customer'}</p>
-                <p className="text-sm text-muted-foreground">{deliveryAddress}</p>
-                {selectedOrder.eircode && (
-                  <p className="text-sm text-muted-foreground">{selectedOrder.eircode}</p>
-                )}
-              </div>
-
-              {/* Order Items */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-3">Services:</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Laundry Service</span>
-                    <span>€{subtotal}</span>
-                  </div>
-                  {selectedOrder.deliveryInstructions && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Note: {selectedOrder.deliveryInstructions}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="space-y-2 pt-4 border-t">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>€{subtotal}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Delivery Fee</span>
-                  <span className="text-primary font-medium">FREE</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">VAT (23%)</span>
-                  <span>€{vat}</span>
-                </div>
-                <div className="h-px bg-border my-2"></div>
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>€{total}</span>
-                </div>
-              </div>
-
-              {/* Payment Info */}
-              <div className="mt-6 pt-4 border-t">
-                <div className="flex items-center gap-2 text-sm">
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Paid with {selectedOrder.paymentMethod || 'card'} • {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleDateString('en-IE')}
-                  </span>
-                </div>
-              </div>
-
-              {/* AI Generated Notice */}
-              <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-center text-muted-foreground">
-                  This invoice was automatically generated by Mr Bubbles AI
-                </p>
-              </div>
-            </Card>
-
-            {/* Order Status Timeline */}
-            <Card className="p-4 mt-4">
-              <h4 className="font-semibold mb-3">Order Status</h4>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${selectedOrder.state !== 'created' ? 'bg-primary text-white' : 'bg-muted'}`}>
-                    <Check className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">Order Placed</p>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedOrder.createdAt && new Date(selectedOrder.createdAt).toLocaleString('en-IE')}
-                    </p>
-                  </div>
-                </div>
-                {selectedOrder.pickedUpAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
-                      <Truck className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Picked Up</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(selectedOrder.pickedUpAt).toLocaleString('en-IE')}
-                      </p>
+            {/* Vehicle/Order Info - Uber Eats Style */}
+            {(isPickedUp || isDelivered) && (
+              <div className="px-6 py-4 border-t border-b">
+                <div className="flex items-center gap-4">
+                  {/* Car Icon Placeholder */}
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-12 bg-muted rounded flex items-center justify-center">
+                      <Truck className="h-6 w-6 text-foreground" />
                     </div>
                   </div>
-                )}
-                {selectedOrder.deliveredAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center">
-                      <Check className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Delivered</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(selectedOrder.deliveredAt).toLocaleString('en-IE')}
-                      </p>
-                    </div>
+                  
+                  {/* Driver Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">Mr Bubbles IONIQ 5 • L12344</p>
+                    <p className="text-xs text-muted-foreground">Autonomous, supervised by Natali</p>
                   </div>
-                )}
+                </div>
               </div>
-            </Card>
+            )}
+
+            {/* Action Buttons - Uber Eats Style */}
+            <div className="p-4 space-y-2">
+              {isDelivered ? (
+                <>
+                  <Button 
+                    className="w-full h-12 text-base rounded-xl" 
+                    data-testid="button-unlock-vehicle"
+                  >
+                    Unlock the vehicle
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-12 text-base rounded-xl" 
+                    data-testid="button-cant-find-vehicle"
+                  >
+                    Can't find the vehicle?
+                  </Button>
+                </>
+              ) : isPickedUp ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-base rounded-xl" 
+                  data-testid="button-learn-more"
+                >
+                  Learn more
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-base rounded-xl" 
+                  data-testid="button-view-details"
+                >
+                  View order details
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
