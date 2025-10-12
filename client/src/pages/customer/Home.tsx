@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket } from "lucide-react";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -21,6 +21,12 @@ export default function CustomerHome() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Booking flow states
+  const [selectedService, setSelectedService] = useState<ServiceWithImage | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [cart, setCart] = useState<Array<{service: ServiceWithImage, quantity: number}>>([]);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
@@ -85,6 +91,47 @@ export default function CustomerHome() {
     // In a real implementation, this would pre-fill the cart with last order items
     // For now, navigate to services page where they can browse and order
     navigate('/customer/services');
+  };
+
+  // Cart management functions
+  const addToCart = (service: ServiceWithImage, qty: number) => {
+    const existingItem = cart.find(item => item.service.id === service.id);
+    if (existingItem) {
+      setCart(cart.map(item => 
+        item.service.id === service.id 
+          ? { ...item, quantity: item.quantity + qty }
+          : item
+      ));
+    } else {
+      setCart([...cart, { service, quantity: qty }]);
+    }
+    setSelectedService(null);
+    setQuantity(1);
+  };
+
+  const removeFromCart = (serviceId: string) => {
+    setCart(cart.filter(item => item.service.id !== serviceId));
+  };
+
+  const updateCartQuantity = (serviceId: string, newQuantity: number) => {
+    if (newQuantity === 0) {
+      removeFromCart(serviceId);
+    } else {
+      setCart(cart.map(item => 
+        item.service.id === serviceId 
+          ? { ...item, quantity: newQuantity }
+          : item
+      ));
+    }
+  };
+
+  const cartTotal = cart.reduce((total, item) => {
+    return total + (parseFloat(item.service.pricePerUnit) * item.quantity);
+  }, 0);
+
+  const handleServiceClick = (service: ServiceWithImage) => {
+    setSelectedService(service);
+    setQuantity(1);
   };
 
   // Uber Eats style Browse View
@@ -164,22 +211,25 @@ export default function CustomerHome() {
             {recommendedServices.map((service) => {
               const ServiceIcon = getServiceIcon(service.name);
               return (
-                <Link key={service.id} href={`/customer/services?service=${service.id}`}>
-                  <Card className="flex-shrink-0 w-40 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-recommended-${service.id}`}>
-                    <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
-                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                        <ServiceIcon className="h-12 w-12 text-primary" />
-                      </div>
+                <Card 
+                  key={service.id}
+                  className="flex-shrink-0 w-40 hover-elevate active-elevate-2 cursor-pointer" 
+                  onClick={() => handleServiceClick(service)}
+                  data-testid={`card-recommended-${service.id}`}
+                >
+                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                      <ServiceIcon className="h-12 w-12 text-primary" />
                     </div>
-                    <div className="p-3">
-                      <h4 className="font-semibold text-sm truncate">{service.name}</h4>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Star className="h-3 w-3 fill-primary text-primary" />
-                        <span className="text-xs font-medium">4.8</span>
-                      </div>
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-semibold text-sm truncate">{service.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="h-3 w-3 fill-primary text-primary" />
+                      <span className="text-xs font-medium">4.8</span>
                     </div>
-                  </Card>
-                </Link>
+                  </div>
+                </Card>
               );
             })}
           </div>
@@ -217,48 +267,51 @@ export default function CustomerHome() {
           {filteredServices.slice(0, 6).map((service) => {
             const ServiceIcon = getServiceIcon(service.name);
             return (
-              <Link key={service.id} href={`/customer/services?service=${service.id}`}>
-                <Card className="flex gap-3 p-3 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-service-${service.id}`}>
-                  {/* Service Image */}
-                  <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
-                    {service.imageUrl ? (
-                      <img 
-                        src={service.imageUrl} 
-                        alt={service.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                        <ServiceIcon className="h-8 w-8 text-primary" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Service Info */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold truncate">{service.name}</h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="h-3 w-3 fill-primary text-primary" />
-                      <span className="text-sm font-medium">4.8</span>
-                      <span className="text-sm text-muted-foreground">• </span>
-                      <span className="text-sm text-muted-foreground">
-                        €{parseFloat(service.pricePerUnit).toFixed(2)} / {service.unit}
-                      </span>
+              <Card 
+                key={service.id}
+                className="flex gap-3 p-3 hover-elevate active-elevate-2 cursor-pointer" 
+                onClick={() => handleServiceClick(service)}
+                data-testid={`card-service-${service.id}`}
+              >
+                {/* Service Image */}
+                <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
+                  {service.imageUrl ? (
+                    <img 
+                      src={service.imageUrl} 
+                      alt={service.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                      <ServiceIcon className="h-8 w-8 text-primary" />
                     </div>
-                    <div className="flex items-center gap-1 mt-1.5">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">24-48 hrs</span>
-                    </div>
-                  </div>
+                  )}
+                </div>
 
-                  {/* Service Badge */}
-                  <div className="flex items-start">
-                    <Badge variant="secondary" className="text-xs">
-                      {service.unit === 'kg' ? 'By Weight' : 'Per Item'}
-                    </Badge>
+                {/* Service Info */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold truncate">{service.name}</h4>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="h-3 w-3 fill-primary text-primary" />
+                    <span className="text-sm font-medium">4.8</span>
+                    <span className="text-sm text-muted-foreground">• </span>
+                    <span className="text-sm text-muted-foreground">
+                      €{parseFloat(service.pricePerUnit).toFixed(2)} / {service.unit}
+                    </span>
                   </div>
-                </Card>
-              </Link>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">24-48 hrs</span>
+                  </div>
+                </div>
+
+                {/* Service Badge */}
+                <div className="flex items-start">
+                  <Badge variant="secondary" className="text-xs">
+                    {service.unit === 'kg' ? 'By Weight' : 'Per Item'}
+                  </Badge>
+                </div>
+              </Card>
             );
           })}
         </div>
@@ -272,7 +325,7 @@ export default function CustomerHome() {
     const mockDriverLocation = { latitude: 53.7197, longitude: -6.3488 };
     
     return (
-      <div className="flex-1 flex flex-col pb-16 relative">
+      <div className="flex-1 flex flex-col pb-20 relative">
         <div className="flex-1">
           <DroghedaMap 
             height="100%" 
@@ -282,7 +335,7 @@ export default function CustomerHome() {
           />
         </div>
         {/* Nearby shops overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent pt-8 pb-4 px-4 pointer-events-none">
+        <div className="absolute bottom-20 left-0 right-0 bg-gradient-to-t from-background to-transparent pt-8 pb-4 px-4 pointer-events-none">
           <div className="pointer-events-auto">
             <h3 className="font-semibold mb-2">Nearby laundry shops</h3>
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
@@ -420,6 +473,266 @@ export default function CustomerHome() {
     );
   };
 
+  // Service Detail Modal - Uber Eats Style
+  const ServiceDetailModal = () => {
+    if (!selectedService) return null;
+    const ServiceIcon = getServiceIcon(selectedService.name);
+    
+    return (
+      <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+        <div className="fixed inset-x-0 bottom-0 bg-background rounded-t-3xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+          {/* Header */}
+          <div className="sticky top-0 bg-background border-b z-10">
+            <div className="flex items-center justify-between p-4">
+              <h2 className="text-xl font-bold">{selectedService.name}</h2>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setSelectedService(null)}
+                data-testid="button-close-service"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Service Image */}
+          <div className="aspect-video bg-muted">
+            <div className="w-full h-full flex items-center justify-center bg-primary/10">
+              <ServiceIcon className="h-24 w-24 text-primary" />
+            </div>
+          </div>
+
+          {/* Service Details */}
+          <div className="p-4 space-y-4">
+            {selectedService.description && (
+              <p className="text-muted-foreground">{selectedService.description}</p>
+            )}
+
+            {/* Price & Rating */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="font-semibold">4.8</span>
+                <span className="text-sm text-muted-foreground">(500+ reviews)</span>
+              </div>
+              <div className="text-lg font-bold">
+                €{parseFloat(selectedService.pricePerUnit).toFixed(2)} / {selectedService.unit}
+              </div>
+            </div>
+
+            {/* Info Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-3">
+                <Clock className="h-5 w-5 text-primary mb-2" />
+                <p className="text-sm font-medium">Processing Time</p>
+                <p className="text-xs text-muted-foreground">24-48 hours</p>
+              </Card>
+              <Card className="p-3">
+                <Truck className="h-5 w-5 text-primary mb-2" />
+                <p className="text-sm font-medium">Free Delivery</p>
+                <p className="text-xs text-muted-foreground">On all orders</p>
+              </Card>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Quantity ({selectedService.unit})</label>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  data-testid="button-decrease-quantity"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="text-2xl font-bold w-12 text-center">{quantity}</span>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setQuantity(quantity + 1)}
+                  data-testid="button-increase-quantity"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <div className="sticky bottom-0 bg-background border-t p-4">
+            <Button 
+              className="w-full h-12 text-lg" 
+              onClick={() => addToCart(selectedService, quantity)}
+              data-testid="button-add-to-cart"
+            >
+              Add to Cart • €{(parseFloat(selectedService.pricePerUnit) * quantity).toFixed(2)}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Checkout View - Uber Eats Style
+  const CheckoutView = () => (
+    <div className="fixed inset-0 z-50 bg-background">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-background">
+        <div className="flex items-center gap-3 p-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowCheckout(false)}
+            data-testid="button-close-checkout"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-bold">Checkout</h1>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto pb-32">
+        {/* Delivery/Pickup Info */}
+        <Card className="m-4 p-4">
+          <div className="flex items-start gap-3">
+            <MapPin className="h-5 w-5 text-primary mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold">{deliveryMode === 'delivery' ? 'Delivery to' : 'Pickup from'}</p>
+              <p className="text-sm text-muted-foreground">123 Main St, Drogheda</p>
+              <Button variant="ghost" className="h-auto p-0 mt-1 text-primary" data-testid="button-change-address">
+                Change address
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Cart Items */}
+        <div className="m-4 space-y-3">
+          <h3 className="font-bold">Your Order</h3>
+          {cart.map((item) => {
+            const ItemIcon = getServiceIcon(item.service.name);
+            return (
+              <Card key={item.service.id} className="p-4">
+                <div className="flex gap-3">
+                  <div className="w-16 h-16 flex-shrink-0 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <ItemIcon className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{item.service.name}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      €{parseFloat(item.service.pricePerUnit).toFixed(2)} / {item.service.unit}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-7 w-7"
+                        onClick={() => updateCartQuantity(item.service.id, item.quantity - 1)}
+                        data-testid={`button-decrease-${item.service.id}`}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="font-medium">{item.quantity}</span>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-7 w-7"
+                        onClick={() => updateCartQuantity(item.service.id, item.quantity + 1)}
+                        data-testid={`button-increase-${item.service.id}`}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold">€{(parseFloat(item.service.pricePerUnit) * item.quantity).toFixed(2)}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-destructive hover:text-destructive h-auto p-0 mt-1"
+                      onClick={() => removeFromCart(item.service.id)}
+                      data-testid={`button-remove-${item.service.id}`}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Schedule Pickup */}
+        <Card className="m-4 p-4">
+          <div className="flex items-start gap-3">
+            <Calendar className="h-5 w-5 text-primary mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold">Schedule Pickup</p>
+              <p className="text-sm text-muted-foreground">Tomorrow, 10:00 AM - 12:00 PM</p>
+              <Button variant="ghost" className="h-auto p-0 mt-1 text-primary" data-testid="button-change-schedule">
+                Change time
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Payment Method */}
+        <Card className="m-4 p-4">
+          <div className="flex items-start gap-3">
+            <CreditCard className="h-5 w-5 text-primary mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold">Payment Method</p>
+              <p className="text-sm text-muted-foreground">Visa •••• 4242</p>
+              <Button variant="ghost" className="h-auto p-0 mt-1 text-primary" data-testid="button-change-payment">
+                Change payment method
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Order Summary */}
+        <div className="m-4 space-y-2">
+          <h3 className="font-bold">Order Summary</h3>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>€{cartTotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Delivery Fee</span>
+            <span className="text-primary font-medium">FREE</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">VAT (23%)</span>
+            <span>€{(cartTotal * 0.23).toFixed(2)}</span>
+          </div>
+          <div className="h-px bg-border my-2"></div>
+          <div className="flex justify-between font-bold text-lg">
+            <span>Total</span>
+            <span>€{(cartTotal * 1.23).toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Place Order Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
+        <Button 
+          className="w-full h-12 text-lg" 
+          data-testid="button-place-order"
+          onClick={() => {
+            // In real app, would submit order here
+            setShowCheckout(false);
+            setCart([]);
+            setActiveTab('orders');
+          }}
+        >
+          Place Order • €{(cartTotal * 1.23).toFixed(2)}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar - Uber Eats Style */}
@@ -538,6 +851,27 @@ export default function CustomerHome() {
           </Button>
         </div>
       </div>
+
+      {/* Floating Cart Button - Only show when cart has items and not in checkout */}
+      {cart.length > 0 && !showCheckout && (
+        <Button
+          size="lg"
+          className="fixed bottom-24 right-4 z-40 rounded-full shadow-lg h-14 px-6 gap-2"
+          onClick={() => setShowCheckout(true)}
+          data-testid="button-view-cart"
+        >
+          <ShoppingCart className="h-5 w-5" />
+          <span className="font-bold">{cart.length}</span>
+          <span className="mx-1">•</span>
+          <span>€{(cartTotal * 1.23).toFixed(2)}</span>
+        </Button>
+      )}
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal />
+
+      {/* Checkout View */}
+      {showCheckout && <CheckoutView />}
     </div>
   );
 }
