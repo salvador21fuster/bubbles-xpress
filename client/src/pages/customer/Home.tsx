@@ -1,25 +1,32 @@
 import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, ChevronDown, Search, Package, ShoppingBag, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets } from "lucide-react";
+import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
-import type { Service } from "@shared/schema";
+import type { Service, Order } from "@shared/schema";
 
 interface ServiceWithImage extends Service {
   imageUrl?: string;
 }
 
 export default function CustomerHome() {
+  const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<'browse' | 'map' | 'orders' | 'account'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: services = [] } = useQuery<ServiceWithImage[]>({
     queryKey: ["/api/services"],
+  });
+
+  const { data: orders = [] } = useQuery<Order[]>({
+    queryKey: ["/api/customer/orders"],
   });
 
   const categories = [
@@ -30,9 +37,34 @@ export default function CustomerHome() {
     { id: 'specialty', name: 'Specialty', IconComponent: Wind },
   ];
 
-  const filteredServices = selectedCategory === 'all' 
-    ? services 
-    : services.filter(s => s.name.toLowerCase().includes(selectedCategory));
+  // Enhanced filtering with search
+  const filteredServices = services.filter(service => {
+    // Better category matching using service name patterns
+    const matchesCategory = selectedCategory === 'all' || 
+      (selectedCategory === 'washing' && (service.name.toLowerCase().includes('wash') || service.name.toLowerCase().includes('load'))) ||
+      (selectedCategory === 'ironing' && (service.name.toLowerCase().includes('iron') || service.name.toLowerCase().includes('press'))) ||
+      (selectedCategory === 'dry-cleaning' && (service.name.toLowerCase().includes('dry') || service.name.toLowerCase().includes('clean'))) ||
+      (selectedCategory === 'specialty' && (service.name.toLowerCase().includes('special') || service.name.toLowerCase().includes('delicate') || service.name.toLowerCase().includes('suit')));
+    
+    const matchesSearch = searchQuery === '' || 
+      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  // AI-based recommendations - Only show if user has order history
+  const completedOrders = orders.filter(o => o.state === 'delivered' || o.state === 'closed');
+  const recommendedServices = completedOrders.length > 0 ? services.slice(0, 3) : [];
+  
+  // Quick reorder - Get most recent completed order
+  const recentOrder = completedOrders[0];
+
+  // Handle quick reorder - Navigate to services page (user will see cart and can place order)
+  const handleQuickReorder = () => {
+    // In a real implementation, this would pre-fill the cart with last order items
+    // For now, navigate to services page where they can browse and order
+    navigate('/customer/services');
+  };
 
   // Uber Eats style Browse View
   const BrowseView = () => (
@@ -69,6 +101,85 @@ export default function CustomerHome() {
             );
           })}
         </div>
+      </div>
+
+      {/* Quick Reorder - If user has past orders */}
+      {recentOrder && (
+        <div className="px-4 pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <RotateCcw className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-bold">Reorder</h3>
+          </div>
+          <Card className="p-4 bg-primary/5 border-primary/20 hover-elevate active-elevate-2 cursor-pointer" data-testid="card-quick-reorder">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-semibold">Your last order</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {recentOrder.addressLine1}, {recentOrder.city}
+                </p>
+              </div>
+              <Button 
+                size="sm" 
+                className="gap-2" 
+                onClick={handleQuickReorder}
+                data-testid="button-reorder-now"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reorder
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* AI-Based Recommendations */}
+      {recommendedServices.length > 0 && (
+        <div className="px-4 pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-bold">Recommended for you</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+            {recommendedServices.map((service) => (
+              <Link key={service.id} href={`/customer/services?service=${service.id}`}>
+                <Card className="flex-shrink-0 w-40 hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-recommended-${service.id}`}>
+                  <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                      <Package className="h-12 w-12 text-primary" />
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-semibold text-sm truncate">{service.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="h-3 w-3 fill-primary text-primary" />
+                      <span className="text-xs font-medium">4.8</span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Offers & Deals */}
+      <div className="px-4 pt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Gift className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-bold">Offers near you</h3>
+        </div>
+        <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30" data-testid="card-offer">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <Zap className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold">First order €5 off</p>
+              <p className="text-sm text-muted-foreground">Valid for new customers</p>
+            </div>
+            <Button size="sm" variant="outline" data-testid="button-claim-offer">Claim</Button>
+          </div>
+        </Card>
       </div>
 
       {/* Services Section - "Hidden gems" style */}
@@ -178,12 +289,109 @@ export default function CustomerHome() {
   );
 
   // Account View
-  const AccountView = () => (
-    <div className="flex-1 overflow-y-auto pb-20 p-4">
-      <h2 className="text-2xl font-bold mb-4">Account</h2>
-      <p className="text-muted-foreground">Your profile and settings</p>
-    </div>
-  );
+  const AccountView = () => {
+    // Mock loyalty points data
+    const loyaltyPoints = 450;
+    const nextRewardAt = 500;
+    const progressPercent = (loyaltyPoints / nextRewardAt) * 100;
+
+    return (
+      <div className="flex-1 overflow-y-auto pb-20 p-4 space-y-6">
+        {/* Loyalty Points Card */}
+        <Card className="bg-gradient-to-br from-primary to-primary/80 text-white overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Award className="h-6 w-6" />
+                <h3 className="text-lg font-bold">Mr Bubbles Rewards</h3>
+              </div>
+              <Badge variant="secondary" className="bg-white/20 text-white border-none">
+                Gold Member
+              </Badge>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-4xl font-bold">{loyaltyPoints}</span>
+                <span className="text-white/80">points</span>
+              </div>
+              <p className="text-sm text-white/90">
+                {nextRewardAt - loyaltyPoints} points until your next reward
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Wave decoration */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 opacity-10">
+            <svg viewBox="0 0 1440 320" className="w-full h-full">
+              <path fill="white" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+          </div>
+        </Card>
+
+        {/* Rewards Benefits */}
+        <div>
+          <h3 className="font-bold mb-3">Your Benefits</h3>
+          <div className="space-y-2">
+            <Card className="p-3 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Gift className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">€5 off every 5th order</p>
+                <p className="text-xs text-muted-foreground">Automatically applied</p>
+              </div>
+            </Card>
+            <Card className="p-3 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">Priority pickup</p>
+                <p className="text-xs text-muted-foreground">Get collected first</p>
+              </div>
+            </Card>
+            <Card className="p-3 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">Free express service</p>
+                <p className="text-xs text-muted-foreground">Once per month</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Profile Info */}
+        <div>
+          <h3 className="font-bold mb-3">Profile</h3>
+          <Card className="p-4 space-y-3">
+            <div>
+              <p className="text-sm text-muted-foreground">Email</p>
+              <p className="font-medium">customer@example.com</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Phone</p>
+              <p className="font-medium">+353 123 456 7890</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Member since</p>
+              <p className="font-medium">October 2025</p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -230,6 +438,8 @@ export default function CustomerHome() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for laundry services..." 
                 className="pl-10 h-11 rounded-lg bg-muted"
                 data-testid="input-search"
