@@ -20,7 +20,6 @@ export default function CustomerHome() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<'browse' | 'map' | 'orders' | 'account'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Booking flow states
@@ -704,12 +703,12 @@ export default function CustomerHome() {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-32">
-        {/* Delivery/Pickup Info */}
+        {/* Delivery Address Info */}
         <Card className="m-4 p-4">
           <div className="flex items-start gap-3">
             <MapPin className="h-5 w-5 text-primary mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold">{deliveryMode === 'delivery' ? 'Delivery to' : 'Pickup from'}</p>
+              <p className="font-semibold">Delivery address</p>
               <p className="text-sm text-muted-foreground">123 Main St, Drogheda</p>
               <Button variant="ghost" className="h-auto p-0 mt-1 text-primary" data-testid="button-change-address">
                 Change address
@@ -1037,28 +1036,16 @@ export default function CustomerHome() {
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar - Uber Eats Style */}
       <div className="flex-shrink-0 border-b bg-background">
-        {/* Delivery/Pickup Toggle with Cart */}
+        {/* Pickup and Delivery Button with Cart */}
         <div className="flex items-center justify-between gap-2 p-3 border-b">
-          <div className="flex gap-2">
-            <Button 
-              variant={deliveryMode === 'delivery' ? 'default' : 'ghost'} 
-              size="sm" 
-              className="rounded-full" 
-              onClick={() => setDeliveryMode('delivery')}
-              data-testid="button-delivery"
-            >
-              Delivery
-            </Button>
-            <Button 
-              variant={deliveryMode === 'pickup' ? 'default' : 'ghost'} 
-              size="sm" 
-              className="rounded-full"
-              onClick={() => setDeliveryMode('pickup')}
-              data-testid="button-pickup"
-            >
-              Pickup
-            </Button>
-          </div>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="rounded-full" 
+            data-testid="button-pickup-delivery"
+          >
+            Pickup and Delivery
+          </Button>
           
           {/* Cart Button - Top Right */}
           {cart.length > 0 && !showCheckout && (
