@@ -722,111 +722,216 @@ export default function CustomerHome() {
     );
   };
 
-  // Orders View - Uber Eats Style
+  // Orders View - Uber Eats Style (EXACT MATCH)
   const OrdersView = () => {
+    const [orderTab, setOrderTab] = useState<'upcoming' | 'past'>('upcoming');
+    
     const getStatusColor = (state: string) => {
       switch (state) {
-        case 'delivered': return 'text-green-600';
-        case 'picked_up': case 'out_for_delivery': return 'text-blue-600';
-        case 'washing': case 'drying': case 'pressing': case 'qc': return 'text-orange-600';
-        case 'created': case 'confirmed': return 'text-yellow-600';
+        case 'delivered': case 'closed': return 'text-green-600';
+        case 'picked_up': case 'out_for_delivery': return 'text-primary';
+        case 'washing': case 'drying': case 'pressing': case 'qc': case 'processing': return 'text-orange-600';
+        case 'created': case 'confirmed': return 'text-muted-foreground';
         default: return 'text-muted-foreground';
+      }
+    };
+
+    const getStatusBadgeClass = (state: string) => {
+      switch (state) {
+        case 'delivered': case 'closed': 
+          return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
+        case 'picked_up': case 'out_for_delivery': 
+          return 'bg-primary/10 text-primary border-primary/20';
+        case 'washing': case 'drying': case 'pressing': case 'qc': case 'processing': 
+          return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800';
+        default: 
+          return 'bg-muted text-muted-foreground border-muted';
       }
     };
 
     const getStatusText = (state: string) => {
       switch (state) {
         case 'delivered': return 'Delivered';
-        case 'out_for_delivery': return 'Out for Delivery';
-        case 'picked_up': return 'Picked Up';
-        case 'washing': case 'drying': case 'pressing': return 'Processing';
-        case 'qc': return 'Quality Check';
-        case 'packed': return 'Packed';
-        case 'created': return 'Order Placed';
+        case 'closed': return 'Completed';
+        case 'out_for_delivery': return 'Out for delivery';
+        case 'picked_up': return 'Picked up';
+        case 'washing': return 'Washing';
+        case 'drying': return 'Drying';
+        case 'pressing': return 'Ironing';
+        case 'processing': return 'Processing';
+        case 'qc': return 'Quality check';
+        case 'packed': return 'Ready for delivery';
+        case 'created': return 'Order placed';
         case 'confirmed': return 'Confirmed';
-        case 'at_origin_shop': case 'at_processing_shop': return 'At Shop';
-        default: return state;
+        case 'at_origin_shop': case 'at_processing_shop': return 'At shop';
+        default: return state.replace(/_/g, ' ');
       }
     };
 
+    // Split orders into upcoming and past
+    const upcomingOrders = orders.filter(o => 
+      !['delivered', 'closed'].includes(o.state)
+    );
+    const pastOrders = orders.filter(o => 
+      ['delivered', 'closed'].includes(o.state)
+    );
+
+    const displayOrders = orderTab === 'upcoming' ? upcomingOrders : pastOrders;
+
     return (
-      <div className="flex-1 overflow-y-auto pb-20">
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">My Orders</h2>
-          
-          {orders.length === 0 ? (
-            <Card className="p-8 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                  <Receipt className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">No orders yet</h3>
-                  <p className="text-sm text-muted-foreground">When you place an order, it will appear here</p>
-                </div>
+      <div className="flex-1 flex flex-col bg-background pb-20">
+        {/* Header */}
+        <div className="bg-background border-b sticky top-0 z-10">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold">Orders</h1>
+          </div>
+
+          {/* Tabs - Uber Eats Style */}
+          <div className="flex border-b">
+            <button
+              onClick={() => setOrderTab('upcoming')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                orderTab === 'upcoming' 
+                  ? 'text-foreground' 
+                  : 'text-muted-foreground'
+              }`}
+              data-testid="tab-upcoming-orders"
+            >
+              Upcoming
+              {orderTab === 'upcoming' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground" />
+              )}
+            </button>
+            <button
+              onClick={() => setOrderTab('past')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                orderTab === 'past' 
+                  ? 'text-foreground' 
+                  : 'text-muted-foreground'
+              }`}
+              data-testid="tab-past-orders"
+            >
+              Past
+              {orderTab === 'past' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Orders List */}
+        <div className="flex-1 overflow-y-auto">
+          {displayOrders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 mt-12">
+              <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Receipt className="w-12 h-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                {orderTab === 'upcoming' ? 'No upcoming orders' : 'No past orders'}
+              </h3>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                {orderTab === 'upcoming' 
+                  ? 'Your active orders will appear here' 
+                  : 'Your completed orders will appear here'}
+              </p>
+              {orderTab === 'upcoming' && (
                 <Button 
                   onClick={() => setActiveTab('browse')}
-                  className="mt-2"
-                  data-testid="button-browse-services"
+                  data-testid="button-start-shopping"
                 >
-                  Browse Services
+                  Start shopping
                 </Button>
-              </div>
-            </Card>
+              )}
+            </div>
           ) : (
-            <div className="space-y-3">
-              {orders.map((order) => {
+            <div className="divide-y">
+              {displayOrders.map((order) => {
                 const deliveryAddress = `${order.addressLine1}${order.addressLine2 ? ', ' + order.addressLine2 : ''}, ${order.city}`;
                 const totalWithVat = order.totalCents ? (order.totalCents / 100).toFixed(2) : '0.00';
+                const isActive = !['delivered', 'closed'].includes(order.state);
                 
                 return (
-                  <Card 
-                    key={order.id} 
-                    className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  <div
+                    key={order.id}
+                    className="p-4 hover-elevate active-elevate-2 cursor-pointer bg-background"
                     onClick={() => {
                       setSelectedOrder(order);
                       setShowOrderDetail(true);
                     }}
                     data-testid={`card-order-${order.id}`}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-sm font-semibold ${getStatusColor(order.state)}`}>
-                            {getStatusText(order.state)}
-                          </span>
-                          {(order.state === 'picked_up' || order.state === 'out_for_delivery') && (
-                            <Badge variant="secondary" className="text-xs">
-                              In Transit
-                            </Badge>
-                          )}
+                    {/* Shop Logo & Status */}
+                    <div className="flex gap-3 mb-3">
+                      {/* Shop Logo */}
+                      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img 
+                          src={logoImage} 
+                          alt="Mr Bubbles" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      {/* Order Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold truncate">Mr Bubbles Express</h3>
+                            <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold mt-1 ${getStatusBadgeClass(order.state)}`}>
+                              {getStatusText(order.state)}
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-semibold">€{totalWithVat}</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                      </div>
+                    </div>
+
+                    {/* Order Details */}
+                    <div className="space-y-2 text-sm">
+                      {/* Delivery Address */}
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <span className="line-clamp-1">{deliveryAddress}</span>
+                      </div>
+
+                      {/* Order Date/Time */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="w-4 h-4 flex-shrink-0" />
+                        <span>
                           {order.createdAt && new Date(order.createdAt).toLocaleDateString('en-IE', { 
-                            weekday: 'short', 
                             month: 'short', 
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
-                        </p>
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">€{totalWithVat}</p>
-                        <p className="text-xs text-muted-foreground">incl. VAT</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span className="truncate">{deliveryAddress}</span>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">View Details</span>
-                      <ChevronDown className="h-4 w-4 -rotate-90" />
-                    </div>
-                  </Card>
+                    {/* Action Button */}
+                    {isActive && (
+                      <Button 
+                        variant="outline" 
+                        className="w-full mt-3"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrder(order);
+                          setShowOrderDetail(true);
+                        }}
+                        data-testid={`button-track-order-${order.id}`}
+                      >
+                        Track order
+                      </Button>
+                    )}
+                    
+                    {!isActive && (
+                      <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">View receipt</span>
+                        <ChevronDown className="h-4 w-4 -rotate-90" />
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
