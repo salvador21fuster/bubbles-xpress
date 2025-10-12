@@ -12,7 +12,7 @@ import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
 import logoImage from "@assets/image_1760233335456.png";
 import serviceImage from "@assets/download (4)_1760237350814.jpg";
-import introVideo from "@assets/Lightning-Fast Delivery Zero Hassle, Total Flexibility – We Sync with Your Life Savor the ultimate convenience in laundry and dry cleaning with our lightning-quick 24-hour turnaround. Pick a picku (6)_1760193095528.mp4";
+import introVideo from "@assets/Diseño sin título (4)_1760249798796.mp4";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
