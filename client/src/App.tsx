@@ -24,6 +24,7 @@ import AdminTransactions from "@/pages/admin/Transactions";
 import AdminUsers from "@/pages/admin/Users";
 import AdminPolicies from "@/pages/admin/Policies";
 import AdminInvoices from "@/pages/admin/Invoices";
+import CustomerHome from "@/pages/customer/Home";
 import CustomerServices from "@/pages/customer/Services";
 import CustomerCheckout from "@/pages/customer/Checkout";
 import CustomerDashboard from "@/pages/customer/Dashboard";
@@ -72,7 +73,7 @@ function Router() {
         {/* Customer Routes */}
         {(isCustomer || isSuperAdmin) && (
           <>
-            <Route path="/customer" component={CustomerServices} />
+            <Route path="/customer" component={CustomerHome} />
             <Route path="/customer/services" component={CustomerServices} />
             <Route path="/customer/checkout" component={CustomerCheckout} />
             <Route path="/customer/orders" component={CustomerDashboard} />

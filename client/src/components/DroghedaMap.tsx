@@ -1,177 +1,158 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Navigation, Clock } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface DroghedaMapProps {
+  height?: string;
+  showMarker?: boolean;
+  markerPosition?: [number, number];
+  markerLabel?: string;
   showDriverVan?: boolean;
   driverLocation?: { latitude: number; longitude: number } | null;
-  orderStatus?: string;
 }
 
-export function DroghedaMap({ showDriverVan = true, driverLocation, orderStatus }: DroghedaMapProps) {
-  const [vanPosition, setVanPosition] = useState({ x: 50, y: 50 });
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Drogheda coordinates (approximate center)
-  const droghedaCenter = { lat: 53.7175, lng: -6.3572 };
-  
-  // Mr Bubbles HQ on Bubbles Road (simulated position)
-  const mrBubblesHQ = { x: 50, y: 50 }; // Center of map for demo
+export function DroghedaMap({ 
+  height = "400px", 
+  showMarker = true,
+  markerPosition,
+  markerLabel = "Your location",
+  showDriverVan = false,
+  driverLocation
+}: DroghedaMapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // Idle animation - van bobbing slightly
-    if (showDriverVan && !driverLocation) {
-      const interval = setInterval(() => {
-        setIsAnimating(prev => !prev);
-      }, 2000);
-      return () => clearInterval(interval);
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    // Drogheda, Ireland coordinates
+    const droghedaCenter: [number, number] = [53.7187, -6.3478];
+    
+    // Initialize map
+    const map = L.map(mapRef.current, {
+      center: markerPosition || droghedaCenter,
+      zoom: 14,
+      zoomControl: true,
+      scrollWheelZoom: true,
+    });
+
+    // Add OpenStreetMap tiles (Uber-like style)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Add user location marker if enabled
+    if (showMarker) {
+      const markerIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `
+          <div style="
+            background: #06C167;
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <svg style="transform: rotate(45deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+      });
+
+      L.marker(markerPosition || droghedaCenter, { icon: markerIcon })
+        .addTo(map)
+        .bindPopup(markerLabel);
     }
-  }, [showDriverVan, driverLocation]);
+
+    // Add driver van marker if enabled
+    if (showDriverVan && driverLocation) {
+      const vanIcon = L.divIcon({
+        className: 'van-marker',
+        html: `
+          <div style="
+            background: #06C167;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          ">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <path d="M16 8h2l3 3v5h-3"></path>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            <span style="color: white; font-weight: 600; font-size: 14px;">Driver</span>
+          </div>
+        `,
+        iconSize: [100, 36],
+        iconAnchor: [50, 18],
+      });
+
+      L.marker([driverLocation.latitude, driverLocation.longitude], { icon: vanIcon })
+        .addTo(map)
+        .bindPopup('Your driver is here!');
+    }
+
+    // Add nearby laundry shops markers (mock data for Drogheda area)
+    const laundryShops = [
+      { lat: 53.7197, lng: -6.3488, name: "Mr Bubbles HQ", type: "hq" },
+      { lat: 53.7177, lng: -6.3468, name: "Bubbles Road Station", type: "shop" },
+      { lat: 53.7207, lng: -6.3458, name: "Quick Clean Express", type: "shop" },
+    ];
+
+    laundryShops.forEach(shop => {
+      const shopIcon = L.divIcon({
+        className: 'shop-marker',
+        html: `
+          <div style="
+            background: ${shop.type === 'hq' ? '#06C167' : '#ffffff'};
+            color: ${shop.type === 'hq' ? '#ffffff' : '#000000'};
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 2px solid #06C167;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          ">${shop.name}</div>
+        `,
+        iconSize: [140, 30],
+        iconAnchor: [70, 15],
+      });
+
+      L.marker([shop.lat, shop.lng], { icon: shopIcon })
+        .addTo(map)
+        .bindPopup(`<b>${shop.name}</b><br>${shop.type === 'hq' ? 'Main Hub' : 'Pickup Point'}`);
+    });
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [markerPosition, markerLabel, showMarker, showDriverVan, driverLocation]);
 
   return (
-    <div className="space-y-4">
-      {/* Map Container */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <div className="relative h-[400px] bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950">
-            
-            {/* Geofence Boundary - Drogheda, Louth Area */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {/* Grid lines for street effect */}
-              <defs>
-                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="0.3"/>
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#grid)" />
-              
-              {/* Geofence boundary - circular area around Drogheda */}
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="35" 
-                fill="none" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth="2" 
-                strokeDasharray="4 2"
-                opacity="0.6"
-              />
-              
-              {/* Roads (simplified) */}
-              <path d="M 20 50 L 80 50" stroke="rgba(100,100,100,0.3)" strokeWidth="1.5" />
-              <path d="M 50 20 L 50 80" stroke="rgba(100,100,100,0.3)" strokeWidth="1.5" />
-              <path d="M 30 30 L 70 70" stroke="rgba(100,100,100,0.3)" strokeWidth="1" />
-              
-              {/* Mr Bubbles HQ Marker */}
-              <g transform={`translate(${mrBubblesHQ.x}, ${mrBubblesHQ.y})`}>
-                {/* HQ Building */}
-                <rect x="-3" y="-5" width="6" height="5" fill="hsl(var(--primary))" opacity="0.8" />
-                <circle cx="0" cy="-8" r="2" fill="hsl(var(--primary))" />
-                <text x="0" y="-12" fontSize="3" textAnchor="middle" fill="hsl(var(--primary))" fontWeight="bold">HQ</text>
-              </g>
-            </svg>
-
-            {/* Animated Van */}
-            {showDriverVan && (
-              <div 
-                className="absolute transition-all duration-1000 ease-in-out"
-                style={{
-                  left: `${vanPosition.x}%`,
-                  top: `${vanPosition.y}%`,
-                  transform: `translate(-50%, -50%) scale(${isAnimating ? 1.05 : 1})`,
-                }}
-              >
-                <div className="relative">
-                  {/* Van SVG */}
-                  <svg width="60" height="40" viewBox="0 0 60 40" className="drop-shadow-lg">
-                    {/* Van body */}
-                    <rect x="5" y="12" width="45" height="20" rx="3" fill="hsl(var(--primary))" />
-                    {/* Van cab */}
-                    <path d="M 12 12 L 12 8 L 30 8 L 35 12 Z" fill="hsl(var(--primary))" opacity="0.9" />
-                    {/* Windows */}
-                    <rect x="14" y="9.5" width="8" height="5" rx="1" fill="rgba(255,255,255,0.3)" />
-                    <rect x="24" y="9.5" width="7" height="5" rx="1" fill="rgba(255,255,255,0.3)" />
-                    <rect x="10" y="16" width="35" height="10" rx="1" fill="rgba(255,255,255,0.2)" />
-                    {/* Wheels */}
-                    <circle cx="18" cy="32" r="5" fill="#333" />
-                    <circle cx="18" cy="32" r="3" fill="#666" />
-                    <circle cx="42" cy="32" r="5" fill="#333" />
-                    <circle cx="42" cy="32" r="3" fill="#666" />
-                    {/* Logo */}
-                    <text x="27" y="23" fontSize="8" textAnchor="middle" fill="white" fontWeight="bold">MB</text>
-                  </svg>
-                  
-                  {/* Pulsing indicator */}
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 animate-ping" />
-                    <div className="absolute inset-0 w-8 h-8 rounded-full bg-primary/40" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Driver location marker (when available) */}
-            {driverLocation && (
-              <div 
-                className="absolute transition-all duration-500"
-                style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <Navigation className="h-8 w-8 text-primary animate-pulse" />
-              </div>
-            )}
-
-            {/* Location labels */}
-            <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg border shadow-sm">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-xs font-medium">Pilot Area</p>
-                  <p className="text-xs text-muted-foreground">Drogheda, Louth</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Geofence info */}
-            <div className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg border shadow-sm">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <p className="text-xs font-medium">Service Area Active</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Status Card */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              {orderStatus === 'confirmed' ? (
-                <Clock className="h-5 w-5 text-primary" />
-              ) : (
-                <Navigation className="h-5 w-5 text-primary" />
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">
-                {orderStatus === 'confirmed' && 'Awaiting Driver Acceptance'}
-                {orderStatus === 'picked_up' && 'Driver En Route to Shop'}
-                {orderStatus === 'out_for_delivery' && 'Out for Delivery'}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {orderStatus === 'confirmed' && 'Mr Bubbles van is ready at HQ on Bubbles Road'}
-                {orderStatus === 'picked_up' && 'Your laundry is being transported for cleaning'}
-                {orderStatus === 'out_for_delivery' && 'Driver is heading to your location'}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <div 
+      ref={mapRef} 
+      style={{ height, width: '100%', borderRadius: '8px' }}
+      data-testid="map-drogheda"
+      className="shadow-sm"
+    />
   );
 }
