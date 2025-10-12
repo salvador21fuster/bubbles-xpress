@@ -106,10 +106,10 @@ export default function DriverTraining() {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <div className="mb-6">
-        <Link href="/driver">
+        <Link href="/admin">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back to Admin Portal
           </Button>
         </Link>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" data-testid="text-page-title">Driver Training</h1>

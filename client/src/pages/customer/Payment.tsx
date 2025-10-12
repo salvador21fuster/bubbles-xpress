@@ -144,12 +144,12 @@ export default function Payment() {
       <div className="max-w-4xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate(`/customer/orders/${orderId}`)}
+          onClick={() => navigate('/admin')}
           className="mb-4"
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Order
+          Back to Admin Portal
         </Button>
 
         <div className="grid gap-6 md:grid-cols-2">

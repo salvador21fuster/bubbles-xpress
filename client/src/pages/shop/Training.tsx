@@ -92,10 +92,10 @@ export default function ShopTraining() {
   return (
     <div className="p-6 max-w-6xl">
       <div className="mb-6">
-        <Link href="/shop">
+        <Link href="/admin">
           <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back to Admin Portal
           </Button>
         </Link>
         <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Shop Training</h1>

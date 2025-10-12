@@ -155,11 +155,11 @@ export default function NewOrder() {
           <Button 
             variant="ghost" 
             className="mb-4"
-            onClick={() => navigate('/customer')}
+            onClick={() => navigate('/admin')}
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Admin Portal
           </Button>
           <h1 className="text-2xl font-bold mb-2">New Laundry Order</h1>
           <p className="text-muted-foreground">Book a pickup for your laundry</p>
