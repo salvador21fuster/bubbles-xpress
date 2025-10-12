@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, ChevronDown, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2 } from "lucide-react";
+import { MapPin, ChevronDown, ChevronLeft, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -840,16 +840,16 @@ export default function CustomerHome() {
         <div className="fixed inset-x-0 bottom-0 bg-background rounded-t-3xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
           {/* Header */}
           <div className="sticky top-0 bg-background border-b z-10">
-            <div className="flex items-center justify-between p-4">
-              <h2 className="text-xl font-bold">{selectedService.name}</h2>
+            <div className="flex items-center gap-3 p-4">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setSelectedService(null)}
-                data-testid="button-close-service"
+                data-testid="button-back-service"
               >
-                <X className="h-5 w-5" />
+                <ChevronLeft className="h-6 w-6" />
               </Button>
+              <h2 className="text-xl font-bold">{selectedService.name}</h2>
             </div>
           </div>
 
@@ -944,9 +944,9 @@ export default function CustomerHome() {
             variant="ghost" 
             size="icon" 
             onClick={() => setShowCheckout(false)}
-            data-testid="button-close-checkout"
+            data-testid="button-back-checkout"
           >
-            <X className="h-5 w-5" />
+            <ChevronLeft className="h-6 w-6" />
           </Button>
           <h1 className="text-xl font-bold">Checkout</h1>
         </div>
@@ -1127,10 +1127,10 @@ export default function CustomerHome() {
             variant="ghost" 
             size="icon" 
             onClick={() => setShowOrderDetail(false)}
-            data-testid="button-close-order-detail"
+            data-testid="button-back-order-detail"
             className="rounded-full bg-background"
           >
-            <X className="h-5 w-5" />
+            <ChevronLeft className="h-6 w-6" />
           </Button>
           <Button 
             variant="ghost" 
