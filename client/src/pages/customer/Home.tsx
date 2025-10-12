@@ -740,26 +740,43 @@ export default function CustomerHome() {
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar - Uber Eats Style */}
       <div className="flex-shrink-0 border-b bg-background">
-        {/* Delivery/Pickup Toggle */}
-        <div className="flex gap-2 p-3 border-b">
-          <Button 
-            variant={deliveryMode === 'delivery' ? 'default' : 'ghost'} 
-            size="sm" 
-            className="rounded-full" 
-            onClick={() => setDeliveryMode('delivery')}
-            data-testid="button-delivery"
-          >
-            Delivery
-          </Button>
-          <Button 
-            variant={deliveryMode === 'pickup' ? 'default' : 'ghost'} 
-            size="sm" 
-            className="rounded-full"
-            onClick={() => setDeliveryMode('pickup')}
-            data-testid="button-pickup"
-          >
-            Pickup
-          </Button>
+        {/* Delivery/Pickup Toggle with Cart */}
+        <div className="flex items-center justify-between gap-2 p-3 border-b">
+          <div className="flex gap-2">
+            <Button 
+              variant={deliveryMode === 'delivery' ? 'default' : 'ghost'} 
+              size="sm" 
+              className="rounded-full" 
+              onClick={() => setDeliveryMode('delivery')}
+              data-testid="button-delivery"
+            >
+              Delivery
+            </Button>
+            <Button 
+              variant={deliveryMode === 'pickup' ? 'default' : 'ghost'} 
+              size="sm" 
+              className="rounded-full"
+              onClick={() => setDeliveryMode('pickup')}
+              data-testid="button-pickup"
+            >
+              Pickup
+            </Button>
+          </div>
+          
+          {/* Cart Button - Top Right */}
+          {cart.length > 0 && !showCheckout && (
+            <Button
+              variant="default"
+              size="sm"
+              className="rounded-full gap-2 relative"
+              onClick={() => setShowCheckout(true)}
+              data-testid="button-view-cart"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              <span className="font-bold">{cart.length}</span>
+              <span>€{(cartTotal * 1.23).toFixed(2)}</span>
+            </Button>
+          )}
         </div>
 
         {/* Address Bar */}
@@ -854,21 +871,6 @@ export default function CustomerHome() {
           </Button>
         </div>
       </div>
-
-      {/* Floating Cart Button - Only show when cart has items and not in checkout */}
-      {cart.length > 0 && !showCheckout && (
-        <Button
-          size="lg"
-          className="fixed bottom-24 right-4 z-40 rounded-full shadow-lg h-14 px-6 gap-2"
-          onClick={() => setShowCheckout(true)}
-          data-testid="button-view-cart"
-        >
-          <ShoppingCart className="h-5 w-5" />
-          <span className="font-bold">{cart.length}</span>
-          <span className="mx-1">•</span>
-          <span>€{(cartTotal * 1.23).toFixed(2)}</span>
-        </Button>
-      )}
 
       {/* Service Detail Modal */}
       <ServiceDetailModal />
