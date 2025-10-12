@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, ChevronDown, ChevronLeft, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2, Play, Pause, Volume2, VolumeX, SkipForward, LogOut } from "lucide-react";
+import { MapPin, ChevronDown, ChevronLeft, ArrowLeft, Search, Package, Star, Clock, Home, User, Receipt, Sparkles, Shirt, Wind, Droplets, TrendingUp, Gift, Zap, RotateCcw, Award, Truck, Scissors, Heart, Bed, ShoppingBag, Footprints, Snowflake, Ticket, X, Plus, Minus, ShoppingCart, CreditCard, Calendar, Check, MessageCircle, Send, Loader2, Play, Pause, Volume2, VolumeX, SkipForward, LogOut } from "lucide-react";
 import { Link } from "wouter";
 import { DroghedaMap } from "@/components/DroghedaMap";
 import type { Service, Order } from "@shared/schema";
@@ -1361,13 +1361,13 @@ export default function CustomerHome() {
         {/* Header - Minimal Uber Eats style */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-background/90 backdrop-blur">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
             onClick={() => setShowOrderDetail(false)}
             data-testid="button-back-order-detail"
-            className="rounded-full bg-background"
+            className="rounded-full bg-background shadow-md"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ArrowLeft className="h-6 w-6" />
           </Button>
           <Button 
             variant="ghost" 
