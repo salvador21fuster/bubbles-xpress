@@ -1,7 +1,7 @@
 # Mr Bubbles Express - Uber Eats Style Design Guidelines
 
 ## Overview
-The Customer and Driver apps follow Uber Eats design patterns exactly - mobile-first, clean, and optimized for iOS App Store and Google Play Store deployment.
+**ALL PORTALS** (Customer App, Driver App, Shop Portal, Franchise Portal, and Admin Portal) follow Uber Eats design patterns exactly - mobile-first, clean, and consistent across the entire platform. This creates a unified, professional experience whether on mobile apps (iOS/Android) or web portals.
 
 ## Color Palette
 

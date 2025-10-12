@@ -25,59 +25,62 @@ export default function ShopDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Shop Dashboard</h1>
-        <p className="text-muted-foreground">Manage your orders and workflow</p>
+    <div className="min-h-screen bg-background pb-6">
+      {/* Uber Eats Style Header */}
+      <div className="p-4 border-b">
+        <h1 className="text-2xl font-bold">Shop Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your orders and workflow</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-total-orders">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Intake</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-pending">{stats.pending}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Processing</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-processing">{stats.processing}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="stat-completed">{stats.completed}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="p-4 space-y-6">
+        {/* Stats Cards - Mobile First Grid */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Card className="rounded-lg">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground">Total Orders</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-2xl font-bold" data-testid="stat-total-orders">{stats.total}</div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-lg">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-2xl font-bold" data-testid="stat-pending">{stats.pending}</div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-lg">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground">Processing</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-2xl font-bold" data-testid="stat-processing">{stats.processing}</div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-lg">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground">Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-2xl font-bold text-primary" data-testid="stat-completed">{stats.completed}</div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Recent Orders */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {orders.slice(0, 6).map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
+        {/* Recent Orders */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Recent Orders</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {orders.slice(0, 6).map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
