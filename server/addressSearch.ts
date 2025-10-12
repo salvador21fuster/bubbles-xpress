@@ -2,17 +2,18 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-// Free geocoding service - OpenStreetMap Nominatim
+// Free geocoding service - OpenStreetMap Nominatim with smart fallback
 async function searchAddressNominatim(query: string): Promise<any[]> {
   try {
-    const response = await fetch(
+    // Try full query first
+    const fullResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?` +
       new URLSearchParams({
         q: query,
         format: 'json',
         addressdetails: '1',
         countrycodes: 'ie', // Ireland only
-        limit: '5'
+        limit: '10'
       }),
       {
         headers: {
@@ -21,7 +22,62 @@ async function searchAddressNominatim(query: string): Promise<any[]> {
       }
     );
     
-    const data = await response.json();
+    let data = await fullResponse.json();
+    
+    // If no results, try multiple fallback strategies
+    if (data.length === 0) {
+      const parts = query.toLowerCase().split(/[\s,]+/);
+      
+      // Remove common housing terms that aren't in geocoding databases
+      const housingTerms = ['villas', 'estate', 'apartments', 'apts', 'complex', 'court', 'gardens'];
+      const filtered = parts.filter(p => !housingTerms.includes(p));
+      
+      if (filtered.length >= 2 && filtered.join(' ') !== query.toLowerCase()) {
+        const fallbackQuery = filtered.join(' ');
+        console.log(`No results for "${query}", trying without housing terms: "${fallbackQuery}"`);
+        
+        const fallbackResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?` +
+          new URLSearchParams({
+            q: fallbackQuery,
+            format: 'json',
+            addressdetails: '1',
+            countrycodes: 'ie',
+            limit: '10'
+          }),
+          {
+            headers: {
+              'User-Agent': 'MrBubblesExpress/1.0'
+            }
+          }
+        );
+        data = await fallbackResponse.json();
+      }
+      
+      // If still no results, try just the last word (usually city name)
+      if (data.length === 0 && parts.length > 1) {
+        const cityQuery = parts[parts.length - 1];
+        console.log(`Still no results, trying just city: "${cityQuery}"`);
+        
+        const cityResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?` +
+          new URLSearchParams({
+            q: cityQuery,
+            format: 'json',
+            addressdetails: '1',
+            countrycodes: 'ie',
+            limit: '10'
+          }),
+          {
+            headers: {
+              'User-Agent': 'MrBubblesExpress/1.0'
+            }
+          }
+        );
+        data = await cityResponse.json();
+      }
+    }
+    
     return data;
   } catch (error) {
     console.error("Nominatim error:", error);
@@ -42,60 +98,47 @@ export async function searchAddress(query: string): Promise<Array<{
   const rawResults = await searchAddressNominatim(query);
   
   if (rawResults.length === 0) {
+    console.log(`No address results found for: "${query}"`);
     return [];
   }
 
-  try {
+  console.log(`Found ${rawResults.length} addresses for: "${query}"`);
 
-    // Use Gemini AI to intelligently rank and format the results
-    const systemPrompt = `You are an intelligent address formatter for Ireland. 
-Given search results from a geocoding API, rank them by relevance to the user's search query and format them in a user-friendly way.
-
-Rules:
-1. Prioritize complete street addresses over general areas
-2. Format as: "Street Number Street Name, City, County Postcode" 
-3. Return ONLY a JSON array of the top 5 most relevant results
-4. Each result must have: displayName, street, city, county, postcode, lat, lon
-5. If postcode is missing, use empty string
-6. Make sure displayName is clear and readable`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-      },
-      contents: `User search query: "${query}"
-
-Geocoding API results:
-${JSON.stringify(rawResults, null, 2)}
-
-Return the top 5 most relevant addresses formatted for Irish users.`,
-    });
-
-    const aiResults = JSON.parse(response.text || "[]");
+  // Format Nominatim results directly - simpler and more reliable
+  return rawResults.slice(0, 5).map((result: any) => {
+    const address = result.address || {};
+    const street = address.road || address.street || '';
+    const houseNumber = address.house_number || '';
+    const city = address.city || address.town || address.village || address.suburb || '';
+    const county = address.county || address.state || '';
+    const postcode = address.postcode || '';
     
-    return aiResults.slice(0, 5).map((result: any) => ({
-      displayName: result.displayName || result.display_name || '',
-      street: result.street || result.road || '',
-      city: result.city || result.town || result.village || '',
-      county: result.county || result.state || '',
-      postcode: result.postcode || result.postal_code || '',
+    // Build a nice display name
+    let displayParts = [];
+    if (houseNumber && street) {
+      displayParts.push(`${houseNumber} ${street}`);
+    } else if (street) {
+      displayParts.push(street);
+    }
+    if (city) {
+      displayParts.push(city);
+    }
+    if (county && county !== city) {
+      displayParts.push(county);
+    }
+    
+    const displayName = displayParts.length > 0 
+      ? displayParts.join(', ')
+      : result.display_name;
+
+    return {
+      displayName,
+      street,
+      city,
+      county,
+      postcode,
       lat: parseFloat(result.lat) || 0,
       lon: parseFloat(result.lon) || 0,
-    }));
-  } catch (error) {
-    console.error("Address search error:", error);
-    
-    // Fallback to raw Nominatim results if AI fails
-    return rawResults.slice(0, 5).map((result: any) => ({
-      displayName: result.display_name,
-      street: result.address?.road || '',
-      city: result.address?.city || result.address?.town || result.address?.village || '',
-      county: result.address?.county || result.address?.state || '',
-      postcode: result.address?.postcode || '',
-      lat: parseFloat(result.lat),
-      lon: parseFloat(result.lon),
-    }));
-  }
+    };
+  });
 }
