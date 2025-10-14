@@ -304,6 +304,43 @@ export async function seedDatabase() {
       }
     }
 
+    // Create PAID ORDER ready for driver acceptance (collection + delivery)
+    const customer4 = await storage.getUserByEmail("customer4@test.com");
+    if (customer4) {
+      try {
+        const paidOrder = await storage.createOrder({
+          customerId: customer4.id,
+          customerFullName: "Jack Walsh",
+          customerPhone: "+353871234004",
+          addressLine1: "25 Castle Street",
+          addressLine2: "Apt 3B",
+          city: "Drogheda",
+          eircode: "A92 F7G8",
+          subtotalCents: 3000, // €30.00 for 6kg laundry
+          deliveryFeeCents: 500, // €5.00 delivery
+          tipCents: 300, // €3.00 tip (10%)
+          vatCents: 874, // 23% VAT on subtotal + delivery
+          totalCents: 4674, // €46.74 total
+          currency: "EUR",
+          deliveryOption: "standard",
+          deliveryInstructions: "Leave at reception desk",
+          tipPercentage: 10,
+          paymentMethod: "card",
+          paymentIntentId: "pi_test_" + Date.now(),
+          state: "confirmed", // PAID - ready for driver
+          notes: "Collection AND Delivery - Full service (6kg laundry)",
+        });
+        console.log("✅ Created PAID order ready for driver acceptance");
+        console.log(`   Order ID: ${paidOrder.id}`);
+        console.log(`   Customer: Jack Walsh (+353871234004)`);
+        console.log(`   Address: 25 Castle Street, Apt 3B, Drogheda`);
+        console.log(`   Total: €46.74 (Collection + Delivery)`);
+        console.log(`   Status: PAID & CONFIRMED - Awaiting driver acceptance`);
+      } catch (error) {
+        console.error("❌ Error creating paid order:", error);
+      }
+    }
+
     console.log("✅ Database seeding complete!");
   } catch (error) {
     console.error("❌ Error seeding database:", error);
