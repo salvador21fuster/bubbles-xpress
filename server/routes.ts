@@ -7,6 +7,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { signUpSchema, signInSchema, hashPassword, verifyPassword } from "./auth";
 import { z } from "zod";
 import { generateQRPayload, generateQRCode, parseQRPayload } from "./utils/qrcode";
+import { generateOrderLabelPayload } from "./utils/labelQr";
 import type { InsertShop } from "@shared/schema";
 
 // ============= VALIDATION SCHEMAS =============
@@ -274,6 +275,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Order not found" });
       }
       res.json(order);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Generate label QR payload for order (server-side signed)
+  app.get("/api/orders/:id/label-qr", async (req, res) => {
+    try {
+      const order = await storage.getOrder(req.params.id);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Extract property number from address (first number found, or use order ID as fallback)
+      const propertyNo = order.addressLine1.match(/^\d+/)?.[0] || order.id.slice(0, 6);
+      
+      // Generate updated date in YYYY-MM-DD format
+      const updatedDate = new Date(order.updatedAt || order.createdAt || Date.now())
+        .toISOString()
+        .split('T')[0];
+
+      // Generate signed QR payload
+      const qrPayload = generateOrderLabelPayload({
+        orderId: order.id,
+        customerId: order.customerId,
+        propertyNo,
+        balanceDueEUR: (order.totalCents || 0) / 100,
+        updatedDate,
+      });
+
+      res.json({ 
+        qrPayload,
+        orderId: order.id,
+        customerId: order.customerId,
+        propertyNo,
+        balanceDue: (order.totalCents || 0) / 100,
+        updatedDate,
+      });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

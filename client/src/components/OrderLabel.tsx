@@ -2,10 +2,11 @@
 // Based on Mr Bubbles Express label specification
 
 import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Download, Printer, X } from 'lucide-react';
+import { Download, Printer, Loader2 } from 'lucide-react';
 
 interface OrderLabelProps {
   orderId: string;
@@ -15,6 +16,15 @@ interface OrderLabelProps {
   updatedDate: string;
   open: boolean;
   onClose: () => void;
+}
+
+interface LabelQRData {
+  qrPayload: string;
+  orderId: string;
+  customerId: string;
+  propertyNo: string;
+  balanceDue: number;
+  updatedDate: string;
 }
 
 export function OrderLabel({
@@ -29,6 +39,12 @@ export function OrderLabel({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
+  // Fetch signed QR payload from server
+  const { data: labelData, isLoading: isLoadingLabel } = useQuery<LabelQRData>({
+    queryKey: ['/api/orders', orderId, 'label-qr'],
+    enabled: open && !!orderId,
+  });
+
   // Label specifications (70x70mm at 203 DPI)
   const DPI = 203;
   const MM_TO_INCHES = 1 / 25.4;
@@ -37,7 +53,7 @@ export function OrderLabel({
   const MARGIN_PX = 16;
 
   useEffect(() => {
-    if (!open || !canvasRef.current) return;
+    if (!open || !canvasRef.current || !labelData) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -47,18 +63,8 @@ export function OrderLabel({
     canvas.width = LABEL_SIZE_PX;
     canvas.height = LABEL_SIZE_PX;
 
-    // Generate QR payload
-    const qrPayload = {
-      v: 1,
-      type: 'order_label',
-      order_id: orderId,
-      customer_id: customerId,
-      property_no: propertyNo,
-      balance_due_eur: balanceDue,
-      updated: updatedDate,
-      ts: Math.floor(Date.now() / 1000),
-    };
-    const qrData = `mrbl://order?${JSON.stringify(qrPayload)}`;
+    // Use server-generated signed QR payload
+    const qrData = labelData.qrPayload;
 
     // Generate QR code
     QRCode.toDataURL(qrData, {
@@ -89,18 +95,18 @@ export function OrderLabel({
         const qrY = 60;
         ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
 
-        // Draw text information
+        // Draw text information (use server data)
         ctx.font = '22px sans-serif';
         ctx.textAlign = 'left';
         const textY = qrY + qrSize + 30;
 
-        ctx.fillText(`Property: ${propertyNo}`, MARGIN_PX, textY);
-        ctx.fillText(`Balance Due: €${balanceDue.toFixed(2)}`, MARGIN_PX, textY + 30);
-        ctx.fillText(`Updated: ${updatedDate}`, MARGIN_PX, textY + 60);
+        ctx.fillText(`Property: ${labelData.propertyNo}`, MARGIN_PX, textY);
+        ctx.fillText(`Balance Due: €${labelData.balanceDue.toFixed(2)}`, MARGIN_PX, textY + 30);
+        ctx.fillText(`Updated: ${labelData.updatedDate}`, MARGIN_PX, textY + 60);
       };
       qrImage.src = url;
     });
-  }, [open, orderId, customerId, propertyNo, balanceDue, updatedDate]);
+  }, [open, orderId, labelData]);
 
   const handlePrint = () => {
     const canvas = canvasRef.current;
@@ -157,11 +163,17 @@ export function OrderLabel({
         <div className="space-y-4">
           {/* Label Preview */}
           <div className="flex justify-center p-4 bg-muted rounded-lg">
-            <canvas
-              ref={canvasRef}
-              className="border-2 border-border rounded"
-              style={{ width: '280px', height: '280px' }}
-            />
+            {isLoadingLabel ? (
+              <div className="flex items-center justify-center" style={{ width: '280px', height: '280px' }}>
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <canvas
+                ref={canvasRef}
+                className="border-2 border-border rounded"
+                style={{ width: '280px', height: '280px' }}
+              />
+            )}
           </div>
 
           {/* Action Buttons */}

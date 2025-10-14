@@ -43,8 +43,12 @@ export function generateOrderLabelPayload({
   };
 
   // Sign the payload (server-side only)
+  const secret = process.env.QR_SECRET || process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error('QR_SECRET or SESSION_SECRET must be set for secure label generation');
+  }
+  
   const canonical = JSON.stringify(payload);
-  const secret = process.env.QR_SECRET || process.env.SESSION_SECRET || 'default-secret';
   const sig = crypto.createHmac('sha256', secret).update(canonical).digest('hex');
   payload.sig = sig;
 
@@ -66,8 +70,12 @@ export function verifyOrderLabelPayload(qrData: string): OrderLabelPayload | nul
 
     // Verify signature
     const { sig, ...unsignedPayload } = payload;
+    const secret = process.env.QR_SECRET || process.env.SESSION_SECRET;
+    if (!secret) {
+      return null; // Cannot verify without secret
+    }
+    
     const canonical = JSON.stringify(unsignedPayload);
-    const secret = process.env.QR_SECRET || process.env.SESSION_SECRET || 'default-secret';
     const expectedSig = crypto.createHmac('sha256', secret).update(canonical).digest('hex');
 
     if (sig === expectedSig) {

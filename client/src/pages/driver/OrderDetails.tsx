@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MapPin, MessageCircle, Send, User } from "lucide-react";
+import { ArrowLeft, MapPin, MessageCircle, Send, User, Printer } from "lucide-react";
 import { useRoute, useLocation } from "wouter";
 import type { Order, Message, User as UserType } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { OrderLabel } from "@/components/OrderLabel";
 
 export default function DriverOrderDetail() {
   const [, navigate] = useLocation();
@@ -17,6 +18,7 @@ export default function DriverOrderDetail() {
   const orderId = params?.id;
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
+  const [showLabelDialog, setShowLabelDialog] = useState(false);
 
   const { data: order } = useQuery<Order>({
     queryKey: ["/api/orders", orderId],
@@ -104,6 +106,17 @@ export default function DriverOrderDetail() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Print Label Button */}
+        <Button
+          onClick={() => setShowLabelDialog(true)}
+          className="w-full gap-2"
+          variant="outline"
+          data-testid="button-print-label"
+        >
+          <Printer className="h-4 w-4" />
+          Print Order Label
+        </Button>
+
         {/* Customer Info */}
         <Card>
           <div className="p-4">
@@ -217,6 +230,17 @@ export default function DriverOrderDetail() {
           </div>
         </Card>
       </div>
+
+      {/* Order Label Dialog */}
+      <OrderLabel
+        orderId={order.id}
+        customerId={order.customerId}
+        propertyNo={order.addressLine1.match(/^\d+/)?.[0] || order.id.slice(0, 6)}
+        balanceDue={(order.totalCents || 0) / 100}
+        updatedDate={new Date(order.updatedAt || order.createdAt || Date.now()).toISOString().split('T')[0]}
+        open={showLabelDialog}
+        onClose={() => setShowLabelDialog(false)}
+      />
     </div>
   );
 }
