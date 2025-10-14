@@ -74,13 +74,15 @@ export default function DriverDashboard() {
     mutationFn: async (orderId: string) => {
       return await apiRequest("POST", "/api/driver/accept-order", { orderId });
     },
-    onSuccess: () => {
+    onSuccess: (_data, orderId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/driver/available-orders"] });
       toast({
         title: "Order Accepted",
         description: "The order has been assigned to you",
       });
+      // Navigate to order details page
+      navigate(`/driver/orders/${orderId}`);
     },
     onError: (error: any) => {
       toast({

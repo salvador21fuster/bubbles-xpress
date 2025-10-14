@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MapPin, MessageCircle, Send, User, Printer } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ArrowLeft, MapPin, MessageCircle, Send, User, Printer, QrCode, Camera, X } from "lucide-react";
 import { useRoute, useLocation } from "wouter";
 import type { Order, Message, User as UserType } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { OrderLabel } from "@/components/OrderLabel";
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 export default function DriverOrderDetail() {
   const [, navigate] = useLocation();
@@ -19,6 +21,9 @@ export default function DriverOrderDetail() {
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
   const [showLabelDialog, setShowLabelDialog] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [scannedData, setScannedData] = useState<string | null>(null);
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   const { data: order } = useQuery<Order>({
     queryKey: ["/api/orders", orderId],
@@ -72,6 +77,48 @@ export default function DriverOrderDetail() {
     "Laundry has been picked up successfully",
   ];
 
+  const startQRScanner = () => {
+    setShowQRScanner(true);
+    setScannedData(null);
+    
+    setTimeout(() => {
+      if (scannerRef.current) {
+        scannerRef.current.clear();
+      }
+      
+      const scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        false
+      );
+
+      scanner.render(
+        (decodedText) => {
+          setScannedData(decodedText);
+          scanner.clear();
+          toast({
+            title: "QR Code Scanned",
+            description: "Successfully scanned QR code",
+          });
+        },
+        (errorMessage) => {
+          // Handle scan errors silently
+        }
+      );
+
+      scannerRef.current = scanner;
+    }, 100);
+  };
+
+  const closeQRScanner = () => {
+    if (scannerRef.current) {
+      scannerRef.current.clear();
+      scannerRef.current = null;
+    }
+    setShowQRScanner(false);
+    setScannedData(null);
+  };
+
   if (!order) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
@@ -106,16 +153,27 @@ export default function DriverOrderDetail() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Print Label Button */}
-        <Button
-          onClick={() => setShowLabelDialog(true)}
-          className="w-full gap-2"
-          variant="outline"
-          data-testid="button-print-label"
-        >
-          <Printer className="h-4 w-4" />
-          Print Order Label
-        </Button>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => setShowLabelDialog(true)}
+            className="gap-2"
+            variant="outline"
+            data-testid="button-print-label"
+          >
+            <Printer className="h-4 w-4" />
+            Print Label
+          </Button>
+          <Button
+            onClick={startQRScanner}
+            className="gap-2"
+            variant="outline"
+            data-testid="button-scan-qr"
+          >
+            <QrCode className="h-4 w-4" />
+            Scan QR
+          </Button>
+        </div>
 
         {/* Customer Info */}
         <Card>
@@ -241,6 +299,38 @@ export default function DriverOrderDetail() {
         open={showLabelDialog}
         onClose={() => setShowLabelDialog(false)}
       />
+
+      {/* QR Scanner Dialog */}
+      <Dialog open={showQRScanner} onOpenChange={closeQRScanner}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan QR Code</DialogTitle>
+            <DialogDescription>
+              Position the QR code within the camera frame to scan
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* QR Scanner */}
+            <div id="qr-reader" className="w-full"></div>
+
+            {/* Scanned Data */}
+            {scannedData && (
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-2">Scanned Data:</p>
+                <p className="text-sm text-muted-foreground break-all">{scannedData}</p>
+              </div>
+            )}
+
+            {/* Instructions */}
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>• Allow camera access when prompted</p>
+              <p>• Hold steady and ensure good lighting</p>
+              <p>• QR code will be scanned automatically</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
