@@ -32,7 +32,30 @@ Future enhancements include live GPS tracking for customers, Firebase push notif
 
 ### Label Printing Workflow
 
-The web application generates HMAC-signed QR labels server-side, which drivers can preview and download as 70x70mm PNG images. These labels can then be printed using the official Phomemo app (via Bluetooth) or any standard printer. A future native mobile app will implement direct Bluetooth printing using `react-native-ble-plx` and printer SDKs. QR codes are secured with server-side HMAC signatures and timestamp validation for expiration.
+**IMPORTANT: Web App Bluetooth Limitation**
+
+⚠️ **Browser-based web applications CANNOT directly connect to Bluetooth thermal printers like the Phomemo M220.**
+
+This is a fundamental browser limitation:
+- Web Bluetooth API has extremely limited support for printer protocols
+- No browser supports the Bluetooth profiles required for thermal printers
+- iOS Safari and many mobile browsers completely block Web Bluetooth
+- Direct Bluetooth printing REQUIRES a native mobile app (iOS/Android)
+
+**Current Web App Workflow:**
+1. Server generates HMAC-signed QR labels via `/api/orders/:id/label-qr`
+2. Driver views 70×70mm label preview (203 DPI) with QR code and order details
+3. Driver downloads label as PNG image using the download button
+4. Driver prints label using one of these methods:
+   - Official Phomemo app (connects via Bluetooth to print the downloaded image)
+   - Any standard printer via browser print dialog
+   - Device's native print system
+
+**Future Native Mobile App:**
+Direct Bluetooth printing will be implemented using `react-native-ble-plx` and printer SDKs when building the React Native version.
+
+**Security:**
+QR codes are secured with server-side HMAC signatures (`QR_SECRET`) and timestamp validation for 24-hour expiration.
 
 ### Deployment Architecture
 
