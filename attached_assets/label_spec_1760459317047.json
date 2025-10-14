@@ -1,0 +1,41 @@
+{
+  "label_mm": {
+    "width": 70,
+    "height": 70
+  },
+  "dpi": 203,
+  "dots_per_mm": 7.9921259842519685,
+  "label_dots": {
+    "width": 559,
+    "height": 559
+  },
+  "margins_mm": 2,
+  "margins_dots": 16,
+  "qr_payload_schema": {
+    "scheme": "mrbl://order",
+    "fields": {
+      "v": "int version number",
+      "type": "string ('order_label')",
+      "order_id": "string unique order id",
+      "customer_id": "string unique customer id",
+      "property_no": "string/number",
+      "balance_due_eur": "number",
+      "updated": "YYYY-MM-DD",
+      "ts": "epoch seconds",
+      "sig": "HMAC-SHA256 hex of the canonical payload (optional but recommended)"
+    },
+    "signature": {
+      "algo": "HMAC-SHA256",
+      "canonical": "lowercase keys, no spaces, JSON compact",
+      "secret_location": "server-side only; NEVER in app"
+    }
+  },
+  "layout": {
+    "title_top_mm": 2,
+    "qr_top_mm": 12,
+    "qr_bottom_gap_mm": 12,
+    "text_block_height_mm": 18,
+    "font": "sans-serif, 20\u201326 px @203 dpi",
+    "contrast": "black on white only"
+  }
+}

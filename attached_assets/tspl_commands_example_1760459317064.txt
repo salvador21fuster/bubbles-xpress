@@ -1,0 +1,11 @@
+! 0 200 200 559 1
+SIZE 70 mm,70 mm
+DENSITY 10
+GAP 0 mm,0 mm
+CLS
+TEXT 16,16,"0",0,1,1,"Mr Bubbles Express"
+QRCODE 16,106,L,8,A,0,"mrbl://order?{\"v\":1,\"type\":\"order_label\",\"order_id\":\"ORD-XXXXX\",\"customer_id\":\"CUST-YYYY\",\"property_no\":\"55\",\"balance_due_eur\":260000,\"updated\":\"2025-10-14\",\"ts\":1697280000}"
+TEXT 16,433,"0",0,1,1,"Property: 55"
+TEXT 16,463,"0",0,1,1,"Balance Due: €260,000.00"
+TEXT 16,493,"0",0,1,1,"Updated: 2025-10-14"
+PRINT 1
