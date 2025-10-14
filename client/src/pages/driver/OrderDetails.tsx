@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -110,14 +110,36 @@ export default function DriverOrderDetail() {
     }, 100);
   };
 
-  const closeQRScanner = () => {
+  const closeQRScanner = async () => {
     if (scannerRef.current) {
-      scannerRef.current.clear();
+      try {
+        await scannerRef.current.clear();
+      } catch (error) {
+        // Scanner may already be cleared
+      }
       scannerRef.current = null;
     }
     setShowQRScanner(false);
     setScannedData(null);
   };
+
+  // Cleanup scanner on unmount or when dialog closes
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Cleanup scanner when dialog closes
+  useEffect(() => {
+    if (!showQRScanner && scannerRef.current) {
+      scannerRef.current.clear().catch(() => {});
+      scannerRef.current = null;
+    }
+  }, [showQRScanner]);
 
   if (!order) {
     return (
