@@ -158,6 +158,152 @@ export async function seedDatabase() {
       }
     }
 
+    // Seed test customer users
+    const testCustomers = [
+      { username: "customer1", email: "customer1@test.com", phone: "+353871234001", firstName: "Emma", lastName: "Murphy", password: "test123" },
+      { username: "customer2", email: "customer2@test.com", phone: "+353871234002", firstName: "Liam", lastName: "Kelly", password: "test123" },
+      { username: "customer3", email: "customer3@test.com", phone: "+353871234003", firstName: "Sophie", lastName: "Ryan", password: "test123" },
+      { username: "customer4", email: "customer4@test.com", phone: "+353871234004", firstName: "Jack", lastName: "Walsh", password: "test123" },
+      { username: "customer5", email: "customer5@test.com", phone: "+353871234005", firstName: "Aoife", lastName: "Brennan", password: "test123" },
+    ];
+
+    for (const customer of testCustomers) {
+      try {
+        const existingUser = await storage.getUserByEmail(customer.email);
+        if (!existingUser) {
+          const hashedPassword = await hashPassword(customer.password);
+          await storage.createUser({
+            username: customer.username,
+            email: customer.email,
+            phone: customer.phone,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            hashedPassword,
+            role: "customer",
+          });
+          console.log(`✅ Created test customer: ${customer.username}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error creating customer ${customer.username}:`, error);
+      }
+    }
+
+    // Seed test driver users
+    const testDrivers = [
+      { username: "driver1", email: "driver1@test.com", phone: "+353871235001", firstName: "Cian", lastName: "McCarthy", password: "test123" },
+      { username: "driver2", email: "driver2@test.com", phone: "+353871235002", firstName: "Ciara", lastName: "O'Brien", password: "test123" },
+      { username: "driver3", email: "driver3@test.com", phone: "+353871235003", firstName: "Finn", lastName: "Doyle", password: "test123" },
+      { username: "driver4", email: "driver4@test.com", phone: "+353871235004", firstName: "Niamh", lastName: "Sullivan", password: "test123" },
+      { username: "driver5", email: "driver5@test.com", phone: "+353871235005", firstName: "Sean", lastName: "Murphy", password: "test123" },
+    ];
+
+    for (const driver of testDrivers) {
+      try {
+        const existingUser = await storage.getUserByEmail(driver.email);
+        if (!existingUser) {
+          const hashedPassword = await hashPassword(driver.password);
+          await storage.createUser({
+            username: driver.username,
+            email: driver.email,
+            phone: driver.phone,
+            firstName: driver.firstName,
+            lastName: driver.lastName,
+            hashedPassword,
+            role: "driver",
+          });
+          console.log(`✅ Created test driver: ${driver.username}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error creating driver ${driver.username}:`, error);
+      }
+    }
+
+    // Create test orders with driver-customer connections
+    const customer1 = await storage.getUserByEmail("customer1@test.com");
+    const customer2 = await storage.getUserByEmail("customer2@test.com");
+    const customer3 = await storage.getUserByEmail("customer3@test.com");
+    const driver1 = await storage.getUserByEmail("driver1@test.com");
+    const driver2 = await storage.getUserByEmail("driver2@test.com");
+
+    if (customer1 && driver1) {
+      try {
+        const order1 = await storage.createOrder({
+          customerId: customer1.id,
+          addressLine1: "12 Green Hills",
+          city: "Drogheda",
+          eircode: "A92 X1Y2",
+          totalCents: 2500,
+          state: "confirmed",
+          driverId: driver1.id,
+        });
+        console.log("✅ Created test order 1");
+
+        // Create test message
+        await storage.createMessage({
+          orderId: order1.id,
+          senderId: driver1.id,
+          senderRole: "driver",
+          message: "I'm on my way to pick up your laundry!",
+          isRead: false,
+        });
+        console.log("✅ Created test message 1");
+      } catch (error) {
+        console.error("❌ Error creating test order 1:", error);
+      }
+    }
+
+    if (customer2 && driver2) {
+      try {
+        const order2 = await storage.createOrder({
+          customerId: customer2.id,
+          addressLine1: "45 West Street",
+          city: "Drogheda",
+          eircode: "A92 B3C4",
+          totalCents: 3600,
+          state: "picked_up",
+          driverId: driver2.id,
+        });
+        console.log("✅ Created test order 2");
+
+        await storage.createMessage({
+          orderId: order2.id,
+          senderId: driver2.id,
+          senderRole: "driver",
+          message: "Your items are at the processing center",
+          isRead: false,
+        });
+        console.log("✅ Created test message 2");
+      } catch (error) {
+        console.error("❌ Error creating test order 2:", error);
+      }
+    }
+
+    if (customer3 && driver1) {
+      try {
+        const order3 = await storage.createOrder({
+          customerId: customer3.id,
+          addressLine1: "78 Main Road",
+          city: "Drogheda",
+          eircode: "A92 D5E6",
+          totalCents: 1600,
+          state: "confirmed",
+          driverId: driver1.id,
+        });
+        console.log("✅ Created test order 3");
+
+        await storage.createMessage({
+          orderId: order3.id,
+          senderId: driver1.id,
+          senderRole: "driver",
+          message: "I'll arrive in 5 minutes",
+          isRead: false,
+        });
+        console.log("✅ Created test message 3");
+      } catch (error) {
+        console.error("❌ Error creating test order 3:", error);
+      }
+    }
+
     console.log("✅ Database seeding complete!");
   } catch (error) {
     console.error("❌ Error seeding database:", error);
