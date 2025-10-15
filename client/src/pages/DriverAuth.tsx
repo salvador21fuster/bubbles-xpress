@@ -1,15 +1,62 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Truck, DollarSign, Calendar, MapPin } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Truck, DollarSign, Calendar, MapPin, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/1800302f-8921-4957-8c39-3059183e7401_1760066658468.jpg";
 
 export default function DriverAuth() {
-  const handleSignIn = () => {
-    window.location.href = "/api/login?role=driver";
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: email, password }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Sign in failed");
+      }
+
+      const user = await response.json();
+      
+      if (user.role !== "driver") {
+        throw new Error("This account is not registered as a driver");
+      }
+
+      toast({
+        title: "Welcome back!",
+        description: "Signed in successfully",
+      });
+
+      setLocation("/driver");
+    } catch (error: any) {
+      toast({
+        title: "Sign in failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
         {/* Left side - Branding */}
         <div className="hidden md:block">
@@ -54,42 +101,56 @@ export default function DriverAuth() {
                 className="h-12 w-auto mx-auto"
               />
             </div>
-            <CardTitle className="text-2xl">Driver Portal</CardTitle>
-            <CardDescription>Sign in to manage your deliveries and earnings</CardDescription>
+            <CardTitle className="text-2xl">Driver Sign In</CardTitle>
+            <CardDescription>Access your driver dashboard</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              className="w-full h-12 text-base"
-              onClick={handleSignIn}
-              data-testid="button-driver-signin"
-            >
-              Sign In with Replit
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+          <CardContent>
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="driver1@test.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  data-testid="input-email"
+                />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  New driver?
-                </span>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  data-testid="input-password"
+                />
               </div>
-            </div>
 
-            <Button 
-              variant="outline" 
-              className="w-full h-12 text-base"
-              onClick={handleSignIn}
-              data-testid="button-driver-signup"
-            >
-              Join as Driver
-            </Button>
+              <Button 
+                type="submit"
+                className="w-full h-12 text-base"
+                disabled={isLoading}
+                data-testid="button-driver-signin"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
 
-            <div className="pt-4 border-t">
-              <p className="text-xs text-center text-muted-foreground">
-                By continuing, you agree to our Terms of Service and Privacy Policy
-              </p>
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              <p>Test Account: driver1@test.com / test123</p>
             </div>
           </CardContent>
         </Card>
